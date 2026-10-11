@@ -15,14 +15,14 @@ function authHeaders() {
 
 function requireAuth() {
   if (!getToken()) {
-    window.location.href = 'Login.html';
+    window.location.href = 'index.html';
   }
 }
 
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
-  window.location.href = 'Login.html';
+  window.location.href = 'index.html';
 }
 
 // Call on every protected page

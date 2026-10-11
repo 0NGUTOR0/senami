@@ -44,7 +44,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public static resources
                 .requestMatchers(
-                    "/", "/Login.html", "/Signup.html",     "/reset-password.html", 
+                    "/", "/index.html", "/Signup.html",     "/reset-password.html", 
                     "/forgot-password.html", "/error", "/favicon.ico","/utility/**",
                     "/css/**", "/js/**", "/Images/**", "/Flavicon/**"
                 ).permitAll()
@@ -72,11 +72,11 @@ public class SecurityConfig {
             )
 
             .oauth2Login(oauth2 -> oauth2
-                .loginPage("/Login.html")
+                .loginPage("/index.html")
                 .successHandler(oAuth2SuccessHandler)
             )
 
-            .logout(logout -> logout.logoutSuccessUrl("/Login.html"))
+            .logout(logout -> logout.logoutSuccessUrl("/index.html"))
 
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((req, res, e) -> {

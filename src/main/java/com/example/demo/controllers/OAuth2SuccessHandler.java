@@ -31,7 +31,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String name = oauthUser.getAttribute("name");
 
         if (rawEmail == null) {
-            response.sendRedirect("/Login.html?error=email_not_found");
+            response.sendRedirect("/index.html?error=email_not_found");
             return;
         }
 

@@ -299,7 +299,7 @@
         } catch (error) {
             console.error('Logout request failed:', error);
         } finally {
-            window.location.href = '/Login.html';
+            window.location.href = '/index.html';
         }
     }
 
@@ -313,7 +313,7 @@
             });
 
             if (!response.ok) {
-                window.location.href = '/Login.html';
+                window.location.href = '/index.html';
                 return null;
             }
 
@@ -383,7 +383,7 @@
             );
 
             if (response.status === 401) {
-                window.location.href = '/Login.html';
+                window.location.href = '/index.html';
                 return;
             }
 

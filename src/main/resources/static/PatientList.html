@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patients</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .topbar {
+      background: #1e3a5f;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .topbar h1 { font-size: 1.35rem; font-weight: 600; }
+    .topbar-actions { display: flex; gap: .75rem; align-items: center; margin-right: 90px; }
+    .btn {
+      padding: .55rem 1.1rem;
+      border-radius: 6px;
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .btn-primary { background: #3182ce; color: #fff; }
+    .btn-primary:hover { background: #2b6cb0; }
+    .btn-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.4);font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    .btn-ghost:hover { background: rgba(255,255,255,.1); }
+    .logo{
+      height: 72px;
+      width: auto;
+      margin-left: 90px;
+    }
+
+    /* Current user, next to the profile icon */
+    .user {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      min-width: 0;
+      padding-right: 1rem;
+      margin-right: .25rem;
+      border-right: 1px solid rgba(255,255,255,.25);
+    }
+    .user-icon {
+      flex: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.16);
+      display: grid;
+      place-items: center;
+    }
+    .user-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .user-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+    .user-name, .user-email {
+      max-width: 15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .user-name { font-weight: 600; font-size: .95rem; }
+    .user-email { font-size: .78rem; opacity: .75; }
+
+    /* Main */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Search bar */
+    .toolbar {
+      display: flex;
+      gap: .75rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .search-wrap {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: .65rem 1rem .65rem 2.5rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: .95rem;
+      background: #fff;
+    }
+    .search-wrap input:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 3px rgba(49,130,206,.15);
+    }
+    .search-wrap::before {
+      content: "🔍";
+      position: absolute;
+      left: .85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: .9rem;
+      opacity: .5;
+    }
+
+    /* Table card */
+    
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      overflow: hidden;
+    }
+    .link-btn {
+      background: none;
+      border: none;
+      color: #3182ce;
+      font-size: .85rem;
+      cursor: pointer;
+      padding: .4rem .75rem;
+      border-radius: 6px;      
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th {
+      text-align: left;
+      padding: .85rem 1.1rem;
+      font-size: .8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      color: #718096;
+      background: #f7fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    th.col-number { width: 200px; }
+    th.col-age { width: 110px; }
+    td {
+      padding: 0;
+      border-bottom: 1px solid #edf2f7;
+      font-size: .95rem;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    /* The link fills the whole cell, so a click anywhere on the row opens the patient. */
+    .cell-link {
+      display: block;
+      padding: .9rem 1.1rem;
+      color: inherit;
+      text-decoration: none;
+    }
+    tbody tr:hover td,
+    tbody tr:focus-within td { background: #ebf8ff; }
+    .cell-link:focus-visible { outline: 3px solid #3182ce; outline-offset: -3px; }
+    .patient-number {
+      font-family: ui-monospace, monospace;
+      font-size: .85rem;
+      color: #4a5568;
+    }
+    .name { font-weight: 500; }
+
+    /* Empty / loading / error */
+    .state {
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: #718096;
+    }
+    .state.error { color: #c53030; }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.1rem;
+      border-top: 1px solid #edf2f7;
+      font-size: .9rem;
+      color: #4a5568;
+      flex-wrap: wrap;
+      gap: .75rem;
+    }
+    .page-btns { display: flex; gap: .4rem; }
+    .page-btn {
+      padding: .4rem .75rem;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .85rem;
+    }
+    .page-btn:hover:not(:disabled) { background: #edf2f7; }
+    .page-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .page-btn.active {
+      background: #1e3a5f;
+      color: #fff;
+      border-color: #1e3a5f;
+    }
+
+    @media (max-width: 700px) {
+      .logo { margin-left: 0; }
+      .topbar-actions { margin-right: 0; flex-wrap: wrap; }
+      .user { border-right: none; padding-right: 0; }
+      .user-email { display: none; }
+      th { padding: .7rem .75rem; }
+      .cell-link { padding: .8rem .75rem; }
+      th.col-number { width: 130px; }
+      th.col-age { width: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <img class="logo" src="/Images/Logo.png" alt="Logo" style="height: 60px;">
+    <div class="topbar-actions">
+      <div class="user" id="userBox" hidden>
+        <span class="user-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path></svg>
+        </span>
+        <div class="user-text">
+          <span class="user-name" id="userName"></span>
+          <span class="user-email" id="userEmail"></span>
+        </div>
+      </div>
+      <a href="Patient.html" class="btn btn-primary">+ New Patient</a>
+      <button class="btn btn-ghost" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <input type="search" id="searchInput" placeholder="Search by name or patient number…" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="content">
+        <div class="state">Loading patients…</div>
+      </div>
+    </div>
+  </main>
+
+
+<script>
+    const API = '/api';
+
+    // Page that opens when a row is clicked. It receives ?id=<patient id>.
+    const PATIENT_PAGE = 'Patient.html';
+
+    let currentPage = 0;
+    let totalPages = 0;
+    let searchQuery = '';
+    let searchTimeout = null;
+
+    // Cookies are HTTP-only, so JavaScript must not read the JWT.
+    function authHeaders() {
+        return {
+            'Content-Type': 'application/json'
+        };
+    }
+
+    // Log out and clear authentication cookies on the server.
+    async function logout() {
+        try {
+            await fetch('/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (error) {
+            console.error('Logout request failed:', error);
+        } finally {
+            window.location.href = '/Login.html';
+        }
+    }
+
+    // Verify the user's authentication cookie.
+    // Returns the signed-in user (an object) or null when the check fails.
+    async function checkAuthentication() {
+        try {
+            const response = await fetch('/auth/me', {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                window.location.href = '/Login.html';
+                return null;
+            }
+
+            const data = await response.json().catch(() => null);
+            return data || {};
+
+        } catch (error) {
+            console.error('Authentication check failed:', error);
+
+            document.getElementById('content').innerHTML =
+                '<div class="state error">' +
+                'Unable to verify your login. Please check your connection and try again.' +
+                '</div>';
+
+            return null;
+        }
+    }
+
+    // Show who is signed in, next to the profile icon.
+    function renderUser(data) {
+        const user = (data && (data.user || data.data)) || data || {};
+
+        const email = user.email || '';
+        const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+        const name =
+            user.fullName ||
+            user.name ||
+            user.username ||
+            fullName ||
+            (email ? email.split('@')[0] : 'Signed in');
+
+        const nameEl = document.getElementById('userName');
+        const emailEl = document.getElementById('userEmail');
+
+        nameEl.textContent = name;
+        emailEl.textContent = email && email !== name ? email : '';
+        document.getElementById('userBox').title = email ? `${name} (${email})` : name;
+        document.getElementById('userBox').hidden = false;
+    }
+
+    // Load patients from the backend.
+    async function loadPatients(page = 0) {
+        currentPage = page;
+
+        const params = new URLSearchParams({
+            page: String(page),
+            size: '15',
+            sort: 'fullName,asc'
+        });
+
+        if (searchQuery) {
+            params.set('q', searchQuery);
+        }
+
+        const container = document.getElementById('content');
+        container.innerHTML =
+            '<div class="state">Loading patients…</div>';
+
+        try {
+            const response = await fetch(
+                `${API}/patients?${params.toString()}`,
+                {
+                    method: 'GET',
+                    headers: authHeaders(),
+                    credentials: 'include'
+                }
+            );
+
+            if (response.status === 401) {
+                window.location.href = '/Login.html';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    `Failed to load patients (${response.status})`
+                );
+            }
+
+            const data = await response.json();
+
+            totalPages = data.totalPages || 0;
+
+            renderTable(data);
+
+        } catch (error) {
+            console.error('Error loading patients:', error);
+
+            container.innerHTML =
+                `<div class="state error">${escapeHtml(error.message)}</div>`;
+        }
+    }
+
+    // Render the patient table: number, name and age. Every cell links to the patient.
+    function renderTable(page) {
+        const patients = page.content || [];
+        const container = document.getElementById('content');
+
+        if (patients.length === 0) {
+            container.innerHTML = `
+                <div class="state">
+                    ${searchQuery
+                        ? 'No patients match your search.'
+                        : 'No patients yet.'}
+                    <br><br>
+                    <a href="PatientList.html" class="btn btn-primary">
+                        Add first patient
+                    </a>
+                </div>`;
+            return;
+        }
+
+        const rows = patients.map(patient => {
+            const href = escapeHtml(
+                `${PATIENT_PAGE}?id=${encodeURIComponent(patient.id)}`
+            );
+
+            // Only the name link is focusable, so keyboard users get one stop per row.
+            return `
+            <tr>
+                <td class="patient-number">
+                    <a class="cell-link" href="${href}" tabindex="-1" aria-hidden="true">
+                        ${escapeHtml(patient.patientNumber || '—')}
+                    </a>
+                </td>
+
+                <td class="name">
+                    <a class="cell-link" href="${href}">
+                        ${escapeHtml(patient.fullName || '—')}
+                    </a>
+                </td>
+
+                <td>
+                    <a class="cell-link" href="${href}" tabindex="-1" aria-hidden="true">
+                        ${patient.age != null
+                            ? escapeHtml(patient.age)
+                            : '—'}
+                    </a>
+                </td>
+
+                <td class="actions-cell">
+                    <button class="link-btn"
+                        onclick="AllPatientIncidents('${escapeHtml(patient.id)}')">
+                        Incidents & Consumption
+                    </button>
+                    
+                </td>
+            </tr>
+        `;
+        }).join('');
+
+        container.innerHTML = `
+            <table>
+
+            <thead>
+                <tr>
+                    <th class="col-number">Number</th>
+                    <th>Name</th>
+                    <th class="col-age">Age</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+
+                <tbody>${rows}</tbody>
+            </table>
+
+            ${renderPagination(page)}
+        `;
+    }
+
+    // Render pagination controls.
+    function renderPagination(page) {
+        if (page.totalPages <= 1) {
+            return '';
+        }
+
+        const from = page.number * page.size + 1;
+
+        const to = Math.min(
+            (page.number + 1) * page.size,
+            page.totalElements
+        );
+
+        let buttons = '';
+
+        buttons += `
+            <button class="page-btn"
+                ${page.first ? 'disabled' : ''}
+                onclick="loadPatients(${page.number - 1})">
+                Prev
+            </button>
+        `;
+
+        const start = Math.max(0, page.number - 2);
+        const end = Math.min(page.totalPages - 1, page.number + 2);
+
+        for (let i = start; i <= end; i++) {
+            buttons += `
+                <button class="page-btn ${i === page.number ? 'active' : ''}"
+                    onclick="loadPatients(${i})">
+                    ${i + 1}
+                </button>
+            `;
+        }
+
+        buttons += `
+            <button class="page-btn"
+                ${page.last ? 'disabled' : ''}
+                onclick="loadPatients(${page.number + 1})">
+                Next
+            </button>
+        `;
+
+        return `
+            <div class="pagination">
+                <span>
+                    Showing ${from}–${to} of ${page.totalElements}
+                </span>
+
+                <div class="page-btns">
+                    ${buttons}
+                </div>
+            </div>
+        `;
+    }
+
+    function AllPatientIncidents(id) {
+        window.location.href =
+            `IncidentAnalyticsDashboard.html?patientId=${encodeURIComponent(id)}`;
+    }
+
+    // Escape HTML characters before displaying text.
+    function escapeHtml(value) {
+        if (value == null) {
+            return '';
+        }
+
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // Debounced patient search.
+    document.getElementById('searchInput')
+        .addEventListener('input', event => {
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(() => {
+                searchQuery = event.target.value.trim();
+                loadPatients(0);
+            }, 350);
+        });
+
+    // Authenticate first, then show the user and load the patient list.
+    (async function init() {
+        const user = await checkAuthentication();
+
+        if (user) {
+            renderUser(user);
+            await loadPatients(0);
+        }
+    })();
+</script>
+
+</body>
+</html>

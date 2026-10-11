@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.1);
+      overflow: hidden;
+    }
+    .card-header {
+      background: #1e3a5f;
+      color: #fff;
+      padding: 1.75rem 2rem;
+      text-align: center;
+    }
+    .card-header h1 { font-size: 1.5rem; font-weight: 600; }
+    .card-header p { opacity: .85; font-size: .9rem; margin-top: .35rem; }
+    form { padding: 2rem; }
+    .field { margin-bottom: 1.15rem; }
+    label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 500;
+      color: #4a5568;
+      margin-bottom: .35rem;
+    }
+    input, select {
+      width: 100%;
+      padding: .7rem .85rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: .95rem;
+      background: #fff;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 3px rgba(49,130,206,.15);
+    }
+    .btn {
+      width: 100%;
+      padding: .75rem;
+      background: #1e3a5f;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: .5rem;
+    }
+    .btn:hover { background: #16304f; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+    .msg {
+      margin-bottom: 1rem;
+      padding: .7rem 1rem;
+      border-radius: 6px;
+      font-size: .9rem;
+      display: none;
+    }
+    .msg.error { background: #fed7d7; color: #9b2c2c; display: block; }
+    .msg.success { background: #c6f6d5; color: #276749; display: block; }
+    .footer {
+      text-align: center;
+      padding: 0 2rem 1.75rem;
+      font-size: .9rem;
+      color: #718096;
+    }
+    .footer a { color: #3182ce; text-decoration: none; font-weight: 500; }
+    .footer a:hover { text-decoration: underline; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 480px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <h1>Create Account</h1>
+      <p>Register a new staff account</p>
+    </div>
+    <form id="signupForm">
+      <div id="message" class="msg"></div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" required>
+        </div>
+        <div class="field">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required autocomplete="email">
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password">
+      </div>
+
+      <div class="field">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
+      </div>
+
+      <!-- Optional role – remove if your backend doesn’t need it -->
+      <div class="field">
+        <label for="role">Role</label>
+        <select id="role" name="role">
+          <option value="STAFF">Staff</option>
+          <option value="TEAM_LEADER">Team Leader</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn" id="signupBtn">Create Account</button>
+    </form>
+    <div class="footer">
+      Already have an account? <a href="Login.html">Sign in</a>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:8080';
+
+    function showMsg(text, isError = true) {
+      const el = document.getElementById('message');
+      el.textContent = text;
+      el.className = 'msg ' + (isError ? 'error' : 'success');
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('signupBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creating…';
+
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirmPassword').value;
+
+      if (password !== confirm) {
+        showMsg('Passwords do not match');
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+        return;
+      }
+
+      const body = {
+        email:     document.getElementById('email').value.trim(),
+        password:  password
+      };
+
+      try {
+        // Adjust path if your endpoint is /auth/register or /auth/signup
+        const res = await fetch(`${API}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.error || data.message || 'Registration failed');
+        }
+
+        showMsg('Account created successfully – redirecting to login…', false);
+        setTimeout(() => {
+          window.location.href = 'Login.html';
+        }, 1200);
+
+      } catch (err) {
+        showMsg(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    });
+  </script>
+</body>
+</html>

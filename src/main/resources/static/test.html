@@ -1,0 +1,3016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Incident Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.5;
+    }
+    .topbar {
+      background: #1e3a5f;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .topbar h1 { font-size: 1.35rem; font-weight: 600; }
+    .filters {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filters input, .filters select {
+      padding: .45rem .7rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.3);
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: .9rem;
+    }
+    .filters input::placeholder { color: rgba(255,255,255,.6); }
+    .filters button {
+      padding: .45rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: #3182ce;
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .filters button:hover { background: #2b6cb0; }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.25rem;
+    }
+    .grid-wide { grid-column: 1 / -1; }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      padding: 1.25rem;
+    }
+    .card h2 {
+      font-size: .95rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid #edf2f7;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 260px;
+    }
+    .chart-wrap.tall { height: 320px; }
+    .state {
+      text-align: center;
+      padding: 3rem;
+      color: #718096;
+    }
+    .state.error { color: #c53030; }
+    .legend-note {
+      font-size: .8rem;
+      color: #718096;
+      margin-top: .5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <img src="/src/main/resources/Images/Logo.png" alt="Logo" style="height: 32px;">
+    
+    <button>New Incident</button>
+  </header>
+
+  <main class="container">
+    <div class="filters">
+      <input type="date" id="fromDate">
+      <input type="date" id="toDate">
+      <button onclick="loadAndRender()">Apply</button>
+    </div>
+    <div id="status" class="state">Loading incidents…</div>
+    <div id="dashboard" class="grid" style="display:none"></div>
+  </main>
+
+  
+<script>
+  // =========================================================
+  // CONFIGURATION
+  // =========================================================
+  const API = 'http://localhost:8080/api';
+  const AUTH_ME = 'http://localhost:8080/auth/me';
+
+  const charts = {};
+
+  // Adjust these dates to match the patient's actual inpatient stay.
+  const INPATIENT = {
+    start: '2025-07-22',
+    end: '2025-08-15',
+    label: 'Inpatient stay 22/07–15/08'
+  };
+
+  // Behaviour groups based on the incident form's enum values.
+  const SUICIDAL = ['HARM_TO_SELF', 'RISK_TAKING'];
+  const WANDERING = ['ABSCONDING_WANDERING'];
+  const AGGRESSION = [
+    'PHYSICAL_AGGRESSION',
+    'VERBAL_AGGRESSION',
+    'THREATENING'
+  ];
+
+  const COLORS = [
+    '#3182ce', '#e53e3e', '#38a169', '#d69e2e',
+    '#805ad5', '#dd6b20', '#319795', '#d53f8c',
+    '#2b6cb0', '#c53030', '#276749', '#b7791f',
+    '#6b46c1', '#c05621'
+  ];
+
+  // =========================================================
+  // COOKIE AUTHENTICATION
+  // =========================================================
+
+  // Do not read access_token from JavaScript.
+  // It is an HTTP-only cookie and the browser sends it automatically.
+  function authHeaders() {
+    return {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+  }
+
+  function redirectToLogin() {
+    const currentPage =
+      window.location.pathname + window.location.search;
+
+    window.location.href =
+      `Login.html?next=${encodeURIComponent(currentPage)}`;
+  }
+
+  async function checkAuthentication() {
+    const response = await fetch(AUTH_ME, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.status === 401) {
+      redirectToLogin();
+      return false;
+    }
+
+    if (response.status === 403) {
+      throw new Error(
+        'Your account does not have permission to access this dashboard.'
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `Unable to verify your session (${response.status}).`
+      );
+    }
+
+    return true;
+  }
+
+  // =========================================================
+  // FETCH INCIDENTS
+  // =========================================================
+
+  async function fetchAllIncidents(patientId) {
+    if (!patientId) {
+      throw new Error('Please enter a Patient UUID.');
+    }
+
+    const all = [];
+    let page = 0;
+    let totalPages = 1;
+
+    while (page < totalPages) {
+      const path =
+        `/patients/${encodeURIComponent(patientId)}/incidents` +
+        `?page=${page}&size=100&sort=occurredAt,asc`;
+
+      const response = await fetch(`${API}${path}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: authHeaders()
+      });
+
+      if (response.status === 401) {
+        redirectToLogin();
+        throw new Error('Your session has expired. Please sign in again.');
+      }
+
+      if (response.status === 403) {
+        throw new Error(
+          'You do not have permission to view these incidents.'
+        );
+      }
+
+      if (response.status === 404) {
+        throw new Error(
+          'The patient or incident endpoint could not be found. ' +
+          'Check the patient UUID and backend route.'
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load incidents (${response.status}).`
+        );
+      }
+
+      const data = await response.json();
+
+      // Spring Page<Incident> response.
+      if (Array.isArray(data.content)) {
+        all.push(...data.content);
+        totalPages = Number.isInteger(data.totalPages)
+          ? data.totalPages
+          : 1;
+      } else if (Array.isArray(data)) {
+        // Also support an endpoint returning a plain array.
+        all.push(...data);
+        totalPages = 1;
+      } else {
+        throw new Error(
+          'Unexpected incidents response. Expected a page or JSON array.'
+        );
+      }
+
+      page++;
+    }
+
+    return all;
+  }
+
+  // =========================================================
+  // GENERAL HELPERS
+  // =========================================================
+
+  function toDate(value) {
+    if (!value) return null;
+
+    // Supports ISO timestamps and YYYY-MM-DD strings.
+    const match = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
+    return match ? match[1] : null;
+  }
+
+  function inRange(date, from, to) {
+    if (!date) return false;
+    if (from && date < from) return false;
+    if (to && date > to) return false;
+    return true;
+  }
+
+  function parseLocalDate(dateString) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  function formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  function addDays(dateString, amount) {
+    const date = parseLocalDate(dateString);
+    date.setDate(date.getDate() + amount);
+    return formatLocalDate(date);
+  }
+
+  function dateDifferenceInclusive(start, end) {
+    if (!start || !end || start > end) return 0;
+
+    let count = 0;
+    let current = start;
+
+    while (current <= end) {
+      count++;
+      current = addDays(current, 1);
+    }
+
+    return count;
+  }
+
+  function displayName(value) {
+    if (!value) return 'Unknown';
+    return String(value)
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, letter => letter.toUpperCase());
+  }
+
+  function destroyCharts() {
+    Object.values(charts).forEach(chart => chart.destroy());
+
+    Object.keys(charts).forEach(key => {
+      delete charts[key];
+    });
+  }
+
+  function makeChart(id, config) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+
+    charts[id] = new Chart(canvas, config);
+  }
+
+  function showStatus(message, isError = false) {
+    const status = document.getElementById('status');
+
+    status.style.display = 'block';
+    status.textContent = message;
+    status.className = isError ? 'state error' : 'state';
+  }
+
+  // =========================================================
+  // DATE RANGE AND AGGREGATIONS
+  // =========================================================
+
+  function buildStats(incidents, from, to) {
+    const validIncidents = incidents.filter(incident =>
+      toDate(incident.occurredAt)
+    );
+
+    const allDates = validIncidents
+      .map(incident => toDate(incident.occurredAt))
+      .sort();
+
+    // If the user has not selected dates, use the first and last
+    // incident dates. Explicit dates define the observation period.
+    const rangeStart = from || allDates[0] || null;
+    const rangeEnd = to || allDates[allDates.length - 1] || null;
+
+    const filtered = validIncidents.filter(incident => {
+      const date = toDate(incident.occurredAt);
+      return inRange(date, rangeStart, rangeEnd);
+    });
+
+    const byDay = {};
+
+    filtered.forEach(incident => {
+      const date = toDate(incident.occurredAt);
+      (byDay[date] ||= []).push(incident);
+    });
+
+    const daysWithIncidents = Object.keys(byDay).sort();
+
+    const multiDays = daysWithIncidents.filter(
+      date => byDay[date].length > 1
+    );
+
+    const singleDays = daysWithIncidents.filter(
+      date => byDay[date].length === 1
+    );
+
+    const totalCalendarDays = dateDifferenceInclusive(
+      rangeStart,
+      rangeEnd
+    );
+
+    const daysWithIncident = daysWithIncidents.length;
+
+    // Incident-free days are only meaningful if the selected observation
+    // period has complete reporting coverage.
+    const freeDays = Math.max(
+      0,
+      totalCalendarDays - daysWithIncident
+    );
+
+    // Build a complete calendar series, including zero-incident days.
+    const calendarDates = [];
+
+    if (rangeStart && rangeEnd && rangeStart <= rangeEnd) {
+      let current = rangeStart;
+
+      while (current <= rangeEnd) {
+        calendarDates.push(current);
+        current = addDays(current, 1);
+      }
+    } else {
+      calendarDates.push(...daysWithIncidents);
+    }
+
+    // Count each behaviour recorded against an incident.
+    const behaviourCount = {};
+    const locationCount = {};
+    const durationCount = {};
+    const frequencyCount = {};
+
+    filtered.forEach(incident => {
+      (incident.behaviours || []).forEach(behaviour => {
+        behaviourCount[behaviour] =
+          (behaviourCount[behaviour] || 0) + 1;
+      });
+
+      const location = incident.location || 'UNKNOWN';
+      locationCount[location] =
+        (locationCount[location] || 0) + 1;
+
+      const duration = incident.duration || 'UNKNOWN';
+      durationCount[duration] =
+        (durationCount[duration] || 0) + 1;
+
+      const frequency = incident.frequency || 'UNKNOWN';
+      frequencyCount[frequency] =
+        (frequencyCount[frequency] || 0) + 1;
+    });
+
+    // Behaviour occurrences on days with multiple incidents.
+    const multiIncidents = multiDays.flatMap(date => byDay[date]);
+    const multiBehaviourCount = {};
+
+    multiIncidents.forEach(incident => {
+      (incident.behaviours || []).forEach(behaviour => {
+        multiBehaviourCount[behaviour] =
+          (multiBehaviourCount[behaviour] || 0) + 1;
+      });
+    });
+
+    // Daily totals include zero-incident days.
+    const dailyTotals = calendarDates.map(date => ({
+      date,
+      count: (byDay[date] || []).length
+    }));
+
+    // Count incidents with any behaviour from the specified group.
+    function dailyFor(behaviours) {
+      return calendarDates.map(date => ({
+        date,
+        count: (byDay[date] || []).filter(incident =>
+          (incident.behaviours || []).some(behaviour =>
+            behaviours.includes(behaviour)
+          )
+        ).length
+      }));
+    }
+
+    const suicidalIncidents = filtered.filter(incident =>
+      (incident.behaviours || []).some(behaviour =>
+        SUICIDAL.includes(behaviour)
+      )
+    );
+
+    const suicidalBreakdown = {};
+    const suicidalSeverity = {};
+
+    suicidalIncidents.forEach(incident => {
+      (incident.behaviours || [])
+        .filter(behaviour => SUICIDAL.includes(behaviour))
+        .forEach(behaviour => {
+          suicidalBreakdown[behaviour] =
+            (suicidalBreakdown[behaviour] || 0) + 1;
+        });
+
+      const severity = incident.severity || 'UNKNOWN';
+
+      suicidalSeverity[severity] =
+        (suicidalSeverity[severity] || 0) + 1;
+    });
+
+    // Separate verbal and physical aggression series.
+    function dailyBehaviourCount(behaviour) {
+      return calendarDates.map(date => ({
+        date,
+        count: (byDay[date] || []).filter(incident =>
+          (incident.behaviours || []).includes(behaviour)
+        ).length
+      }));
+    }
+
+    return {
+      filtered,
+      rangeStart,
+      rangeEnd,
+      byDay,
+      calendarDates,
+      multiDays,
+      singleDays,
+      freeDays,
+      daysWithIncident,
+      totalCalendarDays,
+      behaviourCount,
+      locationCount,
+      durationCount,
+      multiBehaviourCount,
+      frequencyCount,
+      dailyTotals,
+      suicidalDaily: dailyFor(SUICIDAL),
+      wanderingDaily: dailyFor(WANDERING),
+      aggressionDaily: dailyFor(AGGRESSION),
+      verbalAggressionDaily:
+        dailyBehaviourCount('VERBAL_AGGRESSION'),
+      physicalAggressionDaily:
+        dailyBehaviourCount('PHYSICAL_AGGRESSION'),
+      suicidalBreakdown,
+      suicidalSeverity
+    };
+  }
+
+  // =========================================================
+  // COMMON CHART OPTIONS
+  // =========================================================
+
+  function doughnutOptions() {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    };
+  }
+
+  function integerAxisOptions(axis = 'y') {
+    return {
+      [axis]: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          stepSize: 1
+        }
+      }
+    };
+  }
+
+  // =========================================================
+  // RENDER DASHBOARD
+  // =========================================================
+
+  function renderDashboard(stats) {
+    destroyCharts();
+
+    const dashboard = document.getElementById('dashboard');
+
+    dashboard.innerHTML = `
+      <div class="card">
+        <h2>1. Days with incidents vs incident-free days</h2>
+        <div class="chart-wrap"><canvas id="c1"></canvas></div>
+        <p class="legend-note">
+          ${stats.daysWithIncident} days with incidents ·
+          ${stats.freeDays} incident-free days ·
+          ${stats.totalCalendarDays} calendar days
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>2. Days with vs without multiple incidents</h2>
+        <div class="chart-wrap"><canvas id="c2"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>3. Behaviours on multi-incident days</h2>
+        <div class="chart-wrap tall"><canvas id="c3"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>4. Reported frequency breakdown</h2>
+        <div class="chart-wrap"><canvas id="c4"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>5. Setting of incidents</h2>
+        <div class="chart-wrap"><canvas id="c5"></canvas></div>
+      </div>
+
+      <div class="card grid-wide">
+        <h2>6. Trend of all incidents over time</h2>
+        <div class="chart-wrap tall"><canvas id="c6"></canvas></div>
+        <p class="legend-note">
+          Shaded band: ${INPATIENT.label}
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>7. Time frames mentioned in incident reports</h2>
+        <div class="chart-wrap tall"><canvas id="c7"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>8. Total of each behaviour of concern</h2>
+        <div class="chart-wrap tall"><canvas id="c8"></canvas></div>
+      </div>
+
+      <div class="card grid-wide">
+        <h2>9. Trend of suicidal-related behaviours</h2>
+        <div class="chart-wrap tall"><canvas id="c9"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>10. Breakdown of suicidal-related behaviours</h2>
+        <div class="chart-wrap"><canvas id="c10"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>11. Severity recorded for suicidal-related incidents</h2>
+        <div class="chart-wrap"><canvas id="c11"></canvas></div>
+      </div>
+
+      <div class="card grid-wide">
+        <h2>12. Trend of wandering / absconding</h2>
+        <div class="chart-wrap tall"><canvas id="c12"></canvas></div>
+      </div>
+
+      <div class="card grid-wide">
+        <h2>13. Trend of verbal and physical aggression</h2>
+        <div class="chart-wrap tall"><canvas id="c13"></canvas></div>
+      </div>
+    `;
+
+    dashboard.style.display = 'grid';
+    document.getElementById('status').style.display = 'none';
+
+    // ---------------------------------------------------------
+    // 1. Days with incidents vs incident-free days
+    // ---------------------------------------------------------
+    makeChart('c1', {
+      type: 'doughnut',
+      data: {
+        labels: [
+          'Days with at least one incident',
+          'Incident-free days'
+        ],
+        datasets: [{
+          data: [
+            stats.daysWithIncident,
+            stats.freeDays
+          ],
+          backgroundColor: ['#e53e3e', '#38a169']
+        }]
+      },
+      options: doughnutOptions()
+    });
+
+    // ---------------------------------------------------------
+    // 2. Days with vs without multiple incidents
+    // "Without multiple incidents" includes both zero-incident
+    // days and days with exactly one incident.
+    // ---------------------------------------------------------
+    const daysWithoutMultiple = Math.max(
+      0,
+      stats.totalCalendarDays - stats.multiDays.length
+    );
+
+    makeChart('c2', {
+      type: 'doughnut',
+      data: {
+        labels: [
+          'Days with multiple incidents',
+          'Days without multiple incidents'
+        ],
+        datasets: [{
+          data: [
+            stats.multiDays.length,
+            daysWithoutMultiple
+          ],
+          backgroundColor: ['#dd6b20', '#3182ce']
+        }]
+      },
+      options: doughnutOptions()
+    });
+
+    // ---------------------------------------------------------
+    // 3. Behaviours on multi-incident days
+    // This uses behaviours because the available form schema
+    // records a behaviours array, not a separate incident-type field.
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.multiBehaviourCount)
+        .sort((a, b) => b[1] - a[1]);
+
+      makeChart('c3', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            label: 'Behaviour occurrences',
+            data: entries.map(([, value]) => value),
+            backgroundColor: entries.map(
+              (_, index) => COLORS[index % COLORS.length]
+            )
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: {
+            legend: { display: false }
+          },
+          scales: integerAxisOptions('x')
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 4. Frequency pie: 1x / 2x / 3–5x / >5x
+    // ---------------------------------------------------------
+    {
+      const order = [
+        'ONE',
+        'TWO',
+        'THREE_TO_FIVE',
+        'MORE_THAN_FIVE'
+      ];
+
+      const names = {
+        ONE: '1×',
+        TWO: '2×',
+        THREE_TO_FIVE: '3–5×',
+        MORE_THAN_FIVE: '>5×'
+      };
+
+      makeChart('c4', {
+        type: 'pie',
+        data: {
+          labels: order.map(key => names[key]),
+          datasets: [{
+            data: order.map(
+              key => stats.frequencyCount[key] || 0
+            ),
+            backgroundColor: [
+              '#3182ce',
+              '#38a169',
+              '#d69e2e',
+              '#e53e3e'
+            ]
+          }]
+        },
+        options: doughnutOptions()
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 5. Setting of incidents
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.locationCount);
+
+      makeChart('c5', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            label: 'Incidents',
+            data: entries.map(([, value]) => value),
+            backgroundColor: '#3182ce'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: integerAxisOptions('y')
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 6. Overall incident trend + inpatient stay
+    // Requires chartjs-plugin-annotation to be loaded.
+    // ---------------------------------------------------------
+    {
+      const labels = stats.dailyTotals.map(item => item.date);
+      const values = stats.dailyTotals.map(item => item.count);
+
+      const inpatientStart = labels.indexOf(INPATIENT.start);
+      const inpatientEnd = labels.indexOf(INPATIENT.end);
+
+      const annotations = {};
+
+      // Only draw the band when the inpatient dates overlap
+      // the selected date range.
+      if (
+        inpatientStart !== -1 &&
+        inpatientEnd !== -1 &&
+        inpatientStart <= inpatientEnd
+      ) {
+        annotations.inpatient = {
+          type: 'box',
+          xMin: inpatientStart - 0.5,
+          xMax: inpatientEnd + 0.5,
+          backgroundColor: 'rgba(229, 62, 62, 0.12)',
+          borderWidth: 0,
+          label: {
+            display: true,
+            content: INPATIENT.label,
+            position: 'start'
+          }
+        };
+      }
+
+      makeChart('c6', {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Incidents per day',
+            data: values,
+            borderColor: '#3182ce',
+            backgroundColor: 'rgba(49,130,206,0.15)',
+            fill: true,
+            tension: 0.25,
+            pointRadius: labels.length > 90 ? 0 : 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0, stepSize: 1 }
+            },
+            x: {
+              ticks: {
+                autoSkip: true,
+                maxTicksLimit: 15
+              }
+            }
+          },
+          plugins: {
+            annotation: { annotations }
+          }
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 7. Duration / time frame
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.durationCount);
+
+      makeChart('c7', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            label: 'Incidents',
+            data: entries.map(([, value]) => value),
+            backgroundColor: '#805ad5'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: integerAxisOptions('y')
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 8. Total of each behaviour of concern
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.behaviourCount)
+        .sort((a, b) => b[1] - a[1]);
+
+      makeChart('c8', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            label: 'Total occurrences',
+            data: entries.map(([, value]) => value),
+            backgroundColor: entries.map(
+              (_, index) => COLORS[index % COLORS.length]
+            )
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: {
+            legend: { display: false }
+          },
+          scales: integerAxisOptions('x')
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 9. Suicidal-related behaviour trend
+    // ---------------------------------------------------------
+    lineTrend(
+      'c9',
+      stats.suicidalDaily,
+      '#e53e3e',
+      'Suicidal-related behaviour incidents'
+    );
+
+    // ---------------------------------------------------------
+    // 10. Suicidal-related behaviour breakdown
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.suicidalBreakdown);
+
+      makeChart('c10', {
+        type: 'doughnut',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            data: entries.map(([, value]) => value),
+            backgroundColor: [
+              '#e53e3e',
+              '#dd6b20',
+              '#d69e2e'
+            ]
+          }]
+        },
+        options: doughnutOptions()
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 11. Severity for suicidal-related incidents
+    // Note: this is recorded incident severity, not necessarily
+    // a dedicated suicidal-behaviour intensity field.
+    // ---------------------------------------------------------
+    {
+      const order = [
+        'LOW',
+        'MILD',
+        'MODERATE',
+        'HIGH',
+        'SEVERE',
+        'UNKNOWN'
+      ];
+
+      const labels = {
+        LOW: 'Low',
+        MILD: 'Mild',
+        MODERATE: 'Moderate',
+        HIGH: 'High',
+        SEVERE: 'Severe',
+        UNKNOWN: 'Not recorded'
+      };
+
+      const keys = order.filter(
+        key => stats.suicidalSeverity[key]
+      );
+
+      makeChart('c11', {
+        type: 'pie',
+        data: {
+          labels: keys.map(key => labels[key]),
+          datasets: [{
+            data: keys.map(key => stats.suicidalSeverity[key]),
+            backgroundColor: [
+              '#68d391',
+              '#f6e05e',
+              '#ed8936',
+              '#fc8181',
+              '#c53030',
+              '#a0aec0'
+            ]
+          }]
+        },
+        options: doughnutOptions()
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 12. Wandering / absconding trend
+    // ---------------------------------------------------------
+    lineTrend(
+      'c12',
+      stats.wanderingDaily,
+      '#805ad5',
+      'Wandering / absconding incidents'
+    );
+
+    // ---------------------------------------------------------
+    // 13. Verbal vs physical aggression
+    // ---------------------------------------------------------
+    makeChart('c13', {
+      type: 'line',
+      data: {
+        labels: stats.calendarDates,
+        datasets: [
+          {
+            label: 'Verbal aggression',
+            data: stats.verbalAggressionDaily.map(item => item.count),
+            borderColor: '#dd6b20',
+            backgroundColor: 'rgba(221,107,32,0.10)',
+            tension: 0.25,
+            pointRadius: stats.calendarDates.length > 90 ? 0 : 3
+          },
+          {
+            label: 'Physical aggression',
+            data: stats.physicalAggressionDaily.map(item => item.count),
+            borderColor: '#e53e3e',
+            backgroundColor: 'rgba(229,62,62,0.10)',
+            tension: 0.25,
+            pointRadius: stats.calendarDates.length > 90 ? 0 : 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0, stepSize: 1 }
+          },
+          x: {
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: 15
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // =========================================================
+  // SHARED LINE CHART HELPER
+  // =========================================================
+
+  function lineTrend(id, series, color, label) {
+    makeChart(id, {
+      type: 'line',
+      data: {
+        labels: series.map(item => item.date),
+        datasets: [{
+          label,
+          data: series.map(item => item.count),
+          borderColor: color,
+          backgroundColor: `${color}22`,
+          fill: true,
+          tension: 0.25,
+          pointRadius: series.length > 90 ? 0 : 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0,
+              stepSize: 1
+            }
+          },
+          x: {
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: 15
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // =========================================================
+  // LOAD AND RENDER
+  // =========================================================
+
+  async function loadAndRender() {
+    const patientId =
+      document.getElementById('patientId').value.trim();
+
+    const from =
+      document.getElementById('fromDate').value || null;
+
+    const to =
+      document.getElementById('toDate').value || null;
+
+    if (!patientId) {
+      showStatus('Please enter a Patient UUID.', true);
+      return;
+    }
+
+    if (from && to && from > to) {
+      showStatus(
+        'The start date must be on or before the end date.',
+        true
+      );
+      return;
+    }
+
+    showStatus('Loading incidents…');
+
+    document.getElementById('dashboard').style.display = 'none';
+
+    try {
+      // Check the cookie-based session before requesting patient data.
+      const authenticated = await checkAuthentication();
+      if (!authenticated) return;
+
+      const incidents = await fetchAllIncidents(patientId);
+
+      const stats = buildStats(incidents, from, to);
+
+      if (stats.filtered.length === 0) {
+        destroyCharts();
+
+        // If a valid date range was selected, still show charts
+        // with zero incidents and the correct number of calendar days.
+        if (stats.totalCalendarDays > 0) {
+          renderDashboard(stats);
+          showStatus(
+            'No incidents were recorded in this period. ' +
+            'The charts show zero incidents for the selected dates. ' +
+            'Confirm that reporting coverage is complete before interpreting ' +
+            'incident-free days.'
+          );
+        } else {
+          showStatus(
+            'No incidents were found for this patient. ' +
+            'Select a date range to display the observation period.'
+          );
+        }
+
+        return;
+      }
+
+      renderDashboard(stats);
+
+      showStatus(
+        `Loaded ${stats.filtered.length} incidents from ` +
+        `${stats.rangeStart} to ${stats.rangeEnd}.`
+      );
+    } catch (error) {
+      console.error('Dashboard error:', error);
+
+      if (
+        error instanceof TypeError &&
+        /fetch/i.test(error.message)
+      ) {
+        showStatus(
+          'Could not reach the server. Check that Spring Boot is running ' +
+          'and that the frontend origin is allowed by CORS.',
+          true
+        );
+        return;
+      }
+
+      showStatus(
+        error.message || 'Unable to load the patient dashboard.',
+        true
+      );
+    }
+  }
+
+  // =========================================================
+  // INITIALISE
+  // =========================================================
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlPatientId = urlParams.get('patientId');
+
+  if (urlPatientId) {
+    document.getElementById('patientId').value = urlPatientId;
+  }
+
+  // Optional: let the user submit the filters with Enter.
+  const filterForm = document.getElementById('filterForm');
+
+  if (filterForm) {
+    filterForm.addEventListener('submit', event => {
+      event.preventDefault();
+      loadAndRender();
+    });
+  }
+
+  // Auto-load when the URL includes ?patientId=...
+  (async function initialiseDashboard() {
+    try {
+      const authenticated = await checkAuthentication();
+
+      if (!authenticated) return;
+
+      if (urlPatientId) {
+        await loadAndRender();
+      } else {
+        showStatus(
+          'Enter a Patient UUID and select a date range, then click Apply.'
+        );
+      }
+    } catch (error) {
+      console.error('Dashboard initialisation error:', error);
+
+      showStatus(
+        error.message || 'Unable to initialise the dashboard.',
+        true
+      );
+    }
+  })();
+</script>
+
+</body>
+</html>
+
+Worked for 24s
+The crash happens because the script does document.getElementById('patientId').value = … but there is no #patientId field in the HTML.
+
+Below is a fixed filter bar (patient ID from URL + adjustable date range + adjustable inpatient stay) and the matching JS changes.
+
+1. Replace the topbar + filters HTML
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <a href="PatientList.html" style="color:#fff;text-decoration:none;font-size:1.25rem;" title="Back">←</a>
+    <img src="/Images/Logo.png" alt="Logo" style="height:32px;">
+    <h1 style="font-size:1.2rem;font-weight:600;">Incident Analytics</h1>
+  </div>
+  <a id="newIncidentBtn" href="#" class="filters" style="text-decoration:none;">
+    <button type="button" style="padding:.45rem 1rem;border:none;border-radius:6px;background:#3182ce;color:#fff;font-weight:500;cursor:pointer;">
+      New Incident
+    </button>
+  </a>
+</header>
+
+<main class="container">
+  <div class="filters" id="filterForm" style="margin-bottom:1.25rem;background:#1e3a5f;padding:1rem;border-radius:10px;flex-wrap:wrap;">
+    <!-- Patient is taken from ?patientId= in the URL; shown read-only -->
+    <label style="color:#fff;font-size:.85rem;">
+      Patient ID
+      <input type="text" id="patientId" readonly
+             style="display:block;min-width:280px;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <label style="color:#fff;font-size:.85rem;">
+      From
+      <input type="date" id="fromDate" style="display:block;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <label style="color:#fff;font-size:.85rem;">
+      To
+      <input type="date" id="toDate" style="display:block;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <label style="color:#fff;font-size:.85rem;">
+      Inpatient start
+      <input type="date" id="inpatientStart" style="display:block;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <label style="color:#fff;font-size:.85rem;">
+      Inpatient end
+      <input type="date" id="inpatientEnd" style="display:block;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <button type="button" onclick="loadAndRender()" style="align-self:flex-end;">Apply</button>
+  </div>
+
+  <div id="status" class="state">Loading incidents…</div>
+  <div id="dashboard" class="grid" style="display:none"></div>
+</main>
+2. Remove the hardcoded inpatient constant
+Delete this block:
+
+const INPATIENT = {
+  start: '2025-07-22',
+  end: '2025-08-15',
+  label: 'Inpatient stay 22/07–15/08'
+};
+3. Add a helper to read inpatient dates from the inputs
+function getInpatient() {
+  const start = document.getElementById('inpatientStart')?.value || null;
+  const end = document.getElementById('inpatientEnd')?.value || null;
+
+  if (!start || !end) return null;
+  if (start > end) return null;
+
+  // Label like "Inpatient stay 22/07–15/08"
+  const fmt = (iso) => {
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}`;
+  };
+
+  return {
+    start,
+    end,
+    label: `Inpatient stay ${fmt(start)}–${fmt(end)}`
+  };
+}
+4. Fix chart 6 to use adjustable inpatient dates
+Replace the inpatient section inside chart 6 with:
+
+// ---------------------------------------------------------
+// 6. Overall incident trend + inpatient stay (optional)
+// ---------------------------------------------------------
+{
+  const labels = stats.dailyTotals.map(item => item.date);
+  const values = stats.dailyTotals.map(item => item.count);
+  const inpatient = getInpatient();
+  const annotations = {};
+
+  if (inpatient) {
+    const inpatientStart = labels.indexOf(inpatient.start);
+    const inpatientEnd = labels.indexOf(inpatient.end);
+
+    if (
+      inpatientStart !== -1 &&
+      inpatientEnd !== -1 &&
+      inpatientStart <= inpatientEnd
+    ) {
+      annotations.inpatient = {
+        type: 'box',
+        xMin: inpatientStart - 0.5,
+        xMax: inpatientEnd + 0.5,
+        backgroundColor: 'rgba(229, 62, 62, 0.12)',
+        borderWidth: 0,
+        label: {
+          display: true,
+          content: inpatient.label,
+          position: 'start'
+        }
+      };
+    }
+  }
+
+  makeChart('c6', {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Incidents per day',
+        data: values,
+        borderColor: '#3182ce',
+        backgroundColor: 'rgba(49,130,206,0.15)',
+        fill: true,
+        tension: 0.25,
+        pointRadius: labels.length > 90 ? 0 : 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } },
+        x: { ticks: { autoSkip: true, maxTicksLimit: 15 } }
+      },
+      plugins: {
+        annotation: { annotations }
+      }
+    }
+  });
+
+  // Update the note under the chart
+  const note = document.querySelector('#c6')?.closest('.card')?.querySelector('.legend-note');
+  if (note) {
+    note.textContent = inpatient
+      ? `Shaded band: ${inpatient.label}`
+      : 'No inpatient period set (optional dates above).';
+  }
+}
+Also change the static legend in renderDashboard HTML from:
+
+<p class="legend-note">Shaded band: ${INPATIENT.label}</p>
+to:
+
+<p class="legend-note">Inpatient band is optional — set dates above.</p>
+5. Fix loadAndRender and initialise (null-safe)
+async function loadAndRender() {
+  const patientIdEl = document.getElementById('patientId');
+  const patientId = (patientIdEl?.value || '').trim();
+
+  const from = document.getElementById('fromDate')?.value || null;
+  const to = document.getElementById('toDate')?.value || null;
+
+  if (!patientId) {
+    showStatus('No patient ID. Open this page with ?patientId=<uuid>.', true);
+    return;
+  }
+
+  if (from && to && from > to) {
+    showStatus('The start date must be on or before the end date.', true);
+    return;
+  }
+
+  const inpatientStart = document.getElementById('inpatientStart')?.value || null;
+  const inpatientEnd = document.getElementById('inpatientEnd')?.value || null;
+  if (inpatientStart && inpatientEnd && inpatientStart > inpatientEnd) {
+    showStatus('Inpatient start must be on or before inpatient end.', true);
+    return;
+  }
+
+  showStatus('Loading incidents…');
+  document.getElementById('dashboard').style.display = 'none';
+
+  try {
+    const authenticated = await checkAuthentication();
+    if (!authenticated) return;
+
+    const incidents = await fetchAllIncidents(patientId);
+    const stats = buildStats(incidents, from, to);
+
+    if (stats.filtered.length === 0) {
+      destroyCharts();
+      if (stats.totalCalendarDays > 0) {
+        renderDashboard(stats);
+        showStatus(
+          'No incidents in this period. Charts show zeros for the selected dates.'
+        );
+      } else {
+        showStatus(
+          'No incidents found. Select a date range to define the observation period.'
+        );
+      }
+      return;
+    }
+
+    renderDashboard(stats);
+    showStatus(
+      `Loaded ${stats.filtered.length} incidents from ${stats.rangeStart} to ${stats.rangeEnd}.`
+    );
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    if (error instanceof TypeError && /fetch/i.test(error.message)) {
+      showStatus(
+        'Could not reach the server. Check Spring Boot is running and CORS allows this origin.',
+        true
+      );
+      return;
+    }
+    showStatus(error.message || 'Unable to load the dashboard.', true);
+  }
+}
+
+// =========================================================
+// INITIALISE
+// =========================================================
+const urlParams = new URLSearchParams(window.location.search);
+const urlPatientId = urlParams.get('patientId');
+
+const patientIdInput = document.getElementById('patientId');
+if (patientIdInput && urlPatientId) {
+  patientIdInput.value = urlPatientId;
+}
+
+// Wire "New Incident" button
+const newBtn = document.getElementById('newIncidentBtn');
+if (newBtn && urlPatientId) {
+  newBtn.href = `IncidentForm.html?patientId=${encodeURIComponent(urlPatientId)}`;
+}
+
+(async function initialiseDashboard() {
+  try {
+    const authenticated = await checkAuthentication();
+    if (!authenticated) return;
+
+    if (urlPatientId) {
+      await loadAndRender();
+    } else {
+      showStatus('Open this page with ?patientId=<uuid>, then set dates and click Apply.');
+    }
+  } catch (error) {
+    console.error('Dashboard initialisation error:', error);
+    showStatus(error.message || 'Unable to initialise the dashboard.', true);
+  }
+})();
+Summary of fixes
+Problem	Fix
+Cannot set properties of null (setting 'value')	#patientId input added; all getElementById uses optional chaining
+Hardcoded inpatient days	#inpatientStart / #inpatientEnd inputs; band only drawn when both are set
+Patient ID	Comes from ?patientId= in the URL (read-only field)
+After these changes, open:
+
+IncidentAnalyticsDashboard.html?patientId=3e88420a-23bb-41a6-80ff-54010decde26
+
+Set From / To for the analysis window and optionally Inpatient start / end, then click Apply.
+
+IncidentAnalyticsDashboard.html?patientId=3e88420a-23bb-41a6-80ff-54010decde26:1239 Uncaught ReferenceError: Cannot access 'urlPatientId' before initialization
+    at IncidentAnalyticsDashboard.html?patientId=3e88420a-23bb-41a6-80ff-54010decde26:1239:23
+
+
+Worked for 13s
+That error means something uses urlPatientId before this line runs:
+
+const urlPatientId = urlParams.get('patientId');
+With const / let, that causes a Temporal Dead Zone error.
+
+Put all URL/init code in this order at the end of the script (and delete any earlier urlPatientId usage):
+
+// =========================================================
+// INITIALISE  (keep this block last — order matters)
+// =========================================================
+
+const urlParams = new URLSearchParams(window.location.search);
+const urlPatientId = urlParams.get('patientId');   // declare FIRST
+
+const patientIdInput = document.getElementById('patientId');
+if (patientIdInput && urlPatientId) {
+  patientIdInput.value = urlPatientId;
+}
+
+const newBtn = document.getElementById('newIncidentBtn');
+if (newBtn && urlPatientId) {
+  newBtn.href = `IncidentForm.html?patientId=${encodeURIComponent(urlPatientId)}`;
+}
+
+(async function initialiseDashboard() {
+  try {
+    const authenticated = await checkAuthentication();
+    if (!authenticated) return;
+
+    if (urlPatientId) {
+      await loadAndRender();
+    } else {
+      showStatus(
+        'Open this page with ?patientId=<uuid>, then set dates and click Apply.'
+      );
+    }
+  } catch (error) {
+    console.error('Dashboard initialisation error:', error);
+    showStatus(
+      error.message || 'Unable to initialise the dashboard.',
+      true
+    );
+  }
+})();
+Checklist
+Search the file for urlPatientId — it must only appear after the const urlPatientId = … line.
+Remove any older init code that still says things like:
+document.getElementById('patientId').value = urlPatientId;
+higher up in the file.
+Soft-refresh (Ctrl+F5) so the browser isn’t using a cached old script.
+If anything still references urlPatientId above its declaration, move that code below the declaration (or inline urlParams.get('patientId') there instead).
+
+this page is supposed to analyse incidents and consumption. suggest a way to switch between the two dashboards
+
+
+Worked for 19s
+A clean way to switch between Incidents and Consumption on the same page is a segmented control (tabs) in the header or just under it. It keeps patient ID + date filters shared, and only the charts change.
+
+Recommended UI
+[ ← ]  SENAMI   Incident Analytics          [ Incidents | Consumption ]   [ New Incident ]
+Or under the title bar:
+
+┌─────────────┬────────────────┐
+│  Incidents  │  Consumption   │   ← active tab highlighted
+└─────────────┴────────────────┘
+Minimal implementation
+1. Add tabs under the topbar
+
+<nav class="dash-tabs">
+  <button type="button" class="dash-tab active" data-dash="incidents">Incidents</button>
+  <button type="button" class="dash-tab" data-dash="consumption">Consumption</button>
+</nav>
+2. CSS
+
+.dash-tabs {
+  display: flex;
+  gap: 0;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 1.5rem;
+}
+.dash-tab {
+  padding: .85rem 1.25rem;
+  border: none;
+  background: none;
+  font-size: .95rem;
+  font-weight: 500;
+  color: #718096;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+.dash-tab:hover { color: #1e3a5f; }
+.dash-tab.active {
+  color: #1e3a5f;
+  border-bottom-color: #3182ce;
+}
+3. Two dashboard containers
+
+<div id="incidentsDashboard" class="grid"><!-- your current charts --></div>
+<div id="consumptionDashboard" class="grid" style="display:none"><!-- consumption charts --></div>
+4. Switch logic
+
+document.querySelectorAll('.dash-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    const which = tab.dataset.dash;
+    document.getElementById('incidentsDashboard').style.display =
+      which === 'incidents' ? 'grid' : 'none';
+    document.getElementById('consumptionDashboard').style.display =
+      which === 'consumption' ? 'grid' : 'none';
+
+    // Optional: load data only when first opened
+    if (which === 'consumption' && !window.__consumptionLoaded) {
+      loadConsumptionDashboard();
+      window.__consumptionLoaded = true;
+    }
+  });
+});
+Shared filters
+Keep Patient ID, From, To, and Apply above both dashboards.
+
+Inpatient start/end can stay only on the Incidents tab (hide them when Consumption is active), or keep them if consumption also needs a stay window.
+
+function setInpatientVisible(show) {
+  ['inpatientStart', 'inpatientEnd'].forEach(id => {
+    const el = document.getElementById(id)?.closest('label');
+    if (el) el.style.display = show ? '' : 'none';
+  });
+}
+// when switching:
+setInpatientVisible(which === 'incidents');
+URL support (optional but useful)
+?patientId=…&dash=incidents
+?patientId=…&dash=consumption
+On load:
+
+const dash = urlParams.get('dash') || 'incidents';
+document.querySelector(`.dash-tab[data-dash="${dash}"]`)?.click();
+When switching:
+
+const url = new URL(location.href);
+url.searchParams.set('dash', which);
+history.replaceState(null, '', url);
+Alternative patterns
+Pattern	Best when…
+Tabs (above)	Same patient, same date range, two related views
+Two separate pages	Different filters, permissions, or very large UIs
+Dropdown in header	Many modules (Incidents / Consumption / Meds / …)
+For two analytics views, tabs is the best fit.
+
+If you share the consumption model or API (fields, endpoints), I can sketch the Consumption dashboard charts the same way as the incident ones.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Incident Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.5;
+    }
+    .topbar {
+      background: #1e3a5f;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .topbar h1 { font-size: 1.35rem; font-weight: 600; }
+    .filters {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filters input, .filters select {
+      padding: .45rem .7rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.3);
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: .9rem;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,.22); }
+    .filters input::placeholder { color: rgba(255,255,255,.6); }
+    .filters button {
+      padding: .45rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: #3182ce;
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .filters button:hover { background: #2b6cb0; }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.25rem;
+    }
+    .grid-wide { grid-column: 1 / -1; }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      padding: 1.25rem;
+    }
+    .card h2 {
+      font-size: .95rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid #edf2f7;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 260px;
+    }
+    .chart-wrap.tall { height: 320px; }
+    .state {
+      text-align: center;
+      padding: 3rem;
+      color: #718096;
+    }
+    .state.error { color: #c53030; }
+    .legend-note {
+      font-size: .8rem;
+      color: #718096;
+      margin-top: .5rem;
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <a href="PatientList.html" class="back-btn" title="Back to patients">←</a>
+    <img src="/Images/Logo.png" alt="Logo" style="height:32px;">
+    <h1 style="font-size:1.2rem;font-weight:600;">Incident Analytics</h1>
+  </div>
+  <a id="newIncidentBtn" href="#" class="filters" style="text-decoration:none;">
+    <button type="button" font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; style="padding:.45rem 1rem;border:none;border-radius:6px;background:#3182ce;color:#fff;font-weight:500;cursor:pointer;">
+      New Incident
+    </button>
+  </a>
+</header>
+
+<main class="container">
+  <div class="filters" id="filterForm" style="margin-bottom:1.25rem;background:#1e3a5f;padding:1rem;border-radius:10px;flex-wrap:wrap;">
+    <!-- Patient is taken from ?patientId= in the URL; shown read-only -->
+    <label style="color:#fff;font-size:.85rem;">
+      Patient ID
+      <input type="text" id="patientId" readonly
+             style="display:block;min-width:280px;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <label style="color:#fff;font-size:.85rem;">
+      From
+      <input type="date" id="fromDate" style="display:block;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <label style="color:#fff;font-size:.85rem;">
+      To
+      <input type="date" id="toDate" style="display:block;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <label style="color:#fff;font-size:.85rem;">
+      Inpatient start
+      <input type="date" id="inpatientStart" style="display:block;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <label style="color:#fff;font-size:.85rem;">
+      Inpatient end
+      <input type="date" id="inpatientEnd" style="display:block;margin-top:.25rem;padding:.45rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
+    </label>
+
+    <button type="button" onclick="loadAndRender()" style="align-self:flex-end;">Apply</button>
+  </div>
+
+  <div id="status" class="state">Loading incidents…</div>
+  <div id="dashboard" class="grid" style="display:none"></div>
+</main>
+
+  
+<script>
+  // =========================================================
+  // CONFIGURATION
+  // =========================================================
+  const API = 'http://localhost:8080/api';
+  const AUTH_ME = 'http://localhost:8080/auth/me';
+
+  const charts = {};
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlPatientId = urlParams.get('patientId');
+ function getInpatient() {
+  const start = document.getElementById('inpatientStart')?.value || null;
+  const end = document.getElementById('inpatientEnd')?.value || null;
+
+  if (!start || !end) return null;
+  if (start > end) return null;
+
+  // Label like "Inpatient stay 22/07–15/08"
+  const fmt = (iso) => {
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}`;
+  };
+
+  return {
+    start,
+    end,
+    label: `Inpatient stay ${fmt(start)}–${fmt(end)}`
+  };
+}
+
+  // Behaviour groups based on the incident form's enum values.
+  const SUICIDAL = ['HARM_TO_SELF', 'RISK_TAKING'];
+  const WANDERING = ['ABSCONDING_WANDERING'];
+  const AGGRESSION = [
+    'PHYSICAL_AGGRESSION',
+    'VERBAL_AGGRESSION',
+    'THREATENING'
+  ];
+
+  const COLORS = [
+    '#3182ce', '#e53e3e', '#38a169', '#d69e2e',
+    '#805ad5', '#dd6b20', '#319795', '#d53f8c',
+    '#2b6cb0', '#c53030', '#276749', '#b7791f',
+    '#6b46c1', '#c05621'
+  ];
+
+  // =========================================================
+  // COOKIE AUTHENTICATION
+  // =========================================================
+
+  // Do not read access_token from JavaScript.
+  // It is an HTTP-only cookie and the browser sends it automatically.
+  function authHeaders() {
+    return {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+  }
+
+  function redirectToLogin() {
+    const currentPage =
+      window.location.pathname + window.location.search;
+
+    window.location.href =
+      `Login.html?next=${encodeURIComponent(currentPage)}`;
+  }
+
+  async function checkAuthentication() {
+    const response = await fetch(AUTH_ME, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.status === 401) {
+      redirectToLogin();
+      return false;
+    }
+
+    if (response.status === 403) {
+      throw new Error(
+        'Your account does not have permission to access this dashboard.'
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `Unable to verify your session (${response.status}).`
+      );
+    }
+
+    return true;
+  }
+
+  // =========================================================
+  // FETCH INCIDENTS
+  // =========================================================
+
+  async function fetchAllIncidents(patientId) {
+    if (!patientId) {
+      throw new Error('Please enter a Patient UUID.');
+    }
+
+    const all = [];
+    let page = 0;
+    let totalPages = 1;
+
+    while (page < totalPages) {
+      const path =
+        `/patients/${encodeURIComponent(patientId)}/incidents` +
+        `?page=${page}&size=100&sort=occurredAt,asc`;
+
+      const response = await fetch(`${API}${path}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: authHeaders()
+      });
+
+      if (response.status === 401) {
+        redirectToLogin();
+        throw new Error('Your session has expired. Please sign in again.');
+      }
+
+      if (response.status === 403) {
+        throw new Error(
+          'You do not have permission to view these incidents.'
+        );
+      }
+
+      if (response.status === 404) {
+        throw new Error(
+          'The patient or incident endpoint could not be found. ' +
+          'Check the patient UUID and backend route.'
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load incidents (${response.status}).`
+        );
+      }
+
+      const data = await response.json();
+
+      // Spring Page<Incident> response.
+      if (Array.isArray(data.content)) {
+        all.push(...data.content);
+        totalPages = Number.isInteger(data.totalPages)
+          ? data.totalPages
+          : 1;
+      } else if (Array.isArray(data)) {
+        // Also support an endpoint returning a plain array.
+        all.push(...data);
+        totalPages = 1;
+      } else {
+        throw new Error(
+          'Unexpected incidents response. Expected a page or JSON array.'
+        );
+      }
+
+      page++;
+    }
+
+    return all;
+  }
+
+  // =========================================================
+  // GENERAL HELPERS
+  // =========================================================
+
+  function toDate(value) {
+    if (!value) return null;
+
+    // Supports ISO timestamps and YYYY-MM-DD strings.
+    const match = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
+    return match ? match[1] : null;
+  }
+
+  function inRange(date, from, to) {
+    if (!date) return false;
+    if (from && date < from) return false;
+    if (to && date > to) return false;
+    return true;
+  }
+
+  function parseLocalDate(dateString) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  function formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  function addDays(dateString, amount) {
+    const date = parseLocalDate(dateString);
+    date.setDate(date.getDate() + amount);
+    return formatLocalDate(date);
+  }
+
+  function dateDifferenceInclusive(start, end) {
+    if (!start || !end || start > end) return 0;
+
+    let count = 0;
+    let current = start;
+
+    while (current <= end) {
+      count++;
+      current = addDays(current, 1);
+    }
+
+    return count;
+  }
+
+  function displayName(value) {
+    if (!value) return 'Unknown';
+    return String(value)
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, letter => letter.toUpperCase());
+  }
+
+  function destroyCharts() {
+    Object.values(charts).forEach(chart => chart.destroy());
+
+    Object.keys(charts).forEach(key => {
+      delete charts[key];
+    });
+  }
+
+  function makeChart(id, config) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+
+    charts[id] = new Chart(canvas, config);
+  }
+
+  function showStatus(message, isError = false) {
+    const status = document.getElementById('status');
+
+    status.style.display = 'block';
+    status.textContent = message;
+    status.className = isError ? 'state error' : 'state';
+  }
+
+  // =========================================================
+  // DATE RANGE AND AGGREGATIONS
+  // =========================================================
+
+  function buildStats(incidents, from, to) {
+    const validIncidents = incidents.filter(incident =>
+      toDate(incident.occurredAt)
+    );
+
+    const allDates = validIncidents
+      .map(incident => toDate(incident.occurredAt))
+      .sort();
+
+    // If the user has not selected dates, use the first and last
+    // incident dates. Explicit dates define the observation period.
+    const rangeStart = from || allDates[0] || null;
+    const rangeEnd = to || allDates[allDates.length - 1] || null;
+
+    const filtered = validIncidents.filter(incident => {
+      const date = toDate(incident.occurredAt);
+      return inRange(date, rangeStart, rangeEnd);
+    });
+
+    const byDay = {};
+
+    filtered.forEach(incident => {
+      const date = toDate(incident.occurredAt);
+      (byDay[date] ||= []).push(incident);
+    });
+
+    const daysWithIncidents = Object.keys(byDay).sort();
+
+    const multiDays = daysWithIncidents.filter(
+      date => byDay[date].length > 1
+    );
+
+    const singleDays = daysWithIncidents.filter(
+      date => byDay[date].length === 1
+    );
+
+    const totalCalendarDays = dateDifferenceInclusive(
+      rangeStart,
+      rangeEnd
+    );
+
+    const daysWithIncident = daysWithIncidents.length;
+
+    // Incident-free days are only meaningful if the selected observation
+    // period has complete reporting coverage.
+    const freeDays = Math.max(
+      0,
+      totalCalendarDays - daysWithIncident
+    );
+
+    // Build a complete calendar series, including zero-incident days.
+    const calendarDates = [];
+
+    if (rangeStart && rangeEnd && rangeStart <= rangeEnd) {
+      let current = rangeStart;
+
+      while (current <= rangeEnd) {
+        calendarDates.push(current);
+        current = addDays(current, 1);
+      }
+    } else {
+      calendarDates.push(...daysWithIncidents);
+    }
+
+    // Count each behaviour recorded against an incident.
+    const behaviourCount = {};
+    const locationCount = {};
+    const durationCount = {};
+    const frequencyCount = {};
+
+    filtered.forEach(incident => {
+      (incident.behaviours || []).forEach(behaviour => {
+        behaviourCount[behaviour] =
+          (behaviourCount[behaviour] || 0) + 1;
+      });
+
+      const location = incident.location || 'UNKNOWN';
+      locationCount[location] =
+        (locationCount[location] || 0) + 1;
+
+      const duration = incident.duration || 'UNKNOWN';
+      durationCount[duration] =
+        (durationCount[duration] || 0) + 1;
+
+      const frequency = incident.frequency || 'UNKNOWN';
+      frequencyCount[frequency] =
+        (frequencyCount[frequency] || 0) + 1;
+    });
+
+    // Behaviour occurrences on days with multiple incidents.
+    const multiIncidents = multiDays.flatMap(date => byDay[date]);
+    const multiBehaviourCount = {};
+
+    multiIncidents.forEach(incident => {
+      (incident.behaviours || []).forEach(behaviour => {
+        multiBehaviourCount[behaviour] =
+          (multiBehaviourCount[behaviour] || 0) + 1;
+      });
+    });
+
+    // Daily totals include zero-incident days.
+    const dailyTotals = calendarDates.map(date => ({
+      date,
+      count: (byDay[date] || []).length
+    }));
+
+    // Count incidents with any behaviour from the specified group.
+    function dailyFor(behaviours) {
+      return calendarDates.map(date => ({
+        date,
+        count: (byDay[date] || []).filter(incident =>
+          (incident.behaviours || []).some(behaviour =>
+            behaviours.includes(behaviour)
+          )
+        ).length
+      }));
+    }
+
+    const suicidalIncidents = filtered.filter(incident =>
+      (incident.behaviours || []).some(behaviour =>
+        SUICIDAL.includes(behaviour)
+      )
+    );
+
+    const suicidalBreakdown = {};
+    const suicidalSeverity = {};
+
+    suicidalIncidents.forEach(incident => {
+      (incident.behaviours || [])
+        .filter(behaviour => SUICIDAL.includes(behaviour))
+        .forEach(behaviour => {
+          suicidalBreakdown[behaviour] =
+            (suicidalBreakdown[behaviour] || 0) + 1;
+        });
+
+      const severity = incident.severity || 'UNKNOWN';
+
+      suicidalSeverity[severity] =
+        (suicidalSeverity[severity] || 0) + 1;
+    });
+
+    // Separate verbal and physical aggression series.
+    function dailyBehaviourCount(behaviour) {
+      return calendarDates.map(date => ({
+        date,
+        count: (byDay[date] || []).filter(incident =>
+          (incident.behaviours || []).includes(behaviour)
+        ).length
+      }));
+    }
+
+    return {
+      filtered,
+      rangeStart,
+      rangeEnd,
+      byDay,
+      calendarDates,
+      multiDays,
+      singleDays,
+      freeDays,
+      daysWithIncident,
+      totalCalendarDays,
+      behaviourCount,
+      locationCount,
+      durationCount,
+      multiBehaviourCount,
+      frequencyCount,
+      dailyTotals,
+      suicidalDaily: dailyFor(SUICIDAL),
+      wanderingDaily: dailyFor(WANDERING),
+      aggressionDaily: dailyFor(AGGRESSION),
+      verbalAggressionDaily:
+        dailyBehaviourCount('VERBAL_AGGRESSION'),
+      physicalAggressionDaily:
+        dailyBehaviourCount('PHYSICAL_AGGRESSION'),
+      suicidalBreakdown,
+      suicidalSeverity
+    };
+  }
+
+  // =========================================================
+  // COMMON CHART OPTIONS
+  // =========================================================
+
+  function doughnutOptions() {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    };
+  }
+
+  function integerAxisOptions(axis = 'y') {
+    return {
+      [axis]: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          stepSize: 1
+        }
+      }
+    };
+  }
+
+  // =========================================================
+  // RENDER DASHBOARD
+  // =========================================================
+
+  function renderDashboard(stats) {
+    destroyCharts();
+
+    const dashboard = document.getElementById('dashboard');
+
+    dashboard.innerHTML = `
+      <div class="card">
+        <h2>1. Days with incidents vs incident-free days</h2>
+        <div class="chart-wrap"><canvas id="c1"></canvas></div>
+        <p class="legend-note">
+          ${stats.daysWithIncident} days with incidents ·
+          ${stats.freeDays} incident-free days ·
+          ${stats.totalCalendarDays} calendar days
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>2. Days with vs without multiple incidents</h2>
+        <div class="chart-wrap"><canvas id="c2"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>3. Behaviours on multi-incident days</h2>
+        <div class="chart-wrap tall"><canvas id="c3"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>4. Reported frequency breakdown</h2>
+        <div class="chart-wrap"><canvas id="c4"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>5. Setting of incidents</h2>
+        <div class="chart-wrap"><canvas id="c5"></canvas></div>
+      </div>
+
+      <div class="card grid-wide">
+        <h2>6. Trend of all incidents over time</h2>
+        <div class="chart-wrap tall"><canvas id="c6"></canvas></div>
+        <p class="legend-note">Inpatient band is optional — set dates above.</p>
+      </div>
+
+      <div class="card">
+        <h2>7. Time frames mentioned in incident reports</h2>
+        <div class="chart-wrap tall"><canvas id="c7"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>8. Total of each behaviour of concern</h2>
+        <div class="chart-wrap tall"><canvas id="c8"></canvas></div>
+      </div>
+
+      <div class="card grid-wide">
+        <h2>9. Trend of suicidal-related behaviours</h2>
+        <div class="chart-wrap tall"><canvas id="c9"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>10. Breakdown of suicidal-related behaviours</h2>
+        <div class="chart-wrap"><canvas id="c10"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>11. Severity recorded for suicidal-related incidents</h2>
+        <div class="chart-wrap"><canvas id="c11"></canvas></div>
+      </div>
+
+      <div class="card grid-wide">
+        <h2>12. Trend of wandering / absconding</h2>
+        <div class="chart-wrap tall"><canvas id="c12"></canvas></div>
+      </div>
+
+      <div class="card grid-wide">
+        <h2>13. Trend of verbal and physical aggression</h2>
+        <div class="chart-wrap tall"><canvas id="c13"></canvas></div>
+      </div>
+    `;
+
+    dashboard.style.display = 'grid';
+    document.getElementById('status').style.display = 'none';
+
+    // ---------------------------------------------------------
+    // 1. Days with incidents vs incident-free days
+    // ---------------------------------------------------------
+    makeChart('c1', {
+      type: 'doughnut',
+      data: {
+        labels: [
+          'Days with at least one incident',
+          'Incident-free days'
+        ],
+        datasets: [{
+          data: [
+            stats.daysWithIncident,
+            stats.freeDays
+          ],
+          backgroundColor: ['#e53e3e', '#38a169']
+        }]
+      },
+      options: doughnutOptions()
+    });
+
+    // ---------------------------------------------------------
+    // 2. Days with vs without multiple incidents
+    // "Without multiple incidents" includes both zero-incident
+    // days and days with exactly one incident.
+    // ---------------------------------------------------------
+    const daysWithoutMultiple = Math.max(
+      0,
+      stats.totalCalendarDays - stats.multiDays.length
+    );
+
+    makeChart('c2', {
+      type: 'doughnut',
+      data: {
+        labels: [
+          'Days with multiple incidents',
+          'Days without multiple incidents'
+        ],
+        datasets: [{
+          data: [
+            stats.multiDays.length,
+            daysWithoutMultiple
+          ],
+          backgroundColor: ['#dd6b20', '#3182ce']
+        }]
+      },
+      options: doughnutOptions()
+    });
+
+    // ---------------------------------------------------------
+    // 3. Behaviours on multi-incident days
+    // This uses behaviours because the available form schema
+    // records a behaviours array, not a separate incident-type field.
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.multiBehaviourCount)
+        .sort((a, b) => b[1] - a[1]);
+
+      makeChart('c3', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            label: 'Behaviour occurrences',
+            data: entries.map(([, value]) => value),
+            backgroundColor: entries.map(
+              (_, index) => COLORS[index % COLORS.length]
+            )
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: {
+            legend: { display: false }
+          },
+          scales: integerAxisOptions('x')
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 4. Frequency pie: 1x / 2x / 3–5x / >5x
+    // ---------------------------------------------------------
+    {
+      const order = [
+        'ONE',
+        'TWO',
+        'THREE_TO_FIVE',
+        'MORE_THAN_FIVE'
+      ];
+
+      const names = {
+        ONE: '1×',
+        TWO: '2×',
+        THREE_TO_FIVE: '3–5×',
+        MORE_THAN_FIVE: '>5×'
+      };
+
+      makeChart('c4', {
+        type: 'pie',
+        data: {
+          labels: order.map(key => names[key]),
+          datasets: [{
+            data: order.map(
+              key => stats.frequencyCount[key] || 0
+            ),
+            backgroundColor: [
+              '#3182ce',
+              '#38a169',
+              '#d69e2e',
+              '#e53e3e'
+            ]
+          }]
+        },
+        options: doughnutOptions()
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 5. Setting of incidents
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.locationCount);
+
+      makeChart('c5', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            label: 'Incidents',
+            data: entries.map(([, value]) => value),
+            backgroundColor: '#3182ce'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: integerAxisOptions('y')
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 6. Overall incident trend + inpatient stay
+    // Requires chartjs-plugin-annotation to be loaded.
+    // ---------------------------------------------------------
+    // ---------------------------------------------------------
+// 6. Overall incident trend + inpatient stay (optional)
+// ---------------------------------------------------------
+{
+  const labels = stats.dailyTotals.map(item => item.date);
+  const values = stats.dailyTotals.map(item => item.count);
+  const inpatient = getInpatient();
+  const annotations = {};
+
+  if (inpatient) {
+    const inpatientStart = labels.indexOf(inpatient.start);
+    const inpatientEnd = labels.indexOf(inpatient.end);
+
+    if (
+      inpatientStart !== -1 &&
+      inpatientEnd !== -1 &&
+      inpatientStart <= inpatientEnd
+    ) {
+      annotations.inpatient = {
+        type: 'box',
+        xMin: inpatientStart - 0.5,
+        xMax: inpatientEnd + 0.5,
+        backgroundColor: 'rgba(229, 62, 62, 0.12)',
+        borderWidth: 0,
+        label: {
+          display: true,
+          content: inpatient.label,
+          position: 'start'
+        }
+      };
+    }
+  }
+
+  makeChart('c6', {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Incidents per day',
+        data: values,
+        borderColor: '#3182ce',
+        backgroundColor: 'rgba(49,130,206,0.15)',
+        fill: true,
+        tension: 0.25,
+        pointRadius: labels.length > 90 ? 0 : 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } },
+        x: { ticks: { autoSkip: true, maxTicksLimit: 15 } }
+      },
+      plugins: {
+        annotation: { annotations }
+      }
+    }
+  });
+
+  // Update the note under the chart
+  const note = document.querySelector('#c6')?.closest('.card')?.querySelector('.legend-note');
+  if (note) {
+    note.textContent = inpatient
+      ? `Shaded band: ${inpatient.label}`
+      : 'No inpatient period set (optional dates above).';
+  }
+}
+
+    // ---------------------------------------------------------
+    // 7. Duration / time frame
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.durationCount);
+
+      makeChart('c7', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            label: 'Incidents',
+            data: entries.map(([, value]) => value),
+            backgroundColor: '#805ad5'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: integerAxisOptions('y')
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 8. Total of each behaviour of concern
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.behaviourCount)
+        .sort((a, b) => b[1] - a[1]);
+
+      makeChart('c8', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            label: 'Total occurrences',
+            data: entries.map(([, value]) => value),
+            backgroundColor: entries.map(
+              (_, index) => COLORS[index % COLORS.length]
+            )
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: {
+            legend: { display: false }
+          },
+          scales: integerAxisOptions('x')
+        }
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 9. Suicidal-related behaviour trend
+    // ---------------------------------------------------------
+    lineTrend(
+      'c9',
+      stats.suicidalDaily,
+      '#e53e3e',
+      'Suicidal-related behaviour incidents'
+    );
+
+    // ---------------------------------------------------------
+    // 10. Suicidal-related behaviour breakdown
+    // ---------------------------------------------------------
+    {
+      const entries = Object.entries(stats.suicidalBreakdown);
+
+      makeChart('c10', {
+        type: 'doughnut',
+        data: {
+          labels: entries.map(([key]) => displayName(key)),
+          datasets: [{
+            data: entries.map(([, value]) => value),
+            backgroundColor: [
+              '#e53e3e',
+              '#dd6b20',
+              '#d69e2e'
+            ]
+          }]
+        },
+        options: doughnutOptions()
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 11. Severity for suicidal-related incidents
+    // Note: this is recorded incident severity, not necessarily
+    // a dedicated suicidal-behaviour intensity field.
+    // ---------------------------------------------------------
+    {
+      const order = [
+        'LOW',
+        'MILD',
+        'MODERATE',
+        'HIGH',
+        'SEVERE',
+        'UNKNOWN'
+      ];
+
+      const labels = {
+        LOW: 'Low',
+        MILD: 'Mild',
+        MODERATE: 'Moderate',
+        HIGH: 'High',
+        SEVERE: 'Severe',
+        UNKNOWN: 'Not recorded'
+      };
+
+      const keys = order.filter(
+        key => stats.suicidalSeverity[key]
+      );
+
+      makeChart('c11', {
+        type: 'pie',
+        data: {
+          labels: keys.map(key => labels[key]),
+          datasets: [{
+            data: keys.map(key => stats.suicidalSeverity[key]),
+            backgroundColor: [
+              '#68d391',
+              '#f6e05e',
+              '#ed8936',
+              '#fc8181',
+              '#c53030',
+              '#a0aec0'
+            ]
+          }]
+        },
+        options: doughnutOptions()
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 12. Wandering / absconding trend
+    // ---------------------------------------------------------
+    lineTrend(
+      'c12',
+      stats.wanderingDaily,
+      '#805ad5',
+      'Wandering / absconding incidents'
+    );
+
+    // ---------------------------------------------------------
+    // 13. Verbal vs physical aggression
+    // ---------------------------------------------------------
+    makeChart('c13', {
+      type: 'line',
+      data: {
+        labels: stats.calendarDates,
+        datasets: [
+          {
+            label: 'Verbal aggression',
+            data: stats.verbalAggressionDaily.map(item => item.count),
+            borderColor: '#dd6b20',
+            backgroundColor: 'rgba(221,107,32,0.10)',
+            tension: 0.25,
+            pointRadius: stats.calendarDates.length > 90 ? 0 : 3
+          },
+          {
+            label: 'Physical aggression',
+            data: stats.physicalAggressionDaily.map(item => item.count),
+            borderColor: '#e53e3e',
+            backgroundColor: 'rgba(229,62,62,0.10)',
+            tension: 0.25,
+            pointRadius: stats.calendarDates.length > 90 ? 0 : 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0, stepSize: 1 }
+          },
+          x: {
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: 15
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // =========================================================
+  // SHARED LINE CHART HELPER
+  // =========================================================
+
+  function lineTrend(id, series, color, label) {
+    makeChart(id, {
+      type: 'line',
+      data: {
+        labels: series.map(item => item.date),
+        datasets: [{
+          label,
+          data: series.map(item => item.count),
+          borderColor: color,
+          backgroundColor: `${color}22`,
+          fill: true,
+          tension: 0.25,
+          pointRadius: series.length > 90 ? 0 : 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0,
+              stepSize: 1
+            }
+          },
+          x: {
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: 15
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // =========================================================
+  // LOAD AND RENDER
+  // =========================================================
+
+  async function loadAndRender() {
+  const patientIdEl = document.getElementById('patientId');
+  const patientId = (patientIdEl?.value || '').trim();
+
+  const from = document.getElementById('fromDate')?.value || null;
+  const to = document.getElementById('toDate')?.value || null;
+
+  if (!patientId) {
+    showStatus('No patient ID. Open this page with ?patientId=<uuid>.', true);
+    return;
+  }
+
+  if (from && to && from > to) {
+    showStatus('The start date must be on or before the end date.', true);
+    return;
+  }
+
+  const inpatientStart = document.getElementById('inpatientStart')?.value || null;
+  const inpatientEnd = document.getElementById('inpatientEnd')?.value || null;
+  if (inpatientStart && inpatientEnd && inpatientStart > inpatientEnd) {
+    showStatus('Inpatient start must be on or before inpatient end.', true);
+    return;
+  }
+
+  showStatus('Loading incidents…');
+  document.getElementById('dashboard').style.display = 'none';
+
+  try {
+    const authenticated = await checkAuthentication();
+    if (!authenticated) return;
+
+    const incidents = await fetchAllIncidents(patientId);
+    const stats = buildStats(incidents, from, to);
+
+    if (stats.filtered.length === 0) {
+      destroyCharts();
+      if (stats.totalCalendarDays > 0) {
+        renderDashboard(stats);
+        showStatus(
+          'No incidents in this period. Charts show zeros for the selected dates.'
+        );
+      } else {
+        showStatus(
+          'No incidents found. Select a date range to define the observation period.'
+        );
+      }
+      return;
+    }
+
+    renderDashboard(stats);
+    showStatus(
+      `Loaded ${stats.filtered.length} incidents from ${stats.rangeStart} to ${stats.rangeEnd}.`
+    );
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    if (error instanceof TypeError && /fetch/i.test(error.message)) {
+      showStatus(
+        'Could not reach the server. Check Spring Boot is running and CORS allows this origin.',
+        true
+      );
+      return;
+    }
+    showStatus(error.message || 'Unable to load the dashboard.', true);
+  }
+}
+
+// =========================================================
+// INITIALISE
+// =========================================================
+
+
+const patientIdInput = document.getElementById('patientId');
+if (patientIdInput && urlPatientId) {
+  patientIdInput.value = urlPatientId;
+}
+
+// Wire "New Incident" button
+const newBtn = document.getElementById('newIncidentBtn');
+if (newBtn && urlPatientId) {
+  newBtn.href = `Incident.html?patientId=${encodeURIComponent(urlPatientId)}`;
+}
+
+(async function initialiseDashboard() {
+  
+  try {
+    const authenticated = await checkAuthentication();
+    if (!authenticated) return;
+
+    if (urlPatientId) {
+      await loadAndRender();
+    } else {
+      showStatus('Open this page with ?patientId=<uuid>, then set dates and click Apply.');
+    }
+  } catch (error) {
+    console.error('Dashboard initialisation error:', error);
+    showStatus(error.message || 'Unable to initialise the dashboard.', true);
+  }
+})();
+  // =========================================================
+  // INITIALISE
+  // =========================================================
+
+  
+
+  if (urlPatientId) {
+    document.getElementById('patientId').value = urlPatientId;
+  }
+
+  // Optional: let the user submit the filters with Enter.
+  const filterForm = document.getElementById('filterForm');
+
+  if (filterForm) {
+    filterForm.addEventListener('submit', event => {
+      event.preventDefault();
+      loadAndRender();
+    });
+  }
+
+  // Auto-load when the URL includes ?patientId=...
+  (async function initialiseDashboard() {
+    try {
+      const authenticated = await checkAuthentication();
+
+      if (!authenticated) return;
+
+      if (urlPatientId) {
+        await loadAndRender();
+      } else {
+        showStatus(
+          'Enter a Patient UUID and select a date range, then click Apply.'
+        );
+      }
+    } catch (error) {
+      console.error('Dashboard initialisation error:', error);
+
+      showStatus(
+        error.message || 'Unable to initialise the dashboard.',
+        true
+      );
+    }
+  })();
+</script>
+
+</body>
+</html>

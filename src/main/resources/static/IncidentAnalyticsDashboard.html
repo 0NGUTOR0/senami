@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.5;
+    }
+    .topbar {
+      background: #1e3a5f;
+      color: #fff;
+      padding: .85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.2rem;
+    }
+    .back-btn:hover { background: rgba(255,255,255,.22); }
+    .topbar-left { min-width: 0; }
+    .topbar h1 { font-size: 1.15rem; font-weight: 600; overflow-wrap: anywhere; }
+    .plus-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 10px;
+      background: #3182ce;
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .plus-btn:hover { background: #2b6cb0; }
+
+    /* Tabs */
+    .dash-tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 1.25rem;
+    }
+    .dash-tab {
+      padding: .85rem 1.2rem;
+      border: none;
+      background: none;
+      font-size: .95rem;
+      font-weight: 500;
+      color: #718096;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;     
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    .dash-tab:hover { color: #1e3a5f; }
+    .dash-tab.active {
+      color: #1e3a5f;
+      border-bottom-color: #3182ce;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .filters {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      background: #1e3a5f;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.25rem;
+    }
+    .filters label {
+      color: #fff;
+      font-size: .8rem;
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    .filters input[type="date"] {
+      padding: .45rem .7rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.3);
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: .9rem;
+    }
+    .filters button {
+      padding: .65rem 1.1rem;
+      border: none;
+      border-radius: 6px;
+      background: #3182ce;
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+    .filters button:hover { background: #2b6cb0; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.25rem;
+    }
+    .grid-wide { grid-column: 1 / -1; }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      padding: 1.25rem;
+    }
+    .card h2 {
+      font-size: .95rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid #edf2f7;
+    }
+    .chart-wrap { position: relative; height: 260px; }
+    .chart-wrap.tall { height: 320px; }
+    .state { text-align: center; padding: 1.5rem; color: #718096; }
+    .state.error { color: #c53030; }
+    .legend-note { font-size: .8rem; color: #718096; margin-top: .5rem; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.2);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 1.1rem 1.25rem;
+      border-bottom: 1px solid #edf2f7;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-close {
+      border: none;
+      background: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #718096;
+      line-height: 1;
+    }
+    .modal-body { padding: 1rem; display: flex; flex-direction: column; gap: .75rem; }
+    .modal-option {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      padding: 1rem 1.1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #1a202c;
+      font-weight: 500;
+      transition: border-color .15s, background .15s;
+    }
+    .modal-option:hover {
+      border-color: #3182ce;
+      background: #ebf8ff;
+    }
+    .modal-option i, .modal-option .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .icon-incident { background: #fed7d7; color: #c53030; }
+    .icon-consumption { background: #c6f6d5; color: #276749; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="PatientList.html" class="back-btn" title="Back">←</a>
+      <img src="/Images/Logo.png" alt="Logo" style="height:32px;" onerror="this.style.display='none'">
+      <h1 id="pageHeading">Patient Analytics</h1>
+    </div>
+    <button type="button" class="plus-btn" id="plusBtn" title="Add new">+</button>
+  </header>
+
+  <nav class="dash-tabs">
+    <button type="button" class="dash-tab active" data-dash="incidents">Incidents</button>
+    <button type="button" class="dash-tab" data-dash="consumption">Consumption</button>
+  </nav>
+
+  <main class="container">
+    <div class="filters" id="filterBar">
+      <label>
+        From
+        <input type="date" id="fromDate">
+      </label>
+      <label>
+        To
+        <input type="date" id="toDate">
+      </label>
+      <label id="inpatientStartWrap">
+        Inpatient start
+        <input type="date" id="inpatientStart">
+      </label>
+      <label id="inpatientEndWrap">
+        Inpatient end
+        <input type="date" id="inpatientEnd">
+      </label>
+      <button type="button" onclick="loadAndRender()">Apply</button>
+    </div>
+
+    <div id="status" class="state">Loading…</div>
+
+    <div id="incidentsDashboard" class="grid" style="display:none"></div>
+    <div id="consumptionDashboard" class="grid" style="display:none">
+      <div class="card grid-wide">
+        <h2>Consumption analytics</h2>
+        <p class="legend-note">
+          Connect your consumption API here. Charts will appear once data is available.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- + popup -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Create new</span>
+        <button type="button" class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <a class="modal-option" id="optIncident" href="#">
+          <span class="icon icon-incident">⚠</span>
+          <span>
+            <strong>Incident</strong><br>
+            <small style="color:#718096;font-weight:400">Record a new incident report</small>
+          </span>
+        </a>
+        <a class="modal-option" id="optConsumption" href="#">
+          <span class="icon icon-consumption">📦</span>
+          <span>
+            <strong>Consumption</strong><br>
+            <small style="color:#718096;font-weight:400">Log a consumption entry</small>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const API = 'http://localhost:8080/api';
+  const AUTH_ME = 'http://localhost:8080/auth/me';
+  const charts = {};
+
+  const SUICIDAL = ['HARM_TO_SELF', 'RISK_TAKING'];
+  const WANDERING = ['ABSCONDING_WANDERING'];
+  const AGGRESSION = ['PHYSICAL_AGGRESSION', 'VERBAL_AGGRESSION', 'THREATENING'];
+  const COLORS = [
+    '#3182ce', '#e53e3e', '#38a169', '#d69e2e',
+    '#805ad5', '#dd6b20', '#319795', '#d53f8c',
+    '#2b6cb0', '#c53030', '#276749', '#b7791f'
+  ];
+
+  // ── URL patient (declare first — no TDZ) ──
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlPatientId = urlParams.get('patientId');
+
+  function authHeaders() {
+    return { 'Accept': 'application/json', 'Content-Type': 'application/json' };
+  }
+
+  function redirectToLogin() {
+    const next = window.location.pathname + window.location.search;
+    window.location.href = `Login.html?next=${encodeURIComponent(next)}`;
+  }
+
+  async function checkAuthentication() {
+    const res = await fetch(AUTH_ME, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.status === 401) { redirectToLogin(); return false; }
+    if (res.status === 403) throw new Error('No permission for this dashboard.');
+    if (!res.ok) throw new Error(`Session check failed (${res.status}).`);
+    return true;
+  }
+
+  function getInpatient() {
+    const start = document.getElementById('inpatientStart')?.value || null;
+    const end = document.getElementById('inpatientEnd')?.value || null;
+    if (!start || !end || start > end) return null;
+    const fmt = iso => {
+      const [, m, d] = iso.split('-');
+      return `${d}/${m}`;
+    };
+    return { start, end, label: `Inpatient stay ${fmt(start)}–${fmt(end)}` };
+  }
+
+  async function fetchAllIncidents(patientId) {
+    const all = [];
+    let page = 0;
+    let totalPages = 1;
+    while (page < totalPages) {
+      const path =
+        `/patients/${encodeURIComponent(patientId)}/incidents` +
+        `?page=${page}&size=100&sort=occurredAt,asc`;
+      const res = await fetch(`${API}${path}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: authHeaders()
+      });
+      if (res.status === 401) { redirectToLogin(); throw new Error('Session expired.'); }
+      if (!res.ok) throw new Error(`Failed to load incidents (${res.status}).`);
+      const data = await res.json();
+      if (Array.isArray(data.content)) {
+        all.push(...data.content);
+        totalPages = Number.isInteger(data.totalPages) ? data.totalPages : 1;
+      } else if (Array.isArray(data)) {
+        all.push(...data);
+        totalPages = 1;
+      } else {
+        throw new Error('Unexpected incidents response.');
+      }
+      page++;
+    }
+    return all;
+  }
+
+  function toDate(value) {
+    if (!value) return null;
+    const m = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
+    return m ? m[1] : null;
+  }
+  function inRange(date, from, to) {
+    if (!date) return false;
+    if (from && date < from) return false;
+    if (to && date > to) return false;
+    return true;
+  }
+  function parseLocalDate(s) {
+    const [y, m, d] = s.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function formatLocalDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  function addDays(dateString, n) {
+    const d = parseLocalDate(dateString);
+    d.setDate(d.getDate() + n);
+    return formatLocalDate(d);
+  }
+  function dateDifferenceInclusive(start, end) {
+    if (!start || !end || start > end) return 0;
+    let count = 0, cur = start;
+    while (cur <= end) { count++; cur = addDays(cur, 1); }
+    return count;
+  }
+  function displayName(v) {
+    if (!v) return 'Unknown';
+    return String(v).replace(/_/g, ' ').toLowerCase()
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+  function destroyCharts() {
+    Object.values(charts).forEach(c => c.destroy());
+    Object.keys(charts).forEach(k => delete charts[k]);
+  }
+  function makeChart(id, config) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    charts[id] = new Chart(canvas, config);
+  }
+  function showStatus(msg, isError = false) {
+    const el = document.getElementById('status');
+    el.style.display = 'block';
+    el.textContent = msg;
+    el.className = isError ? 'state error' : 'state';
+  }
+
+  function buildStats(incidents, from, to) {
+    const valid = incidents.filter(i => toDate(i.occurredAt));
+    const allDates = valid.map(i => toDate(i.occurredAt)).sort();
+    const rangeStart = from || allDates[0] || null;
+    const rangeEnd = to || allDates[allDates.length - 1] || null;
+    const filtered = valid.filter(i => inRange(toDate(i.occurredAt), rangeStart, rangeEnd));
+
+    const byDay = {};
+    filtered.forEach(i => {
+      const d = toDate(i.occurredAt);
+      (byDay[d] ||= []).push(i);
+    });
+    const daysWithIncidents = Object.keys(byDay).sort();
+    const multiDays = daysWithIncidents.filter(d => byDay[d].length > 1);
+    const singleDays = daysWithIncidents.filter(d => byDay[d].length === 1);
+    const totalCalendarDays = dateDifferenceInclusive(rangeStart, rangeEnd);
+    const daysWithIncident = daysWithIncidents.length;
+    const freeDays = Math.max(0, totalCalendarDays - daysWithIncident);
+
+    const calendarDates = [];
+    if (rangeStart && rangeEnd && rangeStart <= rangeEnd) {
+      let cur = rangeStart;
+      while (cur <= rangeEnd) { calendarDates.push(cur); cur = addDays(cur, 1); }
+    } else {
+      calendarDates.push(...daysWithIncidents);
+    }
+
+    const behaviourCount = {}, locationCount = {}, durationCount = {}, frequencyCount = {};
+    filtered.forEach(i => {
+      (i.behaviours || []).forEach(b => { behaviourCount[b] = (behaviourCount[b] || 0) + 1; });
+      locationCount[i.location || 'UNKNOWN'] = (locationCount[i.location || 'UNKNOWN'] || 0) + 1;
+      durationCount[i.duration || 'UNKNOWN'] = (durationCount[i.duration || 'UNKNOWN'] || 0) + 1;
+      frequencyCount[i.frequency || 'UNKNOWN'] = (frequencyCount[i.frequency || 'UNKNOWN'] || 0) + 1;
+    });
+
+    const multiBehaviourCount = {};
+    multiDays.flatMap(d => byDay[d]).forEach(i => {
+      (i.behaviours || []).forEach(b => {
+        multiBehaviourCount[b] = (multiBehaviourCount[b] || 0) + 1;
+      });
+    });
+
+    const dailyTotals = calendarDates.map(d => ({ date: d, count: (byDay[d] || []).length }));
+    function dailyFor(list) {
+      return calendarDates.map(d => ({
+        date: d,
+        count: (byDay[d] || []).filter(i =>
+          (i.behaviours || []).some(b => list.includes(b))
+        ).length
+      }));
+    }
+    function dailyBehaviourCount(b) {
+      return calendarDates.map(d => ({
+        date: d,
+        count: (byDay[d] || []).filter(i => (i.behaviours || []).includes(b)).length
+      }));
+    }
+
+    const suicidalIncidents = filtered.filter(i =>
+      (i.behaviours || []).some(b => SUICIDAL.includes(b))
+    );
+    const suicidalBreakdown = {}, suicidalSeverity = {};
+    suicidalIncidents.forEach(i => {
+      (i.behaviours || []).filter(b => SUICIDAL.includes(b)).forEach(b => {
+        suicidalBreakdown[b] = (suicidalBreakdown[b] || 0) + 1;
+      });
+      const s = i.severity || 'UNKNOWN';
+      suicidalSeverity[s] = (suicidalSeverity[s] || 0) + 1;
+    });
+
+    return {
+      filtered, rangeStart, rangeEnd, byDay, calendarDates,
+      multiDays, singleDays, freeDays, daysWithIncident, totalCalendarDays,
+      behaviourCount, locationCount, durationCount, multiBehaviourCount, frequencyCount,
+      dailyTotals,
+      suicidalDaily: dailyFor(SUICIDAL),
+      wanderingDaily: dailyFor(WANDERING),
+      verbalAggressionDaily: dailyBehaviourCount('VERBAL_AGGRESSION'),
+      physicalAggressionDaily: dailyBehaviourCount('PHYSICAL_AGGRESSION'),
+      suicidalBreakdown, suicidalSeverity
+    };
+  }
+
+  function doughnutOptions() {
+    return { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } };
+  }
+  function integerAxisOptions(axis = 'y') {
+    return { [axis]: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } } };
+  }
+  function lineTrend(id, series, color, label) {
+    makeChart(id, {
+      type: 'line',
+      data: {
+        labels: series.map(i => i.date),
+        datasets: [{
+          label, data: series.map(i => i.count),
+          borderColor: color, backgroundColor: color + '22',
+          fill: true, tension: 0.25,
+          pointRadius: series.length > 90 ? 0 : 3
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } },
+          x: { ticks: { autoSkip: true, maxTicksLimit: 15 } }
+        }
+      }
+    });
+  }
+
+  function renderDashboard(stats) {
+    destroyCharts();
+    const dashboard = document.getElementById('incidentsDashboard');
+
+    dashboard.innerHTML = `
+      <div class="card">
+        <h2>1. Days with incidents vs incident-free days</h2>
+        <div class="chart-wrap"><canvas id="c1"></canvas></div>
+        <p class="legend-note">${stats.daysWithIncident} with incidents · ${stats.freeDays} free · ${stats.totalCalendarDays} calendar days</p>
+      </div>
+      <div class="card">
+        <h2>2. Days with vs without multiple incidents</h2>
+        <div class="chart-wrap"><canvas id="c2"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>3. Behaviours on multi-incident days</h2>
+        <div class="chart-wrap tall"><canvas id="c3"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>4. Reported frequency breakdown</h2>
+        <div class="chart-wrap"><canvas id="c4"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>5. Setting of incidents</h2>
+        <div class="chart-wrap"><canvas id="c5"></canvas></div>
+      </div>
+      <div class="card grid-wide">
+        <h2>6. Trend of all incidents over time</h2>
+        <div class="chart-wrap tall"><canvas id="c6"></canvas></div>
+        <p class="legend-note">Inpatient band is optional — set dates above.</p>
+      </div>
+      <div class="card">
+        <h2>7. Time frames in reports</h2>
+        <div class="chart-wrap tall"><canvas id="c7"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>8. Total of each behaviour of concern</h2>
+        <div class="chart-wrap tall"><canvas id="c8"></canvas></div>
+      </div>
+      <div class="card grid-wide">
+        <h2>9. Trend of suicidal-related behaviours</h2>
+        <div class="chart-wrap tall"><canvas id="c9"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>10. Breakdown of suicidal-related behaviours</h2>
+        <div class="chart-wrap"><canvas id="c10"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>11. Severity of suicidal-related incidents</h2>
+        <div class="chart-wrap"><canvas id="c11"></canvas></div>
+      </div>
+      <div class="card grid-wide">
+        <h2>12. Trend of wandering / absconding</h2>
+        <div class="chart-wrap tall"><canvas id="c12"></canvas></div>
+      </div>
+      <div class="card grid-wide">
+        <h2>13. Trend of verbal and physical aggression</h2>
+        <div class="chart-wrap tall"><canvas id="c13"></canvas></div>
+      </div>
+    `;
+
+    dashboard.style.display = 'grid';
+    document.getElementById('status').style.display = 'none';
+
+    makeChart('c1', {
+      type: 'doughnut',
+      data: {
+        labels: ['Days with ≥1 incident', 'Incident-free days'],
+        datasets: [{ data: [stats.daysWithIncident, stats.freeDays], backgroundColor: ['#e53e3e', '#38a169'] }]
+      },
+      options: doughnutOptions()
+    });
+
+    const daysWithoutMultiple = Math.max(0, stats.totalCalendarDays - stats.multiDays.length);
+    makeChart('c2', {
+      type: 'doughnut',
+      data: {
+        labels: ['Multiple incidents', 'Without multiple'],
+        datasets: [{ data: [stats.multiDays.length, daysWithoutMultiple], backgroundColor: ['#dd6b20', '#3182ce'] }]
+      },
+      options: doughnutOptions()
+    });
+
+    {
+      const entries = Object.entries(stats.multiBehaviourCount).sort((a, b) => b[1] - a[1]);
+      makeChart('c3', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([k]) => displayName(k)),
+          datasets: [{ label: 'Count', data: entries.map(([, v]) => v), backgroundColor: entries.map((_, i) => COLORS[i % COLORS.length]) }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: integerAxisOptions('x') }
+      });
+    }
+
+    {
+      const order = ['ONE', 'TWO', 'THREE_TO_FIVE', 'MORE_THAN_FIVE'];
+      const names = { ONE: '1×', TWO: '2×', THREE_TO_FIVE: '3–5×', MORE_THAN_FIVE: '>5×' };
+      makeChart('c4', {
+        type: 'pie',
+        data: {
+          labels: order.map(k => names[k]),
+          datasets: [{ data: order.map(k => stats.frequencyCount[k] || 0), backgroundColor: ['#3182ce', '#38a169', '#d69e2e', '#e53e3e'] }]
+        },
+        options: doughnutOptions()
+      });
+    }
+
+    {
+      const entries = Object.entries(stats.locationCount);
+      makeChart('c5', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([k]) => displayName(k)),
+          datasets: [{ label: 'Incidents', data: entries.map(([, v]) => v), backgroundColor: '#3182ce' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: integerAxisOptions('y') }
+      });
+    }
+
+    {
+      const labels = stats.dailyTotals.map(i => i.date);
+      const values = stats.dailyTotals.map(i => i.count);
+      const inpatient = getInpatient();
+      const annotations = {};
+      if (inpatient) {
+        const s = labels.indexOf(inpatient.start);
+        const e = labels.indexOf(inpatient.end);
+        if (s !== -1 && e !== -1 && s <= e) {
+          annotations.inpatient = {
+            type: 'box',
+            xMin: s - 0.5, xMax: e + 0.5,
+            backgroundColor: 'rgba(229,62,62,0.12)',
+            borderWidth: 0,
+            label: { display: true, content: inpatient.label, position: 'start' }
+          };
+        }
+      }
+      makeChart('c6', {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Incidents per day', data: values,
+            borderColor: '#3182ce', backgroundColor: 'rgba(49,130,206,0.15)',
+            fill: true, tension: 0.25, pointRadius: labels.length > 90 ? 0 : 3
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { intersect: false, mode: 'index' },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } },
+            x: { ticks: { autoSkip: true, maxTicksLimit: 15 } }
+          },
+          plugins: { annotation: { annotations } }
+        }
+      });
+      const note = document.querySelector('#c6')?.closest('.card')?.querySelector('.legend-note');
+      if (note) {
+        note.textContent = inpatient
+          ? `Shaded band: ${inpatient.label}`
+          : 'No inpatient period set (optional).';
+      }
+    }
+
+    {
+      const entries = Object.entries(stats.durationCount);
+      makeChart('c7', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([k]) => displayName(k)),
+          datasets: [{ label: 'Incidents', data: entries.map(([, v]) => v), backgroundColor: '#805ad5' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: integerAxisOptions('y') }
+      });
+    }
+
+    {
+      const entries = Object.entries(stats.behaviourCount).sort((a, b) => b[1] - a[1]);
+      makeChart('c8', {
+        type: 'bar',
+        data: {
+          labels: entries.map(([k]) => displayName(k)),
+          datasets: [{ label: 'Total', data: entries.map(([, v]) => v), backgroundColor: entries.map((_, i) => COLORS[i % COLORS.length]) }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: integerAxisOptions('x') }
+      });
+    }
+
+    lineTrend('c9', stats.suicidalDaily, '#e53e3e', 'Suicidal-related');
+    {
+      const entries = Object.entries(stats.suicidalBreakdown);
+      makeChart('c10', {
+        type: 'doughnut',
+        data: {
+          labels: entries.map(([k]) => displayName(k)),
+          datasets: [{ data: entries.map(([, v]) => v), backgroundColor: ['#e53e3e', '#dd6b20', '#d69e2e'] }]
+        },
+        options: doughnutOptions()
+      });
+    }
+    {
+      const order = ['LOW', 'MILD', 'MODERATE', 'HIGH', 'SEVERE', 'UNKNOWN'];
+      const names = { LOW: 'Low', MILD: 'Mild', MODERATE: 'Moderate', HIGH: 'High', SEVERE: 'Severe', UNKNOWN: 'Not recorded' };
+      const keys = order.filter(k => stats.suicidalSeverity[k]);
+      makeChart('c11', {
+        type: 'pie',
+        data: {
+          labels: keys.map(k => names[k]),
+          datasets: [{ data: keys.map(k => stats.suicidalSeverity[k]), backgroundColor: ['#68d391', '#f6e05e', '#ed8936', '#fc8181', '#c53030', '#a0aec0'] }]
+        },
+        options: doughnutOptions()
+      });
+    }
+    lineTrend('c12', stats.wanderingDaily, '#805ad5', 'Wandering / absconding');
+    makeChart('c13', {
+      type: 'line',
+      data: {
+        labels: stats.calendarDates,
+        datasets: [
+          {
+            label: 'Verbal aggression',
+            data: stats.verbalAggressionDaily.map(i => i.count),
+            borderColor: '#dd6b20', backgroundColor: 'rgba(221,107,32,0.10)',
+            tension: 0.25, pointRadius: stats.calendarDates.length > 90 ? 0 : 3
+          },
+          {
+            label: 'Physical aggression',
+            data: stats.physicalAggressionDaily.map(i => i.count),
+            borderColor: '#e53e3e', backgroundColor: 'rgba(229,62,62,0.10)',
+            tension: 0.25, pointRadius: stats.calendarDates.length > 90 ? 0 : 3
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } },
+          x: { ticks: { autoSkip: true, maxTicksLimit: 15 } }
+        }
+      }
+    });
+  }
+
+  async function loadAndRender() {
+    if (!urlPatientId) {
+      showStatus('Open this page with ?patientId=<uuid>.', true);
+      return;
+    }
+    const from = document.getElementById('fromDate')?.value || null;
+    const to = document.getElementById('toDate')?.value || null;
+    if (from && to && from > to) {
+      showStatus('Start date must be on or before end date.', true);
+      return;
+    }
+    const is = document.getElementById('inpatientStart')?.value || null;
+    const ie = document.getElementById('inpatientEnd')?.value || null;
+    if (is && ie && is > ie) {
+      showStatus('Inpatient start must be on or before end.', true);
+      return;
+    }
+
+    showStatus('Loading incidents…');
+    document.getElementById('incidentsDashboard').style.display = 'none';
+
+    try {
+      const ok = await checkAuthentication();
+      if (!ok) return;
+      const incidents = await fetchAllIncidents(urlPatientId);
+      const stats = buildStats(incidents, from, to);
+
+      if (stats.filtered.length === 0) {
+        destroyCharts();
+        if (stats.totalCalendarDays > 0) {
+          renderDashboard(stats);
+          showStatus('No incidents in this period. Charts show zeros.');
+        } else {
+          showStatus('No incidents found. Select a date range if needed.');
+        }
+        return;
+      }
+      renderDashboard(stats);
+      showStatus(`Loaded ${stats.filtered.length} incidents from ${stats.rangeStart} to ${stats.rangeEnd}.`);
+    } catch (err) {
+      console.error(err);
+      showStatus(err.message || 'Unable to load dashboard.', true);
+    }
+  }
+
+  // ── Tabs ──
+  function switchDash(which) {
+    document.querySelectorAll('.dash-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.dash === which);
+    });
+    document.getElementById('incidentsDashboard').style.display =
+      which === 'incidents' ? 'grid' : 'none';
+    document.getElementById('consumptionDashboard').style.display =
+      which === 'consumption' ? 'grid' : 'none';
+
+    const showInpatient = which === 'incidents';
+    document.getElementById('inpatientStartWrap').style.display = showInpatient ? '' : 'none';
+    document.getElementById('inpatientEndWrap').style.display = showInpatient ? '' : 'none';
+
+    const url = new URL(location.href);
+    url.searchParams.set('dash', which);
+    history.replaceState(null, '', url);
+
+    if (which === 'incidents') {
+      document.getElementById('status').style.display =
+        document.getElementById('incidentsDashboard').children.length ? 'none' : 'block';
+    } else {
+      document.getElementById('status').style.display = 'none';
+    }
+  }
+
+  document.querySelectorAll('.dash-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchDash(tab.dataset.dash));
+  });
+
+  // ── + modal ──
+  const modal = document.getElementById('addModal');
+  document.getElementById('plusBtn').addEventListener('click', () => {
+    modal.classList.add('open');
+  });
+  document.getElementById('modalClose').addEventListener('click', () => {
+    modal.classList.remove('open');
+  });
+  modal.addEventListener('click', e => {
+    if (e.target === modal) modal.classList.remove('open');
+  });
+
+  if (urlPatientId) {
+    document.getElementById('optIncident').href =
+      `Incident.html?patientId=${encodeURIComponent(urlPatientId)}`;
+    document.getElementById('optConsumption').href =
+      `ConsumptionForm.html?patientId=${encodeURIComponent(urlPatientId)}`;
+  }
+
+  // ── Patient name in the header ──
+  async function loadPatientName() {
+    if (!urlPatientId) return;
+    try {
+      const res = await fetch(`${API}/patients/${encodeURIComponent(urlPatientId)}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: authHeaders()
+      });
+      if (res.status === 401) { redirectToLogin(); return; }
+      if (!res.ok) throw new Error(`Failed to load patient (${res.status}).`);
+      const patient = await res.json();
+      if (!patient.fullName) return;
+      const title = `${patient.fullName} analytics`;
+      document.getElementById('pageHeading').textContent = title;   // text, never HTML
+      document.title = title;
+    } catch (err) {
+      // The dashboard still works; the heading just stays "Patient Analytics".
+      console.error(err);
+    }
+  }
+
+  // ── Init ──
+  (async function init() {
+    try {
+      const ok = await checkAuthentication();
+      if (!ok) return;
+
+      if (!urlPatientId) {
+        showStatus('Open this page with ?patientId=<uuid>.', true);
+        return;
+      }
+
+      loadPatientName();
+
+      const dash = urlParams.get('dash') || 'incidents';
+      switchDash(dash);
+
+      if (dash === 'incidents') {
+        await loadAndRender();
+      }
+    } catch (err) {
+      console.error(err);
+      showStatus(err.message || 'Unable to initialise.', true);
+    }
+  })();
+</script>
+</body>
+</html>

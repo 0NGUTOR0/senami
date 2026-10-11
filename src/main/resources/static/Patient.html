@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Information</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.5;
+      padding: 2rem 1rem;
+    }
+    .form-container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+    .form-header {
+      background: #1e3a5f;
+      color: #fff;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,.22); }
+    .header-text { flex: 1; min-width: 0; }
+    .form-header h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .form-header p {
+      opacity: .85;
+      font-size: .85rem;
+      margin-top: .15rem;
+    }
+    .logo {
+      height: 48px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    form { padding: 2rem; }
+    .section { margin-bottom: 2rem; }
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #1e3a5f;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: .5rem;
+      margin-bottom: 1.25rem;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 500;
+      color: #4a5568;
+      margin-bottom: .35rem;
+    }
+    label .req { color: #e53e3e; }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: .6rem .75rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: .95rem;
+      background: #fff;
+      transition: border-color .15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 3px rgba(49,130,206,.15);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    .nok-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      background: #f7fafc;
+    }
+    .nok-card h3 { font-size: .95rem; margin-bottom: 1rem; color: #2d3748; }
+    .actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    button {
+      padding: .7rem 1.5rem;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: #1e3a5f; color: #fff; }
+    .btn-primary:hover { background: #16304f; }
+    .btn-secondary { background: #edf2f7; color: #2d3748; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    #form-message {
+      margin-bottom: 1rem;
+      padding: .75rem 1rem;
+      border-radius: 6px;
+      font-size: .9rem;
+      display: none;
+    }
+    #form-message.show { display: block; }
+    #form-message.success { background: #c6f6d5; color: #276749; }
+    #form-message.error { background: #fed7d7; color: #9b2c2c; }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .logo { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="form-header">
+      <a href="PatientList.html" class="back-btn" title="Back to patients">←</a>
+      <div class="header-text">
+        <h1 id="pageTitle">Patient Information</h1>
+        <p id="pageSubtitle">Loading…</p>
+      </div>
+      <img class="logo" src="Images/Logo.png" alt="Logo">
+    </div>
+
+    <form id="patientForm">
+      <div id="form-message"></div>
+
+      <!-- Personal Details -->
+      <div class="section">
+        <div class="section-title">Personal Details</div>
+        <div class="grid">
+          <div class="full">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" name="fullName" required maxlength="150">
+          </div>
+          <div class="full">
+            <label>Previous Name</label>
+            <input type="text" name="previousName" maxlength="150">
+          </div>
+          <div>
+            <label>Date of Birth <span class="req">*</span></label>
+            <input type="date" name="dateOfBirth" required>
+          </div>
+          <div>
+            <label>Sex <span class="req">*</span></label>
+            <select name="sex" required>
+              <option value="">Select…</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+              <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+            </select>
+          </div>
+          <div>
+            <label>Nationality</label>
+            <input type="text" name="nationality" maxlength="80">
+          </div>
+          <div>
+            <label>State of Origin</label>
+            <input type="text" name="stateOfOrigin" maxlength="80">
+          </div>
+          <div>
+            <label>Marital Status</label>
+            <select name="maritalStatus">
+              <option value="">Select…</option>
+              <option value="SINGLE">Single</option>
+              <option value="MARRIED">Married</option>
+              <option value="DIVORCED">Divorced</option>
+              <option value="WIDOWED">Widowed</option>
+              <option value="DE_FACTO">De facto</option>
+            </select>
+          </div>
+          <div>
+            <label>Occupation</label>
+            <input type="text" name="occupation" maxlength="100">
+          </div>
+          <div>
+            <label>Education Level</label>
+            <select name="educationLevel">
+              <option value="">Select…</option>
+              <option value="PRIMARY">Primary</option>
+              <option value="SECONDARY">Secondary</option>
+              <option value="TERTIARY">Tertiary</option>
+              <option value="POSTGRADUATE">Postgraduate</option>
+              <option value="NONE">None</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="section">
+        <div class="section-title">Contact Information</div>
+        <div class="grid">
+          <div class="full">
+            <label>Residential Address</label>
+            <textarea name="residentialAddress" maxlength="300"></textarea>
+          </div>
+          <div>
+            <label>Phone Number <span class="req">*</span></label>
+            <input type="tel" name="phoneNumber" required maxlength="20" placeholder="+61 …">
+          </div>
+          <div>
+            <label>Email Address</label>
+            <input type="email" name="emailAddress" maxlength="150">
+          </div>
+          <div>
+            <label>Preferred Language</label>
+            <input type="text" name="preferredLanguage" maxlength="50">
+          </div>
+          <div>
+            <label>Preferred Communication Method</label>
+            <select name="preferredCommunicationMethod">
+              <option value="">Select…</option>
+              <option value="PHONE">Phone</option>
+              <option value="EMAIL">Email</option>
+              <option value="SMS">SMS</option>
+              <option value="IN_PERSON">In person</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next of Kin -->
+      <div class="section">
+        <div class="section-title">Next of Kin</div>
+        <div class="nok-card">
+          <h3>Contact 1</h3>
+          <div class="grid">
+            <div>
+              <label>Full Name</label>
+              <input type="text" name="nok1_name">
+            </div>
+            <div>
+              <label>Relationship</label>
+              <input type="text" name="nok1_relationship">
+            </div>
+            <div>
+              <label>Phone</label>
+              <input type="tel" name="nok1_phone">
+            </div>
+            <div>
+              <label>Email</label>
+              <input type="email" name="nok1_email">
+            </div>
+          </div>
+        </div>
+        <div class="nok-card">
+          <h3>Contact 2</h3>
+          <div class="grid">
+            <div>
+              <label>Full Name</label>
+              <input type="text" name="nok2_name">
+            </div>
+            <div>
+              <label>Relationship</label>
+              <input type="text" name="nok2_relationship">
+            </div>
+            <div>
+              <label>Phone</label>
+              <input type="tel" name="nok2_phone">
+            </div>
+            <div>
+              <label>Email</label>
+              <input type="email" name="nok2_email">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="PatientList.html" class="btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;">Cancel</a>
+        <button type="submit" class="btn-primary" id="submitBtn">Update</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8080/api';
+
+     function authHeaders() {
+        return {
+            'Content-Type': 'application/json'
+        };
+    }
+
+    async function api(method, path, body) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        method,
+        headers: authHeaders(),
+        body: body ? JSON.stringify(body) : undefined
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: res.statusText }));
+        throw new Error(err.message || err.error || `HTTP ${res.status}`);
+      }
+      if (res.status === 204) return null;
+      return res.json();
+    }
+
+    async function checkAuthentication() {
+        try {
+            const response = await fetch('/auth/me', {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                window.location.href = '/Login.html';
+                return null;
+            }
+
+            const data = await response.json().catch(() => null);
+            return data || {};
+
+        } catch (error) {
+            console.error('Authentication check failed:', error);
+
+            document.getElementById('content').innerHTML =
+                '<div class="state error">' +
+                'Unable to verify your login. Please check your connection and try again.' +
+                '</div>';
+
+            return null;
+        }
+    }
+
+
+    function val(name) {
+      const el = document.querySelector(`[name="${name}"]`);
+      return el ? (el.value.trim() || null) : null;
+    }
+
+    function collectNextOfKin() {
+      const kin = [];
+      for (let i = 1; i <= 5; i++) {
+        const fullName = val(`nok${i}_name`);
+        if (!fullName) continue;
+        kin.push({
+          fullName,
+          relationship: val(`nok${i}_relationship`),
+          phoneNumber: val(`nok${i}_phone`),
+          emailAddress: val(`nok${i}_email`)
+        });
+      }
+      return kin;
+    }
+
+    function collectPatient() {
+      return {
+        fullName: val('fullName'),
+        previousName: val('previousName'),
+        dateOfBirth: val('dateOfBirth'),
+        sex: val('sex'),
+        nationality: val('nationality'),
+        stateOfOrigin: val('stateOfOrigin'),
+        maritalStatus: val('maritalStatus'),
+        occupation: val('occupation'),
+        educationLevel: val('educationLevel'),
+        residentialAddress: val('residentialAddress'),
+        phoneNumber: val('phoneNumber'),
+        emailAddress: val('emailAddress'),
+        preferredLanguage: val('preferredLanguage'),
+        preferredCommunicationMethod: val('preferredCommunicationMethod'),
+        nextOfKin: collectNextOfKin()
+      };
+    }
+
+    async function updatePatient(id) {
+      return api('PUT', `/patients/${id}`, collectPatient());
+    }
+
+    async function getPatient(id) {
+      return api('GET', `/patients/${id}`);
+    }
+
+    async function getPatientByNumber(patientNumber) {
+      return api('GET', `/patients/number/${encodeURIComponent(patientNumber)}`);
+    }
+
+    function set(name, value) {
+      const el = document.querySelector(`[name="${name}"]`);
+      if (el && value != null) el.value = value;
+    }
+
+    function populatePatientForm(data) {
+      if (!data) return;
+
+      set('fullName', data.fullName);
+      set('previousName', data.previousName);
+      set('dateOfBirth', data.dateOfBirth);
+      set('sex', data.sex);
+      set('nationality', data.nationality);
+      set('stateOfOrigin', data.stateOfOrigin);
+      set('maritalStatus', data.maritalStatus);
+      set('occupation', data.occupation);
+      set('educationLevel', data.educationLevel);
+      set('residentialAddress', data.residentialAddress);
+      set('phoneNumber', data.phoneNumber);
+      set('emailAddress', data.emailAddress);
+      set('preferredLanguage', data.preferredLanguage);
+      set('preferredCommunicationMethod', data.preferredCommunicationMethod);
+
+      const list = data.nextOfKin || [];
+      list.forEach((kin, idx) => {
+        const i = idx + 1;
+        set(`nok${i}_name`, kin.fullName);
+        set(`nok${i}_relationship`, kin.relationship);
+        set(`nok${i}_phone`, kin.phoneNumber);
+        set(`nok${i}_email`, kin.emailAddress);
+      });
+
+      // Header: "{Name} Information"
+      const name = data.fullName || 'Patient';
+      document.getElementById('pageTitle').textContent = `${name} Information`;
+      document.title = `${name} Information`;
+
+      const sub = [];
+      if (data.patientNumber) sub.push(data.patientNumber);
+      if (data.age != null) sub.push(`Age ${data.age}`);
+      document.getElementById('pageSubtitle').textContent =
+        sub.length ? sub.join(' · ') : 'Patient record';
+    }
+
+    function showMessage(text, isError = false) {
+      const el = document.getElementById('form-message');
+      el.textContent = text;
+      el.className = isError ? 'error show' : 'success show';
+    }
+
+  
+     document.addEventListener('DOMContentLoaded', async () => {
+ 
+
+  const params = new URLSearchParams(location.search);
+  const patientId = params.get('id');
+  const patientNumber = params.get('number');
+  const isEdit = !!(patientId || patientNumber);
+
+  const submitBtn = document.getElementById('submitBtn');
+  const pageTitle = document.getElementById('pageTitle');
+  const pageSubtitle = document.getElementById('pageSubtitle');
+
+  // Button + header for create vs edit
+  if (isEdit) {
+    submitBtn.textContent = 'Update';
+    pageTitle.textContent = 'Patient Information';
+    pageSubtitle.textContent = 'Loading…';
+  } else {
+    submitBtn.textContent = 'Save';
+    pageTitle.textContent = 'New Patient';
+    pageSubtitle.textContent = 'Create a new patient record';
+  }
+
+  // Load existing patient (edit mode only)
+  if (isEdit) {
+    try {
+      const data = patientId
+        ? await getPatient(patientId)
+        : await getPatientByNumber(patientNumber);
+      populatePatientForm(data);
+      window.__patientId = data.id || patientId;
+    } catch (e) {
+      showMessage('Failed to load patient: ' + e.message, true);
+      pageSubtitle.textContent = 'Could not load patient';
+    }
+  }
+
+  document.getElementById('patientForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const id = window.__patientId || patientId;
+    const editing = !!id;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = editing ? 'Updating…' : 'Saving…';
+
+    try {
+      let result;
+      if (editing) {
+        result = await updatePatient(id);
+        showMessage('Patient updated successfully');
+        const name = val('fullName') || 'Patient';
+        pageTitle.textContent = `${name} Information`;
+        document.title = `${name} Information`;
+      } else {
+        result = await createPatient();
+        showMessage('Patient created successfully');
+        // Switch to edit mode after first save
+        window.__patientId = result.id;
+        const name = result.fullName || val('fullName') || 'Patient';
+        pageTitle.textContent = `${name} Information`;
+        pageSubtitle.textContent = result.patientNumber
+          ? `${result.patientNumber}${result.age != null ? ' · Age ' + result.age : ''}`
+          : 'Patient record';
+        document.title = `${name} Information`;
+        // Update URL so refresh stays on this patient
+        history.replaceState(null, '', `?id=${result.id}`);
+        submitBtn.textContent = 'Update';
+        return;
+      }
+    } catch (err) {
+      showMessage(err.message, true);
+    } finally {
+      submitBtn.disabled = false;
+      if (!window.__patientId && !patientId) {
+        submitBtn.textContent = 'Save';
+      } else {
+        submitBtn.textContent = 'Update';
+      }
+    }
+  });
+});
+  
+  
+  
+  </script>
+</body>
+</html>

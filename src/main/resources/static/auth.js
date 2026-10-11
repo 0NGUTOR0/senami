@@ -1,5 +1,5 @@
 // auth.js – include on protected pages
-const API = 'http://localhost:8080';
+const API = 'https://senami-1.onrender.com';
 
 function getToken() {
   return localStorage.getItem('token');

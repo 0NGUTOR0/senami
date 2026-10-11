@@ -80,7 +80,7 @@ public class AuthController {
         userRepository.save(newUser);
 
         String verificationToken = jwtService.generateVerificationToken(newUser);
-        String verificationUrl = "http://localhost:8080/auth/verify-email?token=" + verificationToken;
+        String verificationUrl = "https://senami-1.onrender.com/auth/verify-email?token=" + verificationToken;
 
         emailService.sendVerificationEmail(email, username, verificationUrl);
 

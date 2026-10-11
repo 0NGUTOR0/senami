@@ -95,7 +95,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-            "http://localhost:8080",
+            "https://senami-1.onrender.com",
             "https://www.demolex.com",
             "https://demolex.com",
             "https://www.demolex.com"

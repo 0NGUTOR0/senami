@@ -532,6 +532,37 @@
 
   <script>
     const API_BASE = 'https://senami-1.onrender.com/api';
+       // relative, so it works on Render and locally
+
+async function api(method, path, body) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    credentials: 'include',
+    headers: authHeaders(),
+    body: body !== undefined ? JSON.stringify(body) : undefined
+  });
+
+  if (res.status === 401) {
+    window.location.href = 'Login.html?next=' +
+      encodeURIComponent(location.pathname + location.search);
+    throw new Error('Session expired.');
+  }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const fields = err.errors
+      ? Object.entries(err.errors).map(([k, v]) => `${k}: ${v}`).join('; ')
+      : '';
+    throw new Error(
+      [err.detail || err.message || err.error || `HTTP ${res.status}`, fields]
+        .filter(Boolean).join(' — ')
+    );
+  }
+
+  if (res.status === 204) return null;
+  return res.json();
+}
+
 
     function authHeaders() {
       const token = localStorage.getItem('token');
@@ -639,22 +670,7 @@ async function loadReportPeople() {
 loadReportPeople();
 
 
-    async function api(method, path, body) {
-      const res = await fetch(`${API_BASE}${path}`, {
-        method,
-        headers: authHeaders(),
-        body: body ? JSON.stringify(body) : undefined
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(err.message || err.error || `HTTP ${res.status}`);
-      }
-
-      if (res.status === 204) return null;
-      return res.json();
-    }
-
+    
     async function loadIncidentOptions() {
       const options = await api('GET', '/incident-options');
 

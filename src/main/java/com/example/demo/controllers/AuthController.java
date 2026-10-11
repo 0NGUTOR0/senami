@@ -135,11 +135,11 @@ public ResponseEntity<?> login(@RequestBody Map<String, String> body,
     }
 
     // Enforce email verification
-    if (!user.isEmailVerified()) {
-        log.warn("Login failed - Email not verified: {}", email);
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Map.of("error", "Please verify your email before logging in"));
-    }
+   // if (!user.isEmailVerified()) {
+     //   log.warn("Login failed - Email not verified: {}", email);
+       // return ResponseEntity.status(HttpStatus.FORBIDDEN)
+         //       .body(Map.of("error", "Please verify your email before logging in"));
+    //}
 
     // Set authentication cookies (JWT + Refresh Token)
     try {

@@ -399,6 +399,9 @@
         nextOfKin: collectNextOfKin()
       };
     }
+    async function createPatient() {
+      return api('POST', '/patients', collectPatient());
+    }
 
     async function updatePatient(id) {
       return api('PUT', `/patients/${id}`, collectPatient());

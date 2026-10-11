@@ -79,10 +79,10 @@ public class AuthController {
 
         userRepository.save(newUser);
 
-        String verificationToken = jwtService.generateVerificationToken(newUser);
-        String verificationUrl = "https://senami-1.onrender.com/auth/verify-email?token=" + verificationToken;
+        //String verificationToken = jwtService.generateVerificationToken(newUser);
+        //String verificationUrl = "https://senami-1.onrender.com/auth/verify-email?token=" + verificationToken;
 
-        emailService.sendVerificationEmail(email, username, verificationUrl);
+        //emailService.sendVerificationEmail(email, username, verificationUrl);
 
         return ResponseEntity.ok(Map.of(
                 "message", "Registration successful. Please check your email to verify your account."

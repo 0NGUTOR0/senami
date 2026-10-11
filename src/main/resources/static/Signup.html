@@ -105,12 +105,8 @@
 
       <div class="grid-2">
         <div class="field">
-          <label for="firstName">First Name</label>
-          <input type="text" id="firstName" name="firstName" required>
-        </div>
-        <div class="field">
-          <label for="lastName">Last Name</label>
-          <input type="text" id="lastName" name="lastName" required>
+          <label for="Name">Name</label>
+          <input type="text" id="name" name="Name" required>
         </div>
       </div>
 
@@ -172,6 +168,7 @@
       }
 
       const body = {
+        name: document.getElementById('name').value.trim(),
         email:     document.getElementById('email').value.trim(),
         password:  password
       };

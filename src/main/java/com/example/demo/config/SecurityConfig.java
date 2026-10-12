@@ -18,6 +18,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Configuration
@@ -44,7 +46,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public static resources
                 .requestMatchers(
-                    "/", "/index.html", "/Signup.html",     "/reset-password.html", 
+                    "/", "/index.html",  "/Signup.html", "/reset-password.html", 
                     "/forgot-password.html", "/error", "/favicon.ico","/utility/**",
                     "/css/**", "/js/**", "/Images/**", "/Flavicon/**"
                 ).permitAll()
@@ -80,6 +82,20 @@ public class SecurityConfig {
 
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((req, res, e) -> {
+                    String path = req.getRequestURI();
+                    String accept = req.getHeader("Accept");
+
+                    // A person opening a page in the browser (not an API or fetch call)
+                    // is sent to the login page and brought back afterwards.
+                    boolean apiCall = path.startsWith("/api/") || path.startsWith("/auth/");
+                    boolean pageVisit = accept != null && accept.contains("text/html");
+
+                    if (pageVisit && !apiCall) {
+                        String next = path + (req.getQueryString() != null ? "?" + req.getQueryString() : "");
+                        res.sendRedirect("/index.html?next=" + URLEncoder.encode(next, StandardCharsets.UTF_8));
+                        return;
+                    }
+
                     res.setStatus(401);
                     res.setContentType("application/json");
                     res.getWriter().write("{\"error\":\"Not authenticated\"}");

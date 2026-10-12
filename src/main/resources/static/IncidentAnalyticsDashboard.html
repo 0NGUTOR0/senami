@@ -906,7 +906,7 @@ function redirectToLogin() {
       if (!res.ok) throw new Error(`Failed to load patient (${res.status}).`);
       const patient = await res.json();
       if (!patient.fullName) return;
-      const title = `${patient.fullName} analytics`;
+      const title = `${patient.fullName}'s analytics`;
       document.getElementById('pageHeading').textContent = title;   // text, never HTML
       document.title = title;
     } catch (err) {

@@ -410,23 +410,31 @@
     // Verify the user's authentication cookie.
     // Returns the signed-in user (an object) or null when the check fails.
     async function checkAuthentication() {
-  const res = await fetch('https://senami-1.onrender.com/auth/me', {
-    method: 'GET',
-    credentials: 'include',
-    headers: { 'Accept': 'application/json' }
-  });
+        try {
+            const response = await fetch('/auth/me', {
+                method: 'GET',
+                credentials: 'include'
+            });
 
-  if (res.status === 401) {
-    redirectToLogin();
-    return false;
-  }
+            if (!response.ok) {
+                window.location.href = '/index.html';
+                return null;
+            }
 
-  if (!res.ok) {
-    throw new Error(`Session check failed (${res.status})`);
-  }
+            const data = await response.json().catch(() => null);
+            return data || {};
 
-  return true;
-}
+        } catch (error) {
+            console.error('Authentication check failed:', error);
+
+            document.getElementById('content').innerHTML =
+                '<div class="state error">' +
+                'Unable to verify your login. Please check your connection and try again.' +
+                '</div>';
+
+            return null;
+        }
+    }
 
     // Show who is signed in, next to the profile icon.
     function renderUser(data) {
@@ -434,19 +442,21 @@
 
         const email = user.email || '';
         const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
-        const name =
+        let name =
             user.fullName ||
             user.name ||
-            user.username ||
             fullName ||
-            (email ? email.split('@')[0] : 'Signed in');
+            user.username ||
+            '';
+        if (name === email) name = '';   // a name that is just the email would show it twice
 
+        // Only ever the full name and the email. With no name, the email takes the top line.
         const nameEl = document.getElementById('userName');
         const emailEl = document.getElementById('userEmail');
 
-        nameEl.textContent = name;
-        emailEl.textContent = email && email !== name ? email : '';
-        document.getElementById('userBox').title = email ? `${name} (${email})` : name;
+        nameEl.textContent = name || email;
+        emailEl.textContent = name ? email : '';
+        document.getElementById('userBox').title = [name, email].filter(Boolean).join(' · ');
         document.getElementById('userMenu').hidden = false;
     }
 
@@ -710,12 +720,6 @@
             }, 350);
         });
 
-        function redirectToLogin() {
-  const next = window.location.pathname + window.location.search;
-  // index.html is your login entry point
-  window.location.href =
-    `index.html?next=${encodeURIComponent(next)}`;
-}
     // Authenticate first, then show the user and load the patient list.
     (async function init() {
         const user = await checkAuthentication();

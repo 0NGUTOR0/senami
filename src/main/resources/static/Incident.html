@@ -6,6 +6,7 @@
   <title>Incident Report</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       background: #f0f4f8;
@@ -13,7 +14,6 @@
       line-height: 1.5;
       padding: 2rem 1rem;
     }
-
     .logo {
       height: 48px;
       margin-left: auto;
@@ -24,7 +24,6 @@
       align-items: center;
       gap: 1rem;
     }
-
     .form-container {
       max-width: 920px;
       margin: 0 auto;
@@ -33,65 +32,54 @@
       box-shadow: 0 4px 20px rgba(0,0,0,.08);
       overflow: hidden;
     }
+
     .form-header {
       background: #1e3a5f;
       color: #fff;
-      padding: 1.25rem 1.5rem;
+      padding: 1.5rem 2rem;
     }
-    .header-content {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .header-text { flex: 1; min-width: 0; }
-    .form-header h1 { font-size: 1.35rem; font-weight: 600; }
-    .form-header p { opacity: .85; font-size: .85rem; margin-top: .15rem; }
-    .logo {
-      height: 48px;
-      margin-left: auto;
-      flex-shrink: 0;
-    }
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: rgba(255,255,255,.12);
-      color: #fff;
-      text-decoration: none;
-      font-size: 1.25rem;
-      flex-shrink: 0;
-    }
-    .back-btn:hover { background: rgba(255,255,255,.22); }
 
+.report-people {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.person-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.person-card h3 {
+    margin: 0 0 16px;
+    color: #1e3a5f;
+    font-size: 1.05rem;
+}
+
+.person-card p {
+    margin: 9px 0;
+    color: #4a5568;
+    overflow-wrap: anywhere;
+}
+
+.person-card strong {
+    color: #2d3748;
+}
+
+@media (max-width: 700px) {
     .report-people {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
-      margin-top: 1.25rem;
+        grid-template-columns: 1fr;
     }
-    .person-card {
-      background: rgba(255,255,255,.1);
-      border: 1px solid rgba(255,255,255,.2);
-      border-radius: 10px;
-      padding: 1rem 1.1rem;
-    }
-    .person-card h3 {
-      margin: 0 0 .75rem;
-      font-size: .95rem;
-      color: #fff;
-    }
-    .person-card p {
-      margin: .4rem 0;
-      font-size: .9rem;
-      color: rgba(255,255,255,.9);
-      overflow-wrap: anywhere;
-    }
-    .person-card strong { color: #fff; }
+}
 
+    .form-header h1 { font-size: 1.5rem; font-weight: 600; }
+    .form-header p { opacity: .85; font-size: .9rem; margin-top: .25rem; }
     form { padding: 2rem; }
+
     .part-banner {
       background: #ebf4ff;
       color: #2b6cb0;
@@ -102,7 +90,9 @@
       margin-bottom: 1.5rem;
       border-left: 4px solid #3182ce;
     }
+
     .section { margin-bottom: 2rem; }
+
     .section-title {
       font-size: 1.05rem;
       font-weight: 600;
@@ -111,9 +101,11 @@
       padding-bottom: .5rem;
       margin-bottom: 1.25rem;
     }
+
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
     .full { grid-column: 1 / -1; }
+
     label {
       display: block;
       font-size: .85rem;
@@ -121,7 +113,9 @@
       color: #4a5568;
       margin-bottom: .35rem;
     }
+
     label .req { color: #e53e3e; }
+
     input[type="text"],
     input[type="datetime-local"],
     select,
@@ -133,18 +127,24 @@
       font-size: .95rem;
       background: #fff;
     }
+
     input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: #3182ce;
       box-shadow: 0 0 0 3px rgba(49,130,206,.15);
     }
+
     textarea { resize: vertical; min-height: 100px; }
+
     .option-group {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: .5rem .75rem;
       margin-top: .25rem;
     }
+
+    .option-group.single { grid-template-columns: 1fr; }
+
     .option-item {
       display: flex;
       align-items: flex-start;
@@ -154,13 +154,16 @@
       padding: .35rem .5rem;
       border-radius: 4px;
     }
+
     .option-item:hover { background: #f7fafc; }
     .option-item input { margin-top: .2rem; flex-shrink: 0; }
+
     .yes-no {
       display: flex;
       gap: 1.5rem;
       margin-top: .4rem;
     }
+
     .yes-no label {
       display: flex;
       align-items: center;
@@ -169,19 +172,29 @@
       color: #2d3748;
       cursor: pointer;
     }
-    .actions {
-      display: flex;
-      flex-direction: column;
-      gap: .75rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid #e2e8f0;
+.back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      transition: background .15s;
     }
-    .actions-buttons {
+    .back-btn:hover { background: rgba(255,255,255,.22); }
+    .actions {
       display: flex;
       gap: 1rem;
       justify-content: flex-end;
-      flex-wrap: wrap;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e2e8f0;
     }
+
     button {
       padding: .7rem 1.5rem;
       border-radius: 6px;
@@ -190,32 +203,14 @@
       cursor: pointer;
       border: none;
     }
+
     .btn-primary { background: #1e3a5f; color: #fff; }
     .btn-primary:hover { background: #16304f; }
-    .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
     .btn-secondary { background: #edf2f7; color: #2d3748; }
     .btn-secondary:hover { background: #e2e8f0; }
-    #form-message {
-      display: none;
-      padding: .85rem 1rem;
-      border-radius: 8px;
-      font-size: .95rem;
-      font-weight: 500;
-    }
-    #form-message.show { display: block; }
-    #form-message.success {
-      background: #c6f6d5;
-      color: #276749;
-      border: 1px solid #9ae6b4;
-    }
-    #form-message.error {
-      background: #fed7d7;
-      color: #9b2c2c;
-      border: 1px solid #feb2b2;
-    }
+
     @media (max-width: 700px) {
-      .grid, .grid-3, .option-group, .report-people { grid-template-columns: 1fr; }
-      .logo { display: none; }
+      .grid, .grid-3, .option-group { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -223,12 +218,6 @@
   <div class="form-container">
     <div class="form-header">
       <div class="header-content">
-
-        <a id="backLink" href="PatientList.html" class="back-btn" title="Back">←</a>
-        <div class="header-text">
-          <h1 id="pageTitle">Incident Report</h1>
-          <p id="pageSubtitle">Report a new incident</p>
-
       <a href="PatientList.html" class="back-btn" title="Back to patients">←</a>
       <div class="header-text">
         <h1 id="pageTitle">Incident Report</h1>
@@ -243,25 +232,22 @@
         <h3>Patient Details</h3>
         <div id="patientDetails">
             Loading patient details...
->>>>>>> 46f5c6f3be0391fe7d5df4c2937c84541ae8211f
         </div>
-        <img class="logo" src="Images/Logo.png" alt="Logo" onerror="this.style.display='none'">
-      </div>
+    </section>
 
-      <div class="report-people">
-        <section class="person-card">
-          <h3>Patient Details</h3>
-          <div id="patientDetails">Loading patient details…</div>
-        </section>
-        <section class="person-card">
-          <h3>Reported By</h3>
-          <div id="staffDetails">Loading staff details…</div>
-        </section>
-      </div>
+    <section class="person-card">
+        <h3>Reported By</h3>
+        <div id="staffDetails">
+            Loading staff details...
+        </div>
+    </section>
+
+</div>
+
     </div>
 
-    <form id="incidentForm">
-      <div class="part-banner">Part 1 — Completed by the staff member</div>
+    <form>
+      
 
       <div class="section">
         <div class="section-title">When &amp; Where</div>
@@ -274,6 +260,10 @@
             <label>Location <span class="req">*</span></label>
             <select name="location" required>
               <option value="">Select…</option>
+              <option value="HOME">Home</option>
+              <option value="COMMUNITY">Community</option>
+              <option value="VEHICLE">Vehicle / transport</option>
+              <option value="OTHER">Other</option>
             </select>
           </div>
           <div class="full">
@@ -285,118 +275,202 @@
 
       <div class="section">
         <div class="section-title">Antecedents</div>
-        <div class="option-group" data-options="antecedents"></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Internal / Personal Factors</div>
-        <div class="option-group" data-options="internalFactors"></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Behaviours</div>
-        <div class="option-group" data-options="behaviours"></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Harmful Activities</div>
-        <div class="option-group" data-options="harmfulActivities"></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Consequences</div>
-        <div class="option-group" data-options="consequences"></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">People Involved</div>
-        <div class="option-group" data-options="peopleInvolved"></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Duration, Frequency &amp; Severity</div>
-        <div class="grid-3">
-          <div>
-            <label>Duration <span class="req">*</span></label>
-            <select name="duration" required>
-              <option value="">Select…</option>
-            </select>
-          </div>
-          <div>
-            <label>Frequency <span class="req">*</span></label>
-            <select name="frequency" required>
-              <option value="">Select…</option>
-            </select>
-          </div>
-          <div>
-            <label>Severity <span class="req">*</span></label>
-            <select name="severity" required>
-              <option value="">Select…</option>
-            </select>
-          </div>
+        <div class="option-group" data-options="antecedents">
+          <label class="option-item"><input type="checkbox" name="antecedents" value="ENVIRONMENTAL_SITUATIONAL"> Environmental / Situational Factors</label>
+          <label class="option-item"><input type="checkbox" name="antecedents" value="INTERNAL_PERSONAL"> Internal / Personal Factors</label>
+          <label class="option-item"><input type="checkbox" name="antecedents" value="ROUTINE_TIME_BASED"> Routine / Time-Based Triggers</label>
+          <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL"> Social / Interactional Factors</label>
+          <label class="option-item"><input type="checkbox" name="antecedents" value="TASK_ACTIVITY"> Task / Activity Related Factors</label>
+          <label class="option-item"><input type="checkbox" name="antecedents" value="OTHER"> Other</label>
         </div>
       </div>
 
       <div class="section">
-        <div class="section-title">Emergency Response</div>
-        <div class="grid">
+        <div class="section-title">Internal / Personal Factors</div>
+        <div class="option-group" data-options="internalFactors">
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="FEELING_OVERWHELMED"> Feeling overwhelmed / overstimulated</label>
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="HORMONAL_CHANGES"> Hormonal changes / menstruation</label>
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="HUNGER_OR_THIRST"> Hunger or thirst</label>
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="MEDICATION_SIDE_EFFECTS"> Medication side effects or changes</label>
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="MENTAL_HEALTH_DETERIORATION"> Mental health deterioration</label>
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="POOR_SLEEP_FATIGUE"> Poor sleep / fatigue</label>
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="SENSORY_DEPRIVATION"> Sensory deprivation (not enough stimulation)</label>
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="SENSORY_OVERLOAD"> Sensory overload (noise, lights, smell, touch)</label>
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="UNWELL_PHYSICAL_PAIN"> Unwell / physical pain</label>
+          <label class="option-item"><input type="checkbox" name="internalFactors" value="OTHER"> Other</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Behaviours</div>
+        <div class="option-group" data-options="behaviours">
+          <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING"> Absconding/Wandering</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED"> Food Related Behaviour</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF"> Harm to self</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_ACTIVITIES"> Harmful Activities</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_REFUSAL"> Non-compliance/Refusal</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION"> Physical Aggression</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_DESTRUCTION"> Property Damage/Destruction</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="RISK_TAKING"> Risk taking behaviours</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED"> Sexualised Behaviour</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="SOCIALLY_INAPPROPRIATE"> Socially Inappropriate Behaviours</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="SUBSTANCE_MISUSE"> Substance Misuse</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="THREATENING"> Threatening Behaviour</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION"> Verbal Aggression</label>
+          <label class="option-item"><input type="checkbox" name="behaviours" value="OTHER"> Other</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Harmful Activities</div>
+        <div class="option-group" data-options="harmfulActivities">
+          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="ALCOHOL"> Alcohol use</label>
+          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="DRUGS"> Drug use</label>
+          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="SELF_HARM"> Self-harm</label>
+          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="SMOKING"> Smoking</label>
+          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="OTHER"> Other</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Consequences</div>
+        <div class="option-group" data-options="consequences">
+          <label class="option-item"><input type="checkbox" name="consequences" value="ACTIVITY_OR_OUTING_CANCELLED"> Activity or outing cancelled</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="DAMAGE_TO_PERSONAL_ITEMS_OR_ENVIRONMENT"> Damage to personal items or environment</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="EMOTIONAL_DISTRESS_TO_OTHERS"> Emotional distress to others</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="EMOTIONAL_DISTRESS_TO_SELF"> Emotional distress to self</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="IMPACTED_PEERS_OR_CO_RESIDENTS"> Impacted peers or co-residents</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="INCREASED_ANXIETY_OR_AGITATION"> Increased anxiety or agitation post-incident</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="INCREASED_SUPERVISION"> Increased supervision temporarily</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="INJURY_TO_OTHER_PEOPLE"> Injury to other people</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="INJURY_TO_SELF"> Injury to self</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="LOSS_OR_BREAKAGE_OF_BELONGINGS"> Loss or breakage of personal belongings</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="PROPERTY_DAMAGE_DESTRUCTION"> Property damage/destruction</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="REFUSAL_OF_FOOD_MEDICATION_ACTIVITY"> Refusal of food/medication/activity</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="REFUSED_COMMUNICATION_DEBRIEF"> Refused communication/debrief</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="REQUIRED_ENVIRONMENTAL_CHANGE"> Required environmental change (e.g., moved to safe space)</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="REQUIRED_PHYSICAL_INTERVENTION"> Required physical intervention (authorised RP only)</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="REQUIRED_POLICE_AMBULANCE"> Required police/ambulance intervention</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="REQUIRED_PRN_MEDICATION"> Required PRN medication</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="WITHDRAWAL_OR_ISOLATION"> Withdrawal or isolation from activity</label>
+          <label class="option-item"><input type="checkbox" name="consequences" value="OTHER"> Other</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">People Involved</div>
+        <div class="option-group" data-options="peopleInvolved">
+          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="FAMILY_MEMBER"> Family member</label>
+          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="FRIEND"> Friend</label>
+          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="HEALTH_PROFESSIONAL"> Health professional</label>
+          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="HOUSEMATE"> Housemate</label>
+          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="NEIGHBOUR"> Neighbour</label>
+          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="PARTNER_EX_PARTNER"> Partner / Ex-partner</label>
+          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="SOMEONE_FROM_COMMUNITY"> Someone from the community</label>
+          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="STAFF_MEMBER"> Staff member</label>
+          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="OTHER"> Other</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Incident Details</div>
+        <div class="grid-3">
           <div>
-            <label>On-call involved? <span class="req">*</span></label>
+            <label>Duration</label>
+            <select name="duration">
+              <option value="">Select…</option>
+            </select>
+          </div>
+          <div>
+            <label>Frequency</label>
+            <select name="frequency">
+              <option value="">Select…</option>
+            </select>
+          </div>
+          <div>
+            <label>Severity</label>
+            <select name="severity">
+              <option value="">Select…</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:1.25rem">
+          <div>
+            <label>Was on-call staff involved?</label>
             <div class="yes-no">
-              <label><input type="radio" name="onCallInvolved" value="true" required> Yes</label>
+              <label><input type="radio" name="onCallInvolved" value="true"> Yes</label>
               <label><input type="radio" name="onCallInvolved" value="false"> No</label>
             </div>
           </div>
           <div>
-            <label>NDIS Reported? <span class="req">*</span></label>
+            <label>Was NDIS reported?</label>
             <div class="yes-no">
-              <label><input type="radio" name="ndisReported" value="true" required> Yes</label>
+              <label><input type="radio" name="ndisReported" value="true"> Yes</label>
               <label><input type="radio" name="ndisReported" value="false"> No</label>
             </div>
           </div>
           <div class="full">
             <label>Emergency Services</label>
-            <div class="option-group" data-options="emergencyServices"></div>
+            <div class="option-group" data-options="emergencyServices">
+              <label class="option-item"><input type="checkbox" name="emergencyServices" value="AMBULANCE"> Ambulance</label>
+              <label class="option-item"><input type="checkbox" name="emergencyServices" value="MENTAL_HEALTH_SERVICES"> Mental health services</label>
+              <label class="option-item"><input type="checkbox" name="emergencyServices" value="NONE_INVOLVED"> None involved</label>
+              <label class="option-item"><input type="checkbox" name="emergencyServices" value="POLICE_SAPOL"> Police (SAPOL)</label>
+              <label class="option-item"><input type="checkbox" name="emergencyServices" value="OTHER"> Other</label>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="section">
         <div class="section-title">Strategies Used</div>
-        <div class="option-group" data-options="strategies"></div>
+        <div class="option-group" data-options="strategies">
+          <label class="option-item"><input type="checkbox" name="strategies" value="BEHAVIOUR_TEACHING_REINFORCEMENT"> Behaviour Teaching &amp; Reinforcement</label>
+          <label class="option-item"><input type="checkbox" name="strategies" value="COMMUNICATION_EMOTIONAL_SUPPORT"> Communication &amp; Emotional Support</label>
+          <label class="option-item"><input type="checkbox" name="strategies" value="ENVIRONMENTAL_SAFETY_ADJUSTMENTS"> Environmental / Safety Adjustments</label>
+          <label class="option-item"><input type="checkbox" name="strategies" value="MEDICAL_PROCEDURAL"> Medical &amp; Procedural</label>
+          <label class="option-item"><input type="checkbox" name="strategies" value="REGULATION_DE_ESCALATION"> Regulation &amp; De-Escalation</label>
+          <label class="option-item"><input type="checkbox" name="strategies" value="OTHER"> Other</label>
+        </div>
       </div>
 
       <div class="section">
         <div class="section-title">Communication Supports</div>
-        <div class="option-group" data-options="communicationSupports"></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Effectiveness &amp; Response</div>
-        <div class="grid">
-          <div>
-            <label>Were strategies effective? <span class="req">*</span></label>
-            <div class="yes-no">
-              <label><input type="radio" name="strategiesEffective" value="true" required> Yes</label>
-              <label><input type="radio" name="strategiesEffective" value="false"> No</label>
-            </div>
-          </div>
-          <div class="full">
-            <label>Response Description</label>
-            <textarea name="responseDescription" maxlength="3000" placeholder="Describe the response and outcome…"></textarea>
-          </div>
+        <div class="option-group" data-options="communicationSupports">
+          <label class="option-item"><input type="checkbox" name="communicationSupports" value="DEBRIEF_AFTER_CRISIS"> Debrief conducted after crisis</label>
+          <label class="option-item"><input type="checkbox" name="communicationSupports" value="PROMPTED_TO_IDENTIFY_EMOTIONS"> Prompted to identify and communicate emotions</label>
+          <label class="option-item"><input type="checkbox" name="communicationSupports" value="VERBAL_PRAISE"> Provided verbal praise for calm or positive choices</label>
         </div>
       </div>
 
-      <div class="part-banner">Part 2 — Review (optional on create; use Review action when editing)</div>
+      <div class="section">
+        <div class="section-title">Strategies Effective?</div>
+        <div class="yes-no">
+          <label><input type="radio" name="strategiesEffective" value="true"> Yes</label>
+          <label><input type="radio" name="strategiesEffective" value="false"> No</label>
+        </div>
+        <div style="margin-top:1rem">
+          <label>Response Description</label>
+          <textarea name="responseDescription" maxlength="5000" placeholder="Describe the response and outcome…"></textarea>
+        </div>
+      </div>
+
+      <div class="part-banner">Part 2 — Review and follow-up</div>
 
       <div class="section">
         <div class="section-title">Follow-up Agencies</div>
-        <div class="option-group" data-options="followUpAgencies"></div>
+        <div class="option-group" data-options="followUpAgencies">
+          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="GP"> General practitioner (GP)</label>
+          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="MENTAL_HEALTH"> Mental health service</label>
+          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="NDIS"> NDIS</label>
+          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="FAMILY"> Family / guardian</label>
+          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="OTHER"> Other</label>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title">Classification</div>
+        <div class="section-title">Incident Classification</div>
         <div class="grid">
           <div>
             <label>Classified as WHS?</label>
@@ -450,81 +524,235 @@
       </div>
 
       <div class="actions">
-        <div id="form-message"></div>
-        <div class="actions-buttons">
-          <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
-          <button type="submit" class="btn-primary" id="submitBtn" data-action="save">Submit Incident Report</button>
-          <button type="submit" class="btn-primary" id="reviewBtn" data-action="review" style="display:none;background:#2b6cb0;">
-            Submit Review (Part 2)
-          </button>
-        </div>
+        <button type="button" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn-primary">Submit Incident Report</button>
       </div>
     </form>
   </div>
 
   <script>
     const API_BASE = 'https://senami-1.onrender.com/api';
-    const AUTH_ME = 'https://senami-1.onrender.com/auth/me';
+       // relative, so it works on Render and locally
+function redirectToLogin() {
+  const next = window.location.pathname + window.location.search;
+  // index.html is your login entry point
+  window.location.href =
+    `index.html?next=${encodeURIComponent(next)}`;
+}
+async function checkAuthentication() {
+  const res = await fetch('https://senami-1.onrender.com/auth/me', {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Accept': 'application/json' }
+  });
 
-    const params = new URLSearchParams(location.search);
-    const patientId = params.get('patientId');
-    const incidentId = params.get('incidentId');
+  if (res.status === 401) {
+    redirectToLogin();
+    return false;
+  }
 
-    function redirectToLogin() {
-      const next = location.pathname + location.search;
-      location.href = `index.html?next=${encodeURIComponent(next)}`;
+  if (!res.ok) {
+    throw new Error(`Session check failed (${res.status})`);
+  }
+
+  return true;
+}
+async function api(method, path, body) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    credentials: 'include',
+    headers: authHeaders(),
+    body: body !== undefined ? JSON.stringify(body) : undefined
+  });
+
+  if (res.status === 401) {
+    window.location.href = 'Login.html?next=' +
+      encodeURIComponent(location.pathname + location.search);
+    throw new Error('Session expired.');
+  }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const fields = err.errors
+      ? Object.entries(err.errors).map(([k, v]) => `${k}: ${v}`).join('; ')
+      : '';
+    throw new Error(
+      [err.detail || err.message || err.error || `HTTP ${res.status}`, fields]
+        .filter(Boolean).join(' — ')
+    );
+  }
+
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+
+    function authHeaders() {
+      const token = localStorage.getItem('token');
+      return {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      };
     }
+    function submitIncidentReport(event) {
+      event.preventDefault();
 
-    async function checkAuthentication() {
-      const res = await fetch(AUTH_ME, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { 'Accept': 'application/json' }
-      });
-      if (res.status === 401) {
-        redirectToLogin();
-        return false;
+      const patientId = new URLSearchParams(window.location.search).get('patientId');
+      if (!patientId) {
+        alert('No patient selected. Open this page from a patient record.');
+        return;
       }
-      if (!res.ok) throw new Error(`Session check failed (${res.status})`);
-      return true;
+
+      const reportData = {
+        patientId,
+        ...collectPart1(),
+        ...collectPart2()
+      };
+
+      api('POST', '/incidents', reportData)
+        .then(() => {
+          alert('Incident report submitted successfully.');
+          window.location.href = `/patients/${encodeURIComponent(patientId)}`;
+        })
+        .catch(err => {
+          console.error('Error submitting incident report:', err);
+          alert(`Error submitting incident report: ${err.message}`);
+        });
     }
+    
+async function loadReportPeople() {
+    const patientContainer = document.getElementById('patientDetails');
+    const staffContainer = document.getElementById('staffDetails');
 
-    async function api(method, path, body) {
-      const res = await fetch(`${API_BASE}${path}`, {
-        method,
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: body !== undefined ? JSON.stringify(body) : undefined
+    const patientId = new URLSearchParams(
+        window.location.search
+    ).get('patientId');
+
+    try {
+        // Get the authenticated staff member from the server.
+        const staffResponse = await fetch('/auth/me', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (staffResponse.status === 401) {
+            window.location.href = '/index.html';
+            return;
+        }
+
+        if (!staffResponse.ok) {
+            throw new Error('Could not load the current staff member.');
+        }
+
+        const staff = await staffResponse.json();
+
+        staffContainer.innerHTML = `
+            <p><strong>Name:</strong> ${escapeHtml(staff.username || 'Not provided')}</p>
+            <p><strong>Email:</strong> ${escapeHtml(staff.email || 'Not provided')}</p>
+        `;
+
+        // Load the patient associated with this report.
+        if (!patientId) {
+            patientContainer.textContent =
+                'No patient selected. Open this page from a patient record.';
+            return;
+        }
+
+        const patientResponse = await fetch(
+            `/api/patients/${encodeURIComponent(patientId)}`,
+            {
+                method: 'GET',
+                credentials: 'include'
+            }
+        );
+
+        if (!patientResponse.ok) {
+            throw new Error('Could not load the selected patient.');
+        }
+
+        const patient = await patientResponse.json();
+
+        patientContainer.innerHTML = `
+            <p><strong>Patient number:</strong>
+                ${escapeHtml(patient.patientNumber || '—')}</p>
+            <p><strong>Full name:</strong>
+                ${escapeHtml(patient.fullName || '—')}</p>
+            
+        `;
+
+    } catch (error) {
+        console.error('Error loading report details:', error);
+
+        patientContainer.textContent =
+            'Unable to load patient details.';
+        staffContainer.textContent =
+            'Unable to load staff details.';
+    }
+}
+
+loadReportPeople();
+
+
+    
+    async function loadIncidentOptions() {
+      const options = await api('GET', '/incident-options');
+
+      const checkboxFields = [
+        'antecedents',
+        'internalFactors',
+        'behaviours',
+        'harmfulActivities',
+        'consequences',
+        'peopleInvolved',
+        'emergencyServices',
+        'strategies',
+        'communicationSupports',
+        'followUpAgencies'
+      ];
+
+      checkboxFields.forEach(field => {
+        const container = document.querySelector(`[data-options="${field}"]`);
+        if (!container || !options[field]) return;
+
+        container.innerHTML = '';
+
+        options[field].forEach(opt => {
+          const label = document.createElement('label');
+          label.className = 'option-item';
+
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.name = field;
+          input.value = opt.value;
+
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(` ${opt.label}`));
+          container.appendChild(label);
+        });
       });
 
-      if (res.status === 401) {
-        redirectToLogin();
-        throw new Error('Not authenticated');
-      }
+      const selectFields = ['location', 'duration', 'frequency', 'severity'];
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const msg =
-          err.detail ||
-          err.message ||
-          err.error ||
-          (err.errors && Object.values(err.errors).flat().join('; ')) ||
-          `HTTP ${res.status}`;
-        const error = new Error(msg);
-        error.status = res.status;
-        error.body = err;
-        throw error;
-      }
+      selectFields.forEach(field => {
+        const select = document.querySelector(`select[name="${field}"]`);
+        if (!select || !options[field]) return;
 
-      if (res.status === 204) return null;
-      return res.json();
+        const placeholder = select.querySelector('option[value=""]');
+        select.innerHTML = '';
+
+        if (placeholder) select.appendChild(placeholder);
+
+        options[field].forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt.value;
+          option.textContent = opt.label;
+          select.appendChild(option);
+        });
+      });
     }
 
     function escapeHtml(value) {
-      return String(value ?? '')
+    return String(value ?? '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -532,15 +760,9 @@
         .replace(/'/g, '&#39;');
     }
 
-    function showMessage(message, isError = false) {
-      const el = document.getElementById('form-message');
-      el.textContent = message;
-      el.className = isError ? 'error show' : 'success show';
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
     function getCheckedValues(name) {
-      return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(el => el.value);
+      return [...document.querySelectorAll(`input[name="${name}"]:checked`)]
+        .map(el => el.value);
     }
 
     function getRadioValue(name) {
@@ -587,56 +809,24 @@
       };
     }
 
-    async function createIncident(pid) {
-      return api('POST', `/patients/${pid}/incidents`, collectPart1());
+    async function createIncident(patientId) {
+      return api('POST', `/patients/${patientId}/incidents`, collectPart1());
     }
 
-    async function updateIncident(id) {
-      return api('PUT', `/incidents/${id}`, collectPart1());
+    async function updateIncident(incidentId) {
+      return api('PUT', `/incidents/${incidentId}`, collectPart1());
     }
 
-    async function reviewIncident(id) {
-      return api('PUT', `/incidents/${id}/review`, collectPart2());
+    async function reviewIncident(incidentId) {
+      return api('PUT', `/incidents/${incidentId}/review`, collectPart2());
     }
 
-    async function getIncident(id) {
-      return api('GET', `/incidents/${id}`);
+    async function getIncident(incidentId) {
+      return api('GET', `/incidents/${incidentId}`);
     }
 
-    async function loadIncidentOptions() {
-      const options = await api('GET', '/incident-options');
-
-      const checkboxFields = [
-        'antecedents', 'internalFactors', 'behaviours', 'harmfulActivities',
-        'consequences', 'peopleInvolved', 'emergencyServices',
-        'strategies', 'communicationSupports', 'followUpAgencies'
-      ];
-
-      checkboxFields.forEach(field => {
-        const container = document.querySelector(`[data-options="${field}"]`);
-        if (!container || !options[field]) return;
-        container.innerHTML = '';
-        options[field].forEach(opt => {
-          const label = document.createElement('label');
-          label.className = 'option-item';
-          label.innerHTML = `<input type="checkbox" name="${field}" value="${opt.value}"> ${escapeHtml(opt.label)}`;
-          container.appendChild(label);
-        });
-      });
-
-      ['location', 'duration', 'frequency', 'severity'].forEach(field => {
-        const select = document.querySelector(`select[name="${field}"]`);
-        if (!select || !options[field]) return;
-        const placeholder = select.querySelector('option[value=""]');
-        select.innerHTML = '';
-        if (placeholder) select.appendChild(placeholder);
-        options[field].forEach(opt => {
-          const o = document.createElement('option');
-          o.value = opt.value;
-          o.textContent = opt.label;
-          select.appendChild(o);
-        });
-      });
+    async function listIncidents(patientId, page = 0, size = 20) {
+      return api('GET', `/patients/${patientId}/incidents?page=${page}&size=${size}`);
     }
 
     function setCheckedValues(name, values = []) {
@@ -653,11 +843,14 @@
 
     function populateForm(data) {
       if (!data) return;
+
       const set = (name, val) => {
         const el = document.querySelector(`[name="${name}"]`);
         if (el && val != null) el.value = val;
       };
+
       if (data.occurredAt) set('occurredAt', data.occurredAt.slice(0, 16));
+
       set('location', data.location);
       set('description', data.description);
       set('duration', data.duration);
@@ -665,16 +858,16 @@
       set('severity', data.severity);
       set('responseDescription', data.responseDescription);
 
-      setCheckedValues('antecedents', data.antecedents || []);
-      setCheckedValues('internalFactors', data.internalFactors || []);
-      setCheckedValues('behaviours', data.behaviours || []);
-      setCheckedValues('harmfulActivities', data.harmfulActivities || []);
-      setCheckedValues('consequences', data.consequences || []);
-      setCheckedValues('peopleInvolved', data.peopleInvolved || []);
-      setCheckedValues('emergencyServices', data.emergencyServices || []);
-      setCheckedValues('strategies', data.strategies || []);
-      setCheckedValues('communicationSupports', data.communicationSupports || []);
-      setCheckedValues('followUpAgencies', data.followUpAgencies || []);
+      setCheckedValues('antecedents', data.antecedents);
+      setCheckedValues('internalFactors', data.internalFactors);
+      setCheckedValues('behaviours', data.behaviours);
+      setCheckedValues('harmfulActivities', data.harmfulActivities);
+      setCheckedValues('consequences', data.consequences);
+      setCheckedValues('peopleInvolved', data.peopleInvolved);
+      setCheckedValues('emergencyServices', data.emergencyServices);
+      setCheckedValues('strategies', data.strategies);
+      setCheckedValues('communicationSupports', data.communicationSupports);
+      setCheckedValues('followUpAgencies', data.followUpAgencies);
 
       setRadioValue('onCallInvolved', data.onCallInvolved);
       setRadioValue('ndisReported', data.ndisReported);
@@ -687,63 +880,24 @@
       setRadioValue('injuryFormCompleted', data.injuryFormCompleted);
     }
 
-    async function loadReportPeople() {
-      const patientContainer = document.getElementById('patientDetails');
-      const staffContainer = document.getElementById('staffDetails');
+    function showMessage(message, isError = false) {
+      let el = document.getElementById('form-message');
 
-      try {
-        const staffRes = await fetch(AUTH_ME, {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Accept': 'application/json' }
-        });
-        if (staffRes.status === 401) {
-          redirectToLogin();
-          return;
-        }
-        if (!staffRes.ok) throw new Error('Could not load staff');
-        const staff = await staffRes.json();
-        staffContainer.innerHTML = `
-          <p><strong>Name:</strong> ${escapeHtml(staff.username || '—')}</p>
-          <p><strong>Email:</strong> ${escapeHtml(staff.email || '—')}</p>
-        `;
-
-        if (!patientId) {
-          patientContainer.textContent = 'No patient selected. Open from a patient record.';
-          return;
-        }
-
-        const patient = await api('GET', `/patients/${encodeURIComponent(patientId)}`);
-        patientContainer.innerHTML = `
-          <p><strong>Patient number:</strong> ${escapeHtml(patient.patientNumber || '—')}</p>
-          <p><strong>Full name:</strong> ${escapeHtml(patient.fullName || '—')}</p>
-        `;
-        document.getElementById('pageSubtitle').textContent =
-          patient.fullName ? `Patient: ${patient.fullName}` : 'Report a new incident';
-        document.getElementById('backLink').href =
-          `IncidentAnalyticsDashboard.html?patientId=${encodeURIComponent(patientId)}`;
-        document.getElementById('cancelBtn').onclick = () => {
-          location.href = `IncidentAnalyticsDashboard.html?patientId=${encodeURIComponent(patientId)}`;
-        };
-      } catch (err) {
-        console.error(err);
-        patientContainer.textContent = 'Unable to load patient details.';
-        staffContainer.textContent = 'Unable to load staff details.';
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'form-message';
+        el.style.cssText = 'margin:1rem 0;padding:.75rem 1rem;border-radius:6px;font-size:.9rem;';
+        document.querySelector('form')?.prepend(el);
       }
+
+      el.textContent = message;
+      el.style.background = isError ? '#fed7d7' : '#c6f6d5';
+      el.style.color = isError ? '#9b2c2c' : '#276749';
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const ok = await checkAuthentication();
-        if (!ok) return;
-      } catch (e) {
-        showMessage(e.message, true);
-        return;
-      }
-
-      if (!patientId && !incidentId) {
-        showMessage('Open this page with ?patientId=… (or ?incidentId=… to edit).', true);
-      }
+      const patientId = new URLSearchParams(location.search).get('patientId');
+      const incidentId = new URLSearchParams(location.search).get('incidentId');
 
       try {
         await loadIncidentOptions();
@@ -752,67 +906,46 @@
         return;
       }
 
-      await loadReportPeople();
-
       if (incidentId) {
-        document.getElementById('pageTitle').textContent = 'Edit Incident';
-        document.getElementById('submitBtn').textContent = 'Update Part 1';
-        document.getElementById('reviewBtn').style.display = '';
         try {
           const data = await getIncident(incidentId);
           populateForm(data);
-          showMessage('Loaded existing incident. Update Part 1 or submit Review.', false);
         } catch (e) {
           showMessage('Failed to load incident: ' + e.message, true);
         }
       }
 
-      document.getElementById('incidentForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const action = e.submitter?.dataset?.action || 'save';
-        const submitBtn = document.getElementById('submitBtn');
-        const reviewBtn = document.getElementById('reviewBtn');
+      const form = document.querySelector('form');
+      if (!form) return;
 
-        submitBtn.disabled = true;
-        reviewBtn.disabled = true;
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+
+        const isReview = e.submitter?.dataset?.action === 'review'
+          || document.querySelector('[data-part="2"]')?.contains(e.submitter);
 
         try {
-          if (action === 'review') {
+          let result;
+
+          if (isReview) {
             if (!incidentId) throw new Error('No incident ID for review');
-            await reviewIncident(incidentId);
-            showMessage('✓ Review (Part 2) saved successfully');
+            result = await reviewIncident(incidentId);
+            showMessage('Review saved successfully');
           } else if (incidentId) {
-            await updateIncident(incidentId);
-            showMessage('✓ Incident (Part 1) updated successfully');
+            result = await updateIncident(incidentId);
+            showMessage('Incident updated successfully');
           } else {
-            if (!patientId) throw new Error('patientId is required in the URL');
-            const result = await createIncident(patientId);
-            showMessage('✓ Incident recorded successfully');
-            // Switch to edit mode so review can be submitted
-            if (result?.id) {
-              history.replaceState(
-                null,
-                '',
-                `?patientId=${encodeURIComponent(patientId)}&incidentId=${encodeURIComponent(result.id)}`
-              );
-              document.getElementById('submitBtn').textContent = 'Update Part 1';
-              document.getElementById('reviewBtn').style.display = '';
-              // reload with new incidentId for further actions
-              window.location.search =
-                `?patientId=${encodeURIComponent(patientId)}&incidentId=${encodeURIComponent(result.id)}&created=1`;
-            }
+            if (!patientId) throw new Error('patientId is required');
+            result = await createIncident(patientId);
+            showMessage('Incident recorded successfully');
+            console.log('Created incident:', result.id);
           }
+
+          console.log(result);
         } catch (err) {
-          showMessage(err.message || 'Could not save incident', true);
-        } finally {
-          submitBtn.disabled = false;
-          reviewBtn.disabled = false;
+          showMessage(err.message, true);
         }
       });
-
-      if (params.get('created') === '1') {
-        showMessage('✓ Incident recorded successfully');
-      }
     });
   </script>
 </body>

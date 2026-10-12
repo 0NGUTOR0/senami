@@ -27,6 +27,7 @@
     }
     .topbar h1 { font-size: 1.35rem; font-weight: 600; }
     .topbar-actions { display: flex; gap: .75rem; align-items: center; margin-right: 90px; }
+    [hidden] { display: none !important; }
     .btn {
       padding: .55rem 1.1rem;
       border-radius: 6px;
@@ -50,15 +51,92 @@
     }
 
     /* Current user, next to the profile icon */
+    .user-menu { position: relative; }
     .user {
       display: flex;
       align-items: center;
       gap: .65rem;
       min-width: 0;
-      padding-right: 1rem;
-      margin-right: .25rem;
-      border-right: 1px solid rgba(255,255,255,.25);
+      padding: .3rem .6rem .3rem .3rem;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
     }
+    .user:hover, .user[aria-expanded="true"] { background: rgba(255,255,255,.12); }
+    .user:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .user-caret {
+      flex: none;
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: .8;
+      transition: transform .15s;
+    }
+    .user[aria-expanded="true"] .user-caret { transform: rotate(180deg); }
+
+    .menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + .5rem);
+      min-width: 220px;
+      background: #fff;
+      color: #1a202c;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.2);
+      padding: .35rem;
+      z-index: 50;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      width: 100%;
+      padding: .6rem .75rem;
+      border: 0;
+      border-radius: 6px;
+      background: none;
+      color: inherit;
+      font: inherit;
+      font-size: .92rem;
+      text-align: left;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .menu-item:hover, .menu-item:focus-visible { background: #edf2f7; outline: none; }
+    .menu-item svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: #4a5568;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .menu-sep { height: 1px; background: #e2e8f0; margin: .3rem .25rem; }
+    .menu-item.danger { color: #c53030; }
+    .menu-item.danger svg { stroke: #c53030; }
+
+    /* Floating "New Patient" button */
+    .fab {
+      position: fixed;
+      right: 1.5rem;
+      bottom: 1.5rem;
+      z-index: 40;
+      padding: .85rem 1.4rem;
+      border-radius: 999px;
+      font-size: 1rem;
+      box-shadow: 0 6px 20px rgba(30,58,95,.35);
+    }
+    .fab:hover { box-shadow: 0 8px 24px rgba(30,58,95,.45); }
+    .fab:focus-visible { outline: 3px solid #1e3a5f; outline-offset: 3px; }
     .user-icon {
       flex: none;
       width: 40px;
@@ -91,7 +169,7 @@
     .container {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 1.5rem;
+      padding: 1.5rem 1.5rem 6rem; /* room so the floating button never covers the last row */
     }
 
     /* Search bar */
@@ -228,7 +306,7 @@
     @media (max-width: 700px) {
       .logo { margin-left: 0; }
       .topbar-actions { margin-right: 0; flex-wrap: wrap; }
-      .user { border-right: none; padding-right: 0; }
+      .fab { right: 1rem; bottom: 1rem; }
       .user-email { display: none; }
       th { padding: .7rem .75rem; }
       .cell-link { padding: .8rem .75rem; }
@@ -242,19 +320,34 @@
   <header class="topbar">
     <img class="logo" src="/Images/Logo.png" alt="Logo" style="height: 60px;">
     <div class="topbar-actions">
-      <div class="user" id="userBox" hidden>
-        <span class="user-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path></svg>
-        </span>
-        <div class="user-text">
-          <span class="user-name" id="userName"></span>
-          <span class="user-email" id="userEmail"></span>
+      <div class="user-menu" id="userMenu" hidden>
+        <button type="button" class="user" id="userBox"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="userDropdown">
+          <span class="user-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path></svg>
+          </span>
+          <span class="user-text">
+            <span class="user-name" id="userName"></span>
+            <span class="user-email" id="userEmail"></span>
+          </span>
+          <svg class="user-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+        <div class="menu" id="userDropdown" role="menu" aria-labelledby="userBox" hidden>
+          <a class="menu-item" role="menuitem" href="AccountSettings.html" id="accountLink">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>
+            Account settings
+          </a>
+          <div class="menu-sep" role="separator"></div>
+          <button type="button" class="menu-item danger" role="menuitem" onclick="logout()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>
+            Logout
+          </button>
         </div>
       </div>
-      <a href="Patient.html" class="btn btn-primary">+ New Patient</a>
-      <button class="btn btn-ghost" onclick="logout()">Logout</button>
     </div>
   </header>
+
+  <a href="Patient.html" class="btn btn-primary fab" id="newPatientBtn">+ New Patient</a>
 
   <main class="container">
     <div class="toolbar">
@@ -351,8 +444,51 @@
         nameEl.textContent = name;
         emailEl.textContent = email && email !== name ? email : '';
         document.getElementById('userBox').title = email ? `${name} (${email})` : name;
-        document.getElementById('userBox').hidden = false;
+        document.getElementById('userMenu').hidden = false;
     }
+
+    // Dropdown under the profile icon: account settings and logout.
+    (function setupUserMenu() {
+        const wrap = document.getElementById('userMenu');
+        const button = document.getElementById('userBox');
+        const menu = document.getElementById('userDropdown');
+
+        function items() {
+            return [...menu.querySelectorAll('[role="menuitem"]')];
+        }
+        function open(focusFirst) {
+            menu.hidden = false;
+            button.setAttribute('aria-expanded', 'true');
+            if (focusFirst) items()[0]?.focus();
+        }
+        function close(returnFocus) {
+            menu.hidden = true;
+            button.setAttribute('aria-expanded', 'false');
+            if (returnFocus) button.focus();
+        }
+
+        button.addEventListener('click', () => (menu.hidden ? open(false) : close(false)));
+        button.addEventListener('keydown', event => {
+            if (event.key === 'ArrowDown') { event.preventDefault(); open(true); }
+        });
+
+        menu.addEventListener('keydown', event => {
+            const list = items();
+            const i = list.indexOf(document.activeElement);
+            if (event.key === 'ArrowDown') { event.preventDefault(); list[(i + 1) % list.length].focus(); }
+            else if (event.key === 'ArrowUp') { event.preventDefault(); list[(i - 1 + list.length) % list.length].focus(); }
+            else if (event.key === 'Home') { event.preventDefault(); list[0].focus(); }
+            else if (event.key === 'End') { event.preventDefault(); list[list.length - 1].focus(); }
+            else if (event.key === 'Tab') { close(false); }
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && !menu.hidden) close(true);
+        });
+        document.addEventListener('click', event => {
+            if (!menu.hidden && !wrap.contains(event.target)) close(false);
+        });
+    })();
 
     // Load patients from the backend.
     async function loadPatients(page = 0) {
@@ -419,7 +555,7 @@
                         ? 'No patients match your search.'
                         : 'No patients yet.'}
                     <br><br>
-                    <a href="PatientList.html" class="btn btn-primary">
+                    <a href="Patient.html" class="btn btn-primary">
                         Add first patient
                     </a>
                 </div>`;

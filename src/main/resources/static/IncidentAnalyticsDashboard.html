@@ -324,16 +324,23 @@
   }
 
   async function checkAuthentication() {
-    const res = await fetch(AUTH_ME, {
-      method: 'GET',
-      credentials: 'include',
-      headers: { 'Accept': 'application/json' }
-    });
-    if (res.status === 401) { redirectToLogin(); return false; }
-    if (res.status === 403) throw new Error('No permission for this dashboard.');
-    if (!res.ok) throw new Error(`Session check failed (${res.status}).`);
-    return true;
+  const res = await fetch('https://senami-1.onrender.com/auth/me', {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Accept': 'application/json' }
+  });
+
+  if (res.status === 401) {
+    redirectToLogin();
+    return false;
   }
+
+  if (!res.ok) {
+    throw new Error(`Session check failed (${res.status})`);
+  }
+
+  return true;
+}
 
   function getInpatient() {
     const start = document.getElementById('inpatientStart')?.value || null;
@@ -881,7 +888,12 @@
     document.getElementById('optConsumption').href =
       `ConsumptionForm.html?patientId=${encodeURIComponent(urlPatientId)}`;
   }
-
+function redirectToLogin() {
+  const next = window.location.pathname + window.location.search;
+  // index.html is your login entry point
+  window.location.href =
+    `index.html?next=${encodeURIComponent(next)}`;
+}
   // ── Patient name in the header ──
   async function loadPatientName() {
     if (!urlPatientId) return;

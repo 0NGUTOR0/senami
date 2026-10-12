@@ -23,10 +23,10 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;   /* logo and user menu always share one row */
     }
     .topbar h1 { font-size: 1.35rem; font-weight: 600; }
-    .topbar-actions { display: flex; gap: .75rem; align-items: center; margin-right: 90px; }
+    .topbar-actions { display: flex; gap: .75rem; align-items: center; margin-right: 90px; min-width: 0; }
     [hidden] { display: none !important; }
     .btn {
       padding: .55rem 1.1rem;
@@ -45,19 +45,22 @@
     .btn-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.4);font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
     .btn-ghost:hover { background: rgba(255,255,255,.1); }
     .logo{
-      height: 72px;
+      height: 60px;
       width: auto;
       margin-left: 90px;
+      flex: none;
     }
 
     /* Current user, next to the profile icon */
-    .user-menu { position: relative; }
+    .user-menu { position: relative; min-width: 0; }
     .user {
       display: flex;
       align-items: center;
       gap: .65rem;
       min-width: 0;
       padding: .3rem .6rem .3rem .3rem;
+      width: 100%;   /* lets the button shrink with its container instead of keeping its text width */
+      max-width: 100%;
       border: 0;
       border-radius: 999px;
       background: transparent;
@@ -303,9 +306,17 @@
       border-color: #1e3a5f;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 900px) {
       .logo { margin-left: 0; }
-      .topbar-actions { margin-right: 0; flex-wrap: wrap; }
+      .topbar-actions { margin-right: 0; }
+    }
+
+    @media (max-width: 700px) {
+      .topbar { padding: .6rem .75rem; gap: .5rem; }
+      .logo { height: 40px; }
+      .user { gap: .5rem; padding-right: .4rem; }
+      .user-icon { width: 36px; height: 36px; }
+      .user-name { max-width: 9rem; }
       .fab { right: 1rem; bottom: 1rem; }
       .user-email { display: none; }
       th { padding: .7rem .75rem; }
@@ -318,7 +329,7 @@
 <body>
 
   <header class="topbar">
-    <img class="logo" src="/Images/Logo.png" alt="Logo" style="height: 60px;">
+    <img class="logo" src="/Images/Logo.png" alt="Logo">
     <div class="topbar-actions">
       <div class="user-menu" id="userMenu" hidden>
         <button type="button" class="user" id="userBox"
@@ -399,31 +410,23 @@
     // Verify the user's authentication cookie.
     // Returns the signed-in user (an object) or null when the check fails.
     async function checkAuthentication() {
-        try {
-            const response = await fetch('/auth/me', {
-                method: 'GET',
-                credentials: 'include'
-            });
+  const res = await fetch('https://senami-1.onrender.com/auth/me', {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Accept': 'application/json' }
+  });
 
-            if (!response.ok) {
-                window.location.href = '/index.html';
-                return null;
-            }
+  if (res.status === 401) {
+    redirectToLogin();
+    return false;
+  }
 
-            const data = await response.json().catch(() => null);
-            return data || {};
+  if (!res.ok) {
+    throw new Error(`Session check failed (${res.status})`);
+  }
 
-        } catch (error) {
-            console.error('Authentication check failed:', error);
-
-            document.getElementById('content').innerHTML =
-                '<div class="state error">' +
-                'Unable to verify your login. Please check your connection and try again.' +
-                '</div>';
-
-            return null;
-        }
-    }
+  return true;
+}
 
     // Show who is signed in, next to the profile icon.
     function renderUser(data) {
@@ -707,6 +710,12 @@
             }, 350);
         });
 
+        function redirectToLogin() {
+  const next = window.location.pathname + window.location.search;
+  // index.html is your login entry point
+  window.location.href =
+    `index.html?next=${encodeURIComponent(next)}`;
+}
     // Authenticate first, then show the user and load the patient list.
     (async function init() {
         const user = await checkAuthentication();

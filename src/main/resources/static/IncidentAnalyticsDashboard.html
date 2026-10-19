@@ -553,9 +553,16 @@
           </span>
         </a>
         <a class="modal-option" id="optConsumption" href="#">
-          <span class="icon icon-consumption">📦</span>
+          <span class="icon icon-consumption"><i class="fa-solid fa-smoking"></i></span>
           <span>
             <strong>Consumption</strong><br>
+            <small style="color:#718096;font-weight:400">Log a consumption entry</small>
+          </span>
+        </a>
+         <a class="modal-option" id="optImport" href="#">
+          <span class="icon icon-import">📦</span>
+          <span>
+            <strong>External Imports</strong><br>
             <small style="color:#718096;font-weight:400">Log a consumption entry</small>
           </span>
         </a>
@@ -2067,6 +2074,7 @@
     if (!id) return;
     $('optIncident').href = `Incident.html?patientId=${encodeURIComponent(id)}`;
     $('optConsumption').href = `ConsumptionForm.html?patientId=${encodeURIComponent(id)}`;
+    $('optImport').href = `ImportIncidents.html?patientId=${encodeURIComponent(id)}`;
   }
 
   // ── Heading ──

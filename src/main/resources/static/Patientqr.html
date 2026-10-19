@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient QR code</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.5; min-height: 100vh; }
+    .topbar { background: #1e3a5f; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .back { color: #fff; text-decoration: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 8px; background: rgba(255,255,255,.12); font-size: 1.2rem; flex: none; }
+    .back:hover { background: rgba(255,255,255,.22); }
+    .topbar h1 { font-size: 1.25rem; font-weight: 600; min-width: 0; }
+    .container { max-width: 560px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.06); padding: 2rem 1.5rem; text-align: center; }
+    .instruction { font-size: 1.2rem; font-weight: 600; color: #1e3a5f; margin-bottom: 1.5rem; overflow-wrap: anywhere; }
+    .qr { display: inline-block; padding: 14px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; }
+    .qr img { display: block; width: min(300px, 70vw); height: auto; image-rendering: pixelated; }
+    .meta { margin-top: 1rem; font-size: .85rem; color: #718096; overflow-wrap: anywhere; }
+    .actions { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; margin-top: 1.5rem; }
+    .btn { padding: .6rem 1.1rem; border-radius: 6px; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; font: inherit; font-size: .9rem; font-weight: 500; cursor: pointer; text-decoration: none; }
+    .btn:hover { background: #edf2f7; }
+    .btn-primary { background: #3182ce; border-color: #3182ce; color: #fff; }
+    .btn-primary:hover { background: #2b6cb0; }
+    .state { padding: 2rem 0; color: #718096; }
+    .state.error { color: #c53030; }
+    @media (max-width: 480px) { .topbar { padding: .75rem; } .card { padding: 1.5rem 1rem; } .instruction { font-size: 1.05rem; } }
+    @media print {
+      body { background: #fff; }
+      .topbar, .actions { display: none !important; }
+      .card { box-shadow: none; }
+      .container { max-width: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="PatientList.html" aria-label="Back to patients">&larr;</a>
+    <h1>Patient QR code</h1>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <div id="loading" class="state">Loading…</div>
+      <div id="error" class="state error" hidden></div>
+      <div id="result" hidden>
+        <p class="instruction" id="instruction"></p>
+        <div class="qr"><img id="qrImg" alt="QR code"></div>
+        <p class="meta" id="meta"></p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="btnPrint">Print</button>
+          <a class="btn" id="btnDownload" download="qr-code.png" href="#">Download PNG</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  const API = '/api';
+  const id = new URLSearchParams(location.search).get('id');
+  const $ = x => document.getElementById(x);
+
+  function redirectToLogin() {
+    location.href = '/Login.html?next=' + encodeURIComponent(location.pathname + location.search);
+  }
+  function showError(msg) {
+    $('loading').hidden = true;
+    $('error').textContent = msg;
+    $('error').hidden = false;
+  }
+
+  (async function init() {
+    if (!id) return showError('No patient selected.');
+    try {
+      const res = await fetch(`${API}/patients/${encodeURIComponent(id)}`, { credentials: 'include', headers: { 'Accept': 'application/json' } });
+      if (res.status === 401 || res.status === 403) return redirectToLogin();
+      if (res.status === 404) return showError('Patient not found.');
+      if (!res.ok) return showError(`Could not load the patient (${res.status}).`);
+      const p = await res.json();
+      const name = p.fullName || p.name || p.patientNumber || 'this patient';
+
+      // The QR code opens the page where staff choose to record an incident or a consumption record.
+      const target = `${location.origin}/Record.html?patientId=${encodeURIComponent(id)}`;
+      const qr = qrcode(0, 'M');
+      qr.addData(target);
+      qr.make();
+      const url = qr.createDataURL(8, 0);
+
+      $('instruction').textContent = `Scan this QR code to record an incident or consumption record for ${name}`;
+      $('qrImg').src = url;
+      $('qrImg').alt = `QR code for ${name}`;
+      $('meta').textContent = (p.patientNumber ? p.patientNumber + ' · ' : '') + target;
+      const dl = $('btnDownload');
+      dl.href = url;
+      // The generator returns a GIF; re-encode as a real PNG for the download.
+      const im = new Image();
+      im.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = im.naturalWidth + 80; c.height = im.naturalHeight + 80;
+        const g = c.getContext('2d');
+        g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+        g.imageSmoothingEnabled = false;
+        g.drawImage(im, 40, 40);
+        dl.href = c.toDataURL('image/png');
+      };
+      im.src = url;
+      dl.download = 'qr-' + name.replace(/[^\w\-]+/g, '_') + '.png';
+      document.title = `QR code – ${name}`;
+      $('loading').hidden = true;
+      $('result').hidden = false;
+    } catch (e) {
+      console.error(e);
+      showError('Could not load the patient. Check your connection and try again.');
+    }
+  })();
+
+  $('btnPrint').addEventListener('click', () => window.print());
+</script>
+</body>
+</html>

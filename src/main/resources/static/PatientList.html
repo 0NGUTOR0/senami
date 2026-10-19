@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patients</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -228,6 +229,20 @@
       border-radius: 6px;      
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     }
+    .row-actions { display: flex; align-items: center; justify-content: flex-end; gap: .25rem; padding-right: .75rem; white-space: nowrap; }
+    .qr-link {
+      flex: none;
+      display: inline-grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: #1e3a5f;
+      font-size: 1.15rem;
+      text-decoration: none;
+    }
+    .qr-link:hover { background: #ebf8ff; color: #3182ce; }
+    .qr-link:focus-visible { outline: 3px solid #3182ce; outline-offset: -2px; }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -321,8 +336,16 @@
       .user-email { display: none; }
       th { padding: .7rem .75rem; }
       .cell-link { padding: .8rem .75rem; }
-      th.col-number { width: 130px; }
+      table { table-layout: fixed; }
+      th.col-number { width: 24%; }
+      th:nth-child(4) { width: 118px; }
+      .name .cell-link { overflow-wrap: anywhere; }
       th.col-age { width: 70px; }
+      .patient-number { font-size: .75rem; overflow-wrap: anywhere; }
+      th:nth-child(3), td:nth-child(3) { display: none; }   /* age is hidden on phones so the row actions stay visible */
+      .link-btn { padding: .4rem .4rem; }
+      .link-btn .long { display: none; }
+      .row-actions { padding-right: .25rem; }
     }
   </style>
 </head>
@@ -604,11 +627,18 @@
                 </td>
 
                 <td class="actions-cell">
-                    <button class="link-btn"
-                        onclick="AllPatientIncidents('${escapeHtml(patient.id)}')">
-                        Incidents & Consumption
-                    </button>
-                    
+                    <div class="row-actions">
+                        <button class="link-btn"
+                            onclick="AllPatientIncidents('${escapeHtml(patient.id)}')">
+                            Incidents<span class="long"> &amp; Consumption</span>
+                        </button>
+                        <a class="qr-link"
+                           href="PatientQr.html?id=${encodeURIComponent(patient.id)}"
+                           title="QR code for ${escapeHtml(patient.fullName || 'this patient')}"
+                           aria-label="QR code for ${escapeHtml(patient.fullName || 'this patient')}">
+                            <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </td>
             </tr>
         `;

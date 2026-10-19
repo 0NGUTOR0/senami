@@ -14,6 +14,8 @@
       color: #1a202c;
       line-height: 1.5;
     }
+    [hidden] { display: none !important; }
+
     .topbar {
       background: #1e3a5f;
       color: #fff;
@@ -22,12 +24,14 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
     .topbar-left {
       display: flex;
       align-items: center;
       gap: .85rem;
+      flex: 1 1 auto;
+      min-width: 0;
     }
     .back-btn {
       display: inline-flex;
@@ -40,9 +44,9 @@
       color: #fff;
       text-decoration: none;
       font-size: 1.2rem;
+      flex: none;
     }
     .back-btn:hover { background: rgba(255,255,255,.22); }
-    .topbar-left { min-width: 0; }
     .topbar h1 { font-size: 1.15rem; font-weight: 600; overflow-wrap: anywhere; }
     .plus-btn {
       width: 40px;
@@ -55,8 +59,16 @@
       font-weight: 500;
       cursor: pointer;
       line-height: 1;
+      flex: none;
     }
     .plus-btn:hover { background: #2b6cb0; }
+    @media (max-width: 600px) {
+      .topbar { padding: .6rem .75rem; gap: .5rem; }
+      .topbar-left { gap: .5rem; }
+      .back-btn { width: 32px; height: 32px; }
+      .plus-btn { width: 36px; height: 36px; }
+      .topbar h1 { font-size: 1rem; }
+    }
 
     /* Tabs */
     .dash-tabs {
@@ -74,7 +86,7 @@
       color: #718096;
       cursor: pointer;
       border-bottom: 3px solid transparent;
-      margin-bottom: -1px;     
+      margin-bottom: -1px;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     }
     .dash-tab:hover { color: #1e3a5f; }
@@ -97,7 +109,7 @@
       background: #1e3a5f;
       padding: 1rem;
       border-radius: 10px;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
     }
     .filters label {
       color: #fff;
@@ -107,14 +119,18 @@
       gap: .3rem;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     }
-    .filters input[type="date"] {
+    .filters input[type="date"],
+    .filters select {
       padding: .45rem .7rem;
       border-radius: 6px;
       border: 1px solid rgba(255,255,255,.3);
       background: rgba(255,255,255,.12);
       color: #fff;
       font-size: .9rem;
+      max-width: 100%;
     }
+    .filters select { min-width: 200px; }
+    .filters select option { color: #1a202c; background: #fff; }
     .filters button {
       padding: .65rem 1.1rem;
       border: none;
@@ -127,9 +143,117 @@
     }
     .filters button:hover { background: #2b6cb0; }
 
+    /* Filter panel */
+    .filter-panel { margin-bottom: 1rem; padding: 1rem 1.25rem; }
+    .fp-head {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      flex-wrap: wrap;
+      margin-bottom: .75rem;
+    }
+    .fp-head strong { font-size: .95rem; color: #2d3748; }
+    .fp-count { font-size: .85rem; color: #718096; margin-right: auto; }
+    .btn-link {
+      border: none;
+      background: none;
+      color: #3182ce;
+      font-size: .85rem;
+      cursor: pointer;
+      padding: .2rem .4rem;
+      font-family: inherit;
+    }
+    .btn-link:hover { text-decoration: underline; }
+    .fp-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+    details.ms { position: relative; }
+    details.ms > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: .45rem .8rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 999px;
+      background: #fff;
+      font-size: .85rem;
+      color: #2d3748;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      user-select: none;
+    }
+    details.ms > summary::-webkit-details-marker { display: none; }
+    details.ms > summary::after { content: "▾"; font-size: .7rem; opacity: .6; }
+    details.ms[open] > summary,
+    details.ms.active > summary { border-color: #3182ce; background: #ebf8ff; }
+    .ms-count {
+      background: #3182ce;
+      color: #fff;
+      border-radius: 999px;
+      font-size: .72rem;
+      min-width: 1.2rem;
+      height: 1.2rem;
+      display: inline-grid;
+      place-items: center;
+      padding: 0 .3rem;
+    }
+    .ms-panel {
+      position: absolute;
+      z-index: 30;
+      top: calc(100% + .35rem);
+      left: 0;
+      min-width: 240px;
+      max-width: min(340px, 86vw);
+      max-height: 280px;
+      overflow: auto;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.15);
+      padding: .4rem;
+    }
+    .ms-opt {
+      display: flex;
+      align-items: flex-start;
+      gap: .5rem;
+      padding: .35rem .5rem;
+      border-radius: 6px;
+      font-size: .88rem;
+      cursor: pointer;
+    }
+    .ms-opt:hover { background: #f7fafc; }
+    .ms-opt input { margin-top: .25rem; flex: none; }
+    .filters label { min-width: 0; max-width: 100%; }
+    .filters select { max-width: 100%; min-width: 0; }
+    .fp-row { position: relative; }
+    @media (max-width: 600px) {
+      details.ms { position: static; }
+      .ms-panel { left: 0; right: 0; max-width: none; min-width: 0; }
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .75rem; }
+    .chips:empty { display: none; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      background: #ebf8ff;
+      color: #2b6cb0;
+      border: 1px solid #bee3f8;
+      border-radius: 999px;
+      padding: .15rem .3rem .15rem .7rem;
+      font-size: .8rem;
+    }
+    .chip button {
+      border: none;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0 .35rem;
+    }
+
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
       gap: 1.25rem;
     }
     .grid-wide { grid-column: 1 / -1; }
@@ -146,12 +270,97 @@
       margin-bottom: 1rem;
       padding-bottom: .5rem;
       border-bottom: 1px solid #edf2f7;
+      display: flex;
+      align-items: center; flex-wrap: wrap;
+      justify-content: space-between;
+      gap: .75rem;
     }
+    .dl-png {
+      flex: none;
+      border: 1px solid #cbd5e0;
+      background: #fff;
+      color: #4a5568;
+      border-radius: 6px;
+      padding: .15rem .55rem;
+      font-size: .75rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .dl-png:hover { background: #edf2f7; }
     .chart-wrap { position: relative; height: 260px; }
     .chart-wrap.tall { height: 320px; }
     .state { text-align: center; padding: 1.5rem; color: #718096; }
     .state.error { color: #c53030; }
     .legend-note { font-size: .8rem; color: #718096; margin-top: .5rem; }
+    .section-label {
+      grid-column: 1 / -1;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #718096;
+      margin-top: .5rem;
+    }
+
+    /* Insights */
+    #insights { display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1.25rem; }
+    .tools { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; padding: .9rem 1.25rem; }
+    .tools .note { font-size: .8rem; color: #718096; margin-left: auto; }
+    .btn {
+      padding: .55rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #cbd5e0;
+      background: #fff;
+      color: #2d3748;
+      font-size: .88rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn:hover:not(:disabled) { background: #edf2f7; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { background: #1e3a5f; border-color: #1e3a5f; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #16304f; }
+
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: .9rem;
+    }
+    .tile {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      padding: 1rem 1.1rem;
+      min-width: 0;
+    }
+    .tile .k { font-size: .75rem; color: #718096; text-transform: uppercase; letter-spacing: .04em; }
+    .tile .v { font-size: 1.5rem; font-weight: 700; color: #1e3a5f; line-height: 1.25; overflow-wrap: anywhere; }
+    .tile .s { font-size: .8rem; color: #718096; }
+    .tile .v.up { color: #c53030; }
+    .tile .v.down { color: #276749; }
+    .badge {
+      font-size: .7rem;
+      font-weight: 600;
+      color: #975a16;
+      background: #fefcbf;
+      border-radius: 999px;
+      padding: .15rem .6rem;
+    }
+    .summary h3 { font-size: .85rem; color: #1e3a5f; margin: 1rem 0 .3rem; }
+    .summary h3:first-child { margin-top: 0; }
+    .summary p { font-size: .92rem; color: #2d3748; margin-bottom: .45rem; }
+    .summary ul { margin: .2rem 0 .5rem 1.2rem; font-size: .92rem; color: #2d3748; }
+    .summary li { margin-bottom: .25rem; }
+    .summary .caveat { font-size: .8rem; color: #718096; font-style: italic; }
+    .table-scroll { overflow-x: auto; }
+    table.data { border-collapse: collapse; width: 100%; font-size: .85rem; }
+    table.data th, table.data td { padding: .5rem .6rem; border-bottom: 1px solid #edf2f7; text-align: left; vertical-align: top; }
+    table.data th { color: #718096; font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .03em; background: #f7fafc; }
+    table.data td.num, table.data th.num { text-align: right; white-space: nowrap; }
+    table.matrix td, table.matrix th { text-align: center; padding: .4rem .5rem; border: 1px solid #edf2f7; }
+    table.matrix th.rowh { text-align: left; background: #f7fafc; text-transform: none; letter-spacing: 0; font-size: .8rem; color: #2d3748; }
+    .sub-h { font-size: .8rem; font-weight: 600; color: #4a5568; margin: 1rem 0 .4rem; }
 
     /* Modal */
     .modal-overlay {
@@ -218,6 +427,33 @@
     }
     .icon-incident { background: #fed7d7; color: #c53030; }
     .icon-consumption { background: #c6f6d5; color: #276749; }
+
+    /* Printable report (filled in by buildReport) */
+    #printReport { display: none; }
+    #printReport h1 { font-size: 20pt; color: #1e3a5f; margin-bottom: 2pt; }
+    #printReport h2 { font-size: 13pt; color: #1e3a5f; margin: 14pt 0 5pt; border-bottom: 1px solid #cbd5e0; padding-bottom: 2pt; }
+    #printReport .meta { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 6pt 0; }
+    #printReport .meta th { text-align: left; width: 26%; color: #4a5568; font-weight: 600; padding: 2pt 6pt 2pt 0; vertical-align: top; }
+    #printReport .meta td { padding: 2pt 0; }
+    #printReport .tiles { grid-template-columns: repeat(4, 1fr); gap: 6pt; }
+    #printReport .tile { box-shadow: none; border: 1px solid #cbd5e0; border-radius: 6px; padding: 5pt 7pt; }
+    #printReport .tile .v { font-size: 13pt; }
+    #printReport .summary p, #printReport .summary li { font-size: 10pt; }
+    #printReport figure { break-inside: avoid; page-break-inside: avoid; margin: 0 0 10pt; }
+    #printReport figure img { width: 100%; height: auto; display: block; border: 1px solid #e2e8f0; }
+    #printReport figcaption { font-size: 9pt; color: #4a5568; margin-top: 2pt; }
+    #printReport .figs { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12pt; }
+    #printReport .figs .wide { grid-column: 1 / -1; }
+    #printReport .foot { margin-top: 14pt; font-size: 8.5pt; color: #4a5568; border-top: 1px solid #cbd5e0; padding-top: 5pt; }
+    #printReport table.data { font-size: 9pt; }
+    #printReport table.data tr { break-inside: avoid; }
+
+    @media print {
+      @page { size: A4; margin: 14mm; }
+      body { background: #fff; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body > *:not(#printReport) { display: none !important; }
+      #printReport { display: block; }
+    }
   </style>
 </head>
 <body>
@@ -225,7 +461,7 @@
   <header class="topbar">
     <div class="topbar-left">
       <a href="PatientList.html" class="back-btn" title="Back">←</a>
-       <h1 id="pageHeading">Patient Analytics</h1>
+      <h1 id="pageHeading">Patient Analytics</h1>
     </div>
     <button type="button" class="plus-btn" id="plusBtn" title="Add new">+</button>
   </header>
@@ -237,6 +473,10 @@
 
   <main class="container">
     <div class="filters" id="filterBar">
+      <label id="participantWrap">
+        Participant
+        <select id="participantSelect"></select>
+      </label>
       <label>
         From
         <input type="date" id="fromDate">
@@ -253,10 +493,38 @@
         Inpatient end
         <input type="date" id="inpatientEnd">
       </label>
-      <button type="button" onclick="loadAndRender()">Apply</button>
+      <button type="button" id="applyBtn">Apply</button>
     </div>
 
+    <section class="card filter-panel" id="filterPanel" hidden>
+      <div class="fp-head">
+        <strong>Filter incidents</strong>
+        <span class="fp-count" id="fpCount"></span>
+        <button type="button" class="btn-link" id="fpReset">Reset filters</button>
+      </div>
+      <div class="fp-row" id="fpRow"></div>
+      <div class="chips" id="chips"></div>
+    </section>
+
     <div id="status" class="state">Loading…</div>
+
+    <div id="insights" hidden>
+      <div class="card tools">
+        <button type="button" class="btn btn-primary" id="btnReport">Download report (PDF)</button>
+        <button type="button" class="btn" id="btnCsv">Download data (CSV)</button>
+        <button type="button" class="btn" id="btnCopy">Copy summary</button>
+        <span class="note" id="toolsNote">In the print window choose “Save as PDF”.</span>
+      </div>
+      <div class="tiles" id="tiles"></div>
+      <div class="card summary" id="summaryCard">
+        <h2>Written summary <span class="badge">Draft – requires clinical review</span></h2>
+        <div id="summaryBody"></div>
+      </div>
+      <div class="card" id="patternsCard">
+        <h2>Patterns and possible associations</h2>
+        <div id="patternsBody"></div>
+      </div>
+    </div>
 
     <div id="incidentsDashboard" class="grid" style="display:none"></div>
     <div id="consumptionDashboard" class="grid" style="display:none">
@@ -295,9 +563,13 @@
     </div>
   </div>
 
+  <!-- Filled in when a report is downloaded or printed -->
+  <div id="printReport"></div>
+
 <script>
   const API = 'https://senami-1.onrender.com/api';
   const AUTH_ME = 'https://senami-1.onrender.com/auth/me';
+  const ALL = '__all__';
   const charts = {};
 
   const SUICIDAL = ['HARM_TO_SELF', 'RISK_TAKING'];
@@ -309,9 +581,39 @@
     '#2b6cb0', '#c53030', '#276749', '#b7791f'
   ];
 
-  // ── URL patient (declare first — no TDZ) ──
+  const TIME_BUCKETS = [
+    { key: 'NIGHT',     label: 'Night (12am–6am)',      from: 0,  to: 5 },
+    { key: 'MORNING',   label: 'Morning (6am–12pm)',    from: 6,  to: 11 },
+    { key: 'AFTERNOON', label: 'Afternoon (12pm–6pm)',  from: 12, to: 17 },
+    { key: 'EVENING',   label: 'Evening (6pm–12am)',    from: 18, to: 23 }
+  ];
+  const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const DURATION_ORDER = ['UNDER_5_MINS', 'MINS_5_TO_10', 'MINS_10_TO_30', 'MINS_30_TO_60', 'HOURS_1_TO_2', 'OVER_2_HOURS'];
+  const SEVERITY_ORDER = ['LOW', 'MILD', 'MODERATE', 'HIGH', 'SEVERE'];
+
+  // Thresholds for the pattern finder. Small numbers are easy to over-read, so be cautious.
+  const MIN_FACTOR = 4;        // a factor must appear in at least this many incidents
+  const MIN_TOGETHER = 3;      // …and occur together with a behaviour at least this often
+  const MIN_LIFT = 1.5;        // …at least 1.5× as often as the behaviour happens overall
+  const MIN_SHARE = 0.4;       // …and in at least 40% of incidents with that factor
+  const MIN_INCIDENTS_FOR_PATTERNS = 8;
+
+  // ── URL patient ──
   const urlParams = new URLSearchParams(window.location.search);
   const urlPatientId = urlParams.get('patientId');
+
+  // ── State ──
+  let scope = urlPatientId || ALL;           // a patient id, or ALL
+  let patients = [];                         // [{id, fullName, patientNumber}]
+  const patientNames = {};
+  const cache = new Map();                   // scope -> incidents
+  let LABELS = {};                           // field -> {VALUE: 'Label'}
+  let OPTION_ORDER = {};                     // field -> [VALUE,...]
+  let currentUser = null;
+  let lastView = null;                       // { stats, A, summary, rows } for downloads
+  const filterState = {};                    // key -> Set of selected values
+
+  const $ = id => document.getElementById(id);
 
   function authHeaders() {
     return { 'Accept': 'application/json', 'Content-Type': 'application/json' };
@@ -319,31 +621,41 @@
 
   function redirectToLogin() {
     const next = window.location.pathname + window.location.search;
-    window.location.href = `index.html?next=${encodeURIComponent(next)}`;
+    window.location.href = `/Login.html?next=${encodeURIComponent(next)}`;
   }
 
+  // Returns the signed-in user (an object) or null when the person has been sent to log in.
   async function checkAuthentication() {
-  const res = await fetch('https://senami-1.onrender.com/auth/me', {
-    method: 'GET',
-    credentials: 'include',
-    headers: { 'Accept': 'application/json' }
-  });
+    const res = await fetch(AUTH_ME, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' }
+    });
 
-  if (res.status === 401) {
-    redirectToLogin();
-    return false;
+    if (res.status === 401) {
+      redirectToLogin();
+      return null;
+    }
+    if (res.status === 403) throw new Error('No permission for this dashboard.');
+    if (!res.ok) throw new Error(`Session check failed (${res.status})`);
+
+    return (await res.json().catch(() => null)) || {};
   }
 
-  if (!res.ok) {
-    throw new Error(`Session check failed (${res.status})`);
+  async function apiGet(path) {
+    const res = await fetch(`${API}${path}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: authHeaders()
+    });
+    if (res.status === 401) { redirectToLogin(); throw new Error('Session expired.'); }
+    if (!res.ok) throw new Error(`Request failed (${res.status}).`);
+    return res.json();
   }
-
-  return true;
-}
 
   function getInpatient() {
-    const start = document.getElementById('inpatientStart')?.value || null;
-    const end = document.getElementById('inpatientEnd')?.value || null;
+    const start = $('inpatientStart')?.value || null;
+    const end = $('inpatientEnd')?.value || null;
     if (!start || !end || start > end) return null;
     const fmt = iso => {
       const [, m, d] = iso.split('-');
@@ -352,22 +664,16 @@
     return { start, end, label: `Inpatient stay ${fmt(start)}–${fmt(end)}` };
   }
 
+  // ── Loading data ──
   async function fetchAllIncidents(patientId) {
     const all = [];
     let page = 0;
     let totalPages = 1;
     while (page < totalPages) {
-      const path =
+      const data = await apiGet(
         `/patients/${encodeURIComponent(patientId)}/incidents` +
-        `?page=${page}&size=100&sort=occurredAt,asc`;
-      const res = await fetch(`${API}${path}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: authHeaders()
-      });
-      if (res.status === 401) { redirectToLogin(); throw new Error('Session expired.'); }
-      if (!res.ok) throw new Error(`Failed to load incidents (${res.status}).`);
-      const data = await res.json();
+        `?page=${page}&size=100&sort=occurredAt,asc`
+      );
       if (Array.isArray(data.content)) {
         all.push(...data.content);
         totalPages = Number.isInteger(data.totalPages) ? data.totalPages : 1;
@@ -382,6 +688,62 @@
     return all;
   }
 
+  async function pool(items, limit, fn) {
+    const out = new Array(items.length);
+    let next = 0;
+    const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (next < items.length) {
+        const idx = next++;
+        out[idx] = await fn(items[idx]);
+      }
+    });
+    await Promise.all(workers);
+    return out;
+  }
+
+  async function fetchScope(which) {
+    if (which !== ALL) return fetchAllIncidents(which);
+    if (!patients.length) await loadPatients();
+    if (!patients.length) throw new Error('Could not load the participant list.');
+    const parts = await pool(patients, 4, p => fetchAllIncidents(p.id));
+    return parts.flat();
+  }
+
+  async function loadPatients() {
+    try {
+      const list = [];
+      let page = 0, totalPages = 1;
+      while (page < totalPages && page < 50) {
+        const data = await apiGet(`/patients?page=${page}&size=100&sort=fullName,asc`);
+        const rows = Array.isArray(data.content) ? data.content : (Array.isArray(data) ? data : []);
+        list.push(...rows);
+        totalPages = Number.isInteger(data.totalPages) ? data.totalPages : 1;
+        page++;
+      }
+      patients = list.map(p => ({ id: p.id, fullName: p.fullName || p.patientNumber || 'Unnamed', patientNumber: p.patientNumber }));
+      patients.forEach(p => { patientNames[p.id] = p.fullName; });
+    } catch (err) {
+      console.error('Participant list unavailable:', err);
+    }
+  }
+
+  async function loadOptions() {
+    try {
+      const options = await apiGet('/incident-options');
+      LABELS = {};
+      OPTION_ORDER = {};
+      Object.entries(options || {}).forEach(([field, list]) => {
+        if (!Array.isArray(list)) return;
+        LABELS[field] = {};
+        OPTION_ORDER[field] = [];
+        list.forEach(o => { LABELS[field][o.value] = o.label; OPTION_ORDER[field].push(o.value); });
+      });
+    } catch (err) {
+      console.error('Option labels unavailable, using generated names:', err);
+    }
+  }
+
+  // ── Small helpers ──
   function toDate(value) {
     if (!value) return null;
     const m = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
@@ -410,31 +772,218 @@
   }
   function dateDifferenceInclusive(start, end) {
     if (!start || !end || start > end) return 0;
-    let count = 0, cur = start;
-    while (cur <= end) { count++; cur = addDays(cur, 1); }
-    return count;
+    return Math.round((parseLocalDate(end) - parseLocalDate(start)) / 86400000) + 1;
+  }
+  function dayIndex(from, date) {
+    return Math.round((parseLocalDate(date) - parseLocalDate(from)) / 86400000);
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    return parseLocalDate(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
   function displayName(v) {
     if (!v) return 'Unknown';
     return String(v).replace(/_/g, ' ').toLowerCase()
       .replace(/\b\w/g, c => c.toUpperCase());
   }
+  function lab(field, value) {
+    if (value === 'UNKNOWN' || value == null) return 'Not recorded';
+    return (LABELS[field] && LABELS[field][value]) || displayName(value);
+  }
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+  function joinList(items) {
+    if (items.length <= 1) return items.join('');
+    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
+  }
+  function countBy(list, getter) {
+    const m = {};
+    list.forEach(i => {
+      const v = getter(i);
+      (Array.isArray(v) ? v : [v]).forEach(x => {
+        if (x === null || x === undefined || x === '') return;
+        m[x] = (m[x] || 0) + 1;
+      });
+    });
+    return m;
+  }
+  const sortedEntries = m => Object.entries(m).sort((a, b) => b[1] - a[1]);
+  const slug = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+
+  function hourOf(i) {
+    const m = /T(\d{2}):/.exec(String(i.occurredAt || ''));
+    return m ? parseInt(m[1], 10) : null;
+  }
+  function timeBucketOf(i) {
+    const h = hourOf(i);
+    if (h === null) return null;
+    return TIME_BUCKETS.find(b => h >= b.from && h <= b.to).key;
+  }
+  function weekdayOf(i) {
+    const d = toDate(i.occurredAt);
+    if (!d) return null;
+    return (parseLocalDate(d).getDay() + 6) % 7;   // Monday = 0
+  }
+  const timeLabel = key => (TIME_BUCKETS.find(b => b.key === key) || {}).label || key;
+  const timeShort = key => timeLabel(key).replace(/\s*\(.*\)/, '');
+
   function destroyCharts() {
     Object.values(charts).forEach(c => c.destroy());
     Object.keys(charts).forEach(k => delete charts[k]);
   }
   function makeChart(id, config) {
-    const canvas = document.getElementById(id);
+    const canvas = $(id);
     if (!canvas) return;
     charts[id] = new Chart(canvas, config);
   }
   function showStatus(msg, isError = false) {
-    const el = document.getElementById('status');
+    const el = $('status');
     el.style.display = 'block';
     el.textContent = msg;
     el.className = isError ? 'state error' : 'state';
   }
 
+  // White background, so exported pictures are not see-through.
+  if (window.Chart && Chart.register) {
+    Chart.register({
+      id: 'whiteBackground',
+      beforeDraw(chart) {
+        const { ctx, width, height } = chart;
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.restore();
+      }
+    });
+  }
+
+  // ── Filters ──
+  const FILTERS = [
+    { key: 'behaviours',          label: 'Behaviour',          field: 'behaviours',      get: i => i.behaviours || [] },
+    { key: 'location',            label: 'Location',           field: 'location',        get: i => (i.location ? [i.location] : []) },
+    { key: 'timeOfDay',           label: 'Time of day',        field: null,              get: i => { const b = timeBucketOf(i); return b ? [b] : []; } },
+    { key: 'antecedents',         label: 'Trigger',            field: 'antecedents',     get: i => i.antecedents || [] },
+    { key: 'internalFactors',     label: 'Internal factor',    field: 'internalFactors', get: i => i.internalFactors || [] },
+    { key: 'strategies',          label: 'Staff response',     field: 'strategies',      get: i => i.strategies || [] },
+    { key: 'strategiesEffective', label: 'Response effective', field: null,              get: i => (i.strategiesEffective === true ? ['true'] : i.strategiesEffective === false ? ['false'] : []) },
+    { key: 'severity',            label: 'Severity',           field: 'severity',        get: i => (i.severity ? [i.severity] : []) },
+    { key: 'duration',            label: 'Duration',           field: 'duration',        get: i => (i.duration ? [i.duration] : []) },
+    { key: 'peopleInvolved',      label: 'People involved',    field: 'peopleInvolved',  get: i => i.peopleInvolved || [] }
+  ];
+  FILTERS.forEach(f => { filterState[f.key] = new Set(); });
+
+  function filterValueLabel(f, value) {
+    if (f.key === 'timeOfDay') return timeLabel(value);
+    if (f.key === 'strategiesEffective') return value === 'true' ? 'Yes' : 'No';
+    return lab(f.field, value);
+  }
+
+  function matchesFilters(i) {
+    return FILTERS.every(f => {
+      const sel = filterState[f.key];
+      if (!sel.size) return true;
+      return f.get(i).some(v => sel.has(v));
+    });
+  }
+  const hasActiveFilters = () => FILTERS.some(f => filterState[f.key].size);
+
+  function filterOptions(f, data) {
+    if (f.key === 'timeOfDay') return TIME_BUCKETS.map(b => ({ value: b.key, label: b.label }));
+    if (f.key === 'strategiesEffective') return [{ value: 'true', label: 'Yes' }, { value: 'false', label: 'No' }];
+    const present = new Set();
+    data.forEach(i => f.get(i).forEach(v => present.add(v)));
+    const ordered = [];
+    (OPTION_ORDER[f.field] || []).forEach(v => { ordered.push(v); present.delete(v); });
+    [...present].sort().forEach(v => ordered.push(v));
+    return ordered.map(v => ({ value: v, label: filterValueLabel(f, v) }));
+  }
+
+  function buildFilterPanel(data) {
+    const row = $('fpRow');
+    row.innerHTML = '';
+    FILTERS.forEach(f => {
+      const opts = filterOptions(f, data);
+      const d = document.createElement('details');
+      d.className = 'ms';
+      d.dataset.key = f.key;
+      d.innerHTML =
+        `<summary><span>${escapeHtml(f.label)}</span><span class="ms-count" hidden></span></summary>` +
+        `<div class="ms-panel">${opts.map(o =>
+          `<label class="ms-opt"><input type="checkbox" value="${escapeHtml(o.value)}"` +
+          `${filterState[f.key].has(o.value) ? ' checked' : ''}> <span>${escapeHtml(o.label)}</span></label>`
+        ).join('')}</div>`;
+      row.appendChild(d);
+    });
+    syncFilterUi();
+    $('filterPanel').hidden = false;
+  }
+
+  function syncFilterUi() {
+    FILTERS.forEach(f => {
+      const d = document.querySelector(`details.ms[data-key="${f.key}"]`);
+      if (!d) return;
+      const sel = filterState[f.key];
+      const badge = d.querySelector('.ms-count');
+      badge.hidden = !sel.size;
+      badge.textContent = sel.size;
+      d.classList.toggle('active', sel.size > 0);
+      d.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = sel.has(cb.value); });
+    });
+    const chips = $('chips');
+    chips.innerHTML = '';
+    FILTERS.forEach(f => {
+      filterState[f.key].forEach(v => {
+        const c = document.createElement('span');
+        c.className = 'chip';
+        c.innerHTML = `${escapeHtml(f.label)}: ${escapeHtml(filterValueLabel(f, v))}` +
+          `<button type="button" aria-label="Remove filter" data-key="${escapeHtml(f.key)}" data-value="${escapeHtml(v)}">&times;</button>`;
+        chips.appendChild(c);
+      });
+    });
+    $('fpReset').hidden = !hasActiveFilters();
+  }
+
+  function describeFilters() {
+    return FILTERS.filter(f => filterState[f.key].size)
+      .map(f => `${f.label} = ${[...filterState[f.key]].map(v => filterValueLabel(f, v)).join(' or ')}`)
+      .join('; ');
+  }
+
+  document.addEventListener('change', e => {
+    const cb = e.target.closest('details.ms input[type="checkbox"]');
+    if (!cb) return;
+    const key = cb.closest('details.ms').dataset.key;
+    if (cb.checked) filterState[key].add(cb.value); else filterState[key].delete(cb.value);
+    syncFilterUi();
+    renderFromCache();
+  });
+  document.addEventListener('click', e => {
+    const x = e.target.closest('.chip button');
+    if (x) {
+      filterState[x.dataset.key].delete(x.dataset.value);
+      syncFilterUi();
+      renderFromCache();
+      return;
+    }
+    // close any open filter dropdown when clicking elsewhere
+    document.querySelectorAll('details.ms[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('details.ms[open]').forEach(d => { d.open = false; });
+  });
+  $('fpReset').addEventListener('click', () => {
+    FILTERS.forEach(f => filterState[f.key].clear());
+    syncFilterUi();
+    renderFromCache();
+  });
+
+  // ── Existing chart statistics ──
   function buildStats(incidents, from, to) {
     const valid = incidents.filter(i => toDate(i.occurredAt));
     const allDates = valid.map(i => toDate(i.occurredAt)).sort();
@@ -518,6 +1067,371 @@
     };
   }
 
+  // ── Pattern finder ──
+  // cur = incidents in the chosen period (after all filters),
+  // base = incidents after every filter except the dates (used for the previous period).
+  function analyse(cur, base, rangeStart, rangeEnd) {
+    const A = { n: cur.length, start: rangeStart, end: rangeEnd };
+    A.days = dateDifferenceInclusive(rangeStart, rangeEnd);
+    const dayset = new Set(cur.map(i => toDate(i.occurredAt)));
+    A.daysWith = dayset.size;
+    A.freeDays = Math.max(0, A.days - A.daysWith);
+    A.perWeek = A.days ? A.n / (A.days / 7) : 0;
+    A.participants = new Set(cur.map(i => i.patientId || i.patientNumber || '')).size;
+
+    // Previous period of the same length
+    A.prevStart = rangeStart ? addDays(rangeStart, -A.days) : null;
+    A.prevEnd = rangeStart ? addDays(rangeStart, -1) : null;
+    const prev = base.filter(i => inRange(toDate(i.occurredAt), A.prevStart, A.prevEnd));
+    A.prev = prev;
+    A.prevN = prev.length;
+    A.changePct = A.prevN > 0 ? ((A.n - A.prevN) / A.prevN) * 100 : null;
+
+    // Weekly counts, trend and unusually busy weeks (full weeks only)
+    const bins = Math.max(1, Math.ceil(A.days / 7));
+    const weekly = new Array(bins).fill(0);
+    cur.forEach(i => {
+      const idx = Math.floor(dayIndex(rangeStart, toDate(i.occurredAt)) / 7);
+      if (idx >= 0 && idx < bins) weekly[idx]++;
+    });
+    const fullWeeks = (A.days % 7 === 0 || bins === 1) ? bins : bins - 1;
+    const w = weekly.slice(0, fullWeeks);
+    A.weekly = weekly;
+    A.trend = null;
+    A.spikes = [];
+    if (w.length >= 4 && A.n >= 6) {
+      const k = w.length;
+      const mean = w.reduce((a, b) => a + b, 0) / k;
+      const xs = w.map((_, x) => x);
+      const xm = (k - 1) / 2;
+      const slope = xs.reduce((s, x, idx) => s + (x - xm) * (w[idx] - mean), 0) /
+                    xs.reduce((s, x) => s + (x - xm) ** 2, 0);
+      const rel = mean > 0 ? (slope * (k - 1)) / mean : 0;
+      A.trend = rel > 0.25 ? 'increasing' : rel < -0.25 ? 'decreasing' : 'stable';
+      const sd = Math.sqrt(w.reduce((s, c) => s + (c - mean) ** 2, 0) / k);
+      w.forEach((c, idx) => {
+        if (c >= 3 && c > mean + 2 * sd) {
+          A.spikes.push({ start: addDays(rangeStart, idx * 7), end: addDays(rangeStart, idx * 7 + 6), count: c });
+        }
+      });
+    }
+
+    // Distributions
+    A.timeOfDay = countBy(cur, i => timeBucketOf(i));
+    A.weekday = countBy(cur, i => weekdayOf(i));
+    A.location = countBy(cur, i => i.location);
+    A.severity = countBy(cur, i => i.severity);
+    A.duration = countBy(cur, i => i.duration);
+    A.behaviours = countBy(cur, i => i.behaviours || []);
+    A.antecedents = countBy(cur, i => i.antecedents || []);
+    A.internalFactors = countBy(cur, i => i.internalFactors || []);
+    A.strategies = countBy(cur, i => i.strategies || []);
+
+    // Staff response and whether it worked (effectiveness is recorded once per incident)
+    const known = cur.filter(i => i.strategiesEffective === true || i.strategiesEffective === false);
+    A.effKnown = known.length;
+    A.effYes = known.filter(i => i.strategiesEffective === true).length;
+    A.strategyUse = {};
+    cur.forEach(i => {
+      (i.strategies || []).forEach(s => {
+        const o = (A.strategyUse[s] ||= { used: 0, yes: 0, no: 0, unknown: 0 });
+        o.used++;
+        if (i.strategiesEffective === true) o.yes++;
+        else if (i.strategiesEffective === false) o.no++;
+        else o.unknown++;
+      });
+    });
+
+    // Items that usually need a clinician's attention
+    const has = (arr, v) => (arr || []).includes(v);
+    A.selfHarm = cur.filter(i => has(i.behaviours, 'HARM_TO_SELF') || has(i.harmfulActivities, 'SELF_HARM') || has(i.behaviours, 'RISK_TAKING')).length;
+    A.highSeverity = cur.filter(i => i.severity === 'HIGH' || i.severity === 'SEVERE').length;
+    A.moderatePlus = cur.filter(i => ['MODERATE', 'HIGH', 'SEVERE'].includes(i.severity)).length;
+    A.emergency = cur.filter(i => has(i.emergencyServices, 'POLICE_SAPOL') || has(i.emergencyServices, 'AMBULANCE') || has(i.consequences, 'REQUIRED_POLICE_AMBULANCE')).length;
+    A.physicalInterventions = cur.filter(i => has(i.consequences, 'REQUIRED_PHYSICAL_INTERVENTION')).length;
+    A.prnMedication = cur.filter(i => has(i.consequences, 'REQUIRED_PRN_MEDICATION')).length;
+    A.injuries = cur.filter(i => has(i.consequences, 'INJURY_TO_SELF') || has(i.consequences, 'INJURY_TO_OTHER_PEOPLE')).length;
+
+    // Behaviours that rose, fell or appeared compared with the previous period
+    A.changes = [];
+    if (A.prevN > 0) {
+      const prevB = countBy(prev, i => i.behaviours || []);
+      new Set([...Object.keys(A.behaviours), ...Object.keys(prevB)]).forEach(b => {
+        if (b === 'OTHER') return;
+        const c = A.behaviours[b] || 0, p = prevB[b] || 0;
+        if (p === 0 && c >= 2) A.changes.push({ b, c, p, kind: 'new' });
+        else if (c - p >= 2 && c / p >= 1.5) A.changes.push({ b, c, p, kind: 'up' });
+        else if (p - c >= 2 && c / p <= 0.67) A.changes.push({ b, c, p, kind: 'down' });
+      });
+      A.changes.sort((x, y) => Math.abs(y.c - y.p) - Math.abs(x.c - x.p));
+    }
+
+    // Things that happen together: how often each behaviour occurs when a factor is present
+    A.associations = [];
+    A.enoughForPatterns = A.n >= MIN_INCIDENTS_FOR_PATTERNS;
+    if (A.enoughForPatterns) {
+      const nF = {}, nB = {}, joint = {};
+      const kinds = {
+        antecedents: ['Trigger', 'antecedents'],
+        internalFactors: ['Internal factor', 'internalFactors'],
+        timeOfDay: ['Time of day', null],
+        location: ['Location', 'location'],
+        peopleInvolved: ['Person involved', 'peopleInvolved']
+      };
+      cur.forEach(i => {
+        const factors = [];
+        (i.antecedents || []).forEach(v => factors.push('antecedents|' + v));
+        (i.internalFactors || []).forEach(v => factors.push('internalFactors|' + v));
+        const tb = timeBucketOf(i); if (tb) factors.push('timeOfDay|' + tb);
+        if (i.location) factors.push('location|' + i.location);
+        (i.peopleInvolved || []).forEach(v => factors.push('peopleInvolved|' + v));
+        const behs = (i.behaviours || []).filter(b => b !== 'OTHER');
+        behs.forEach(b => { nB[b] = (nB[b] || 0) + 1; });
+        factors.forEach(f => {
+          if (f.endsWith('|OTHER')) return;
+          nF[f] = (nF[f] || 0) + 1;
+          behs.forEach(b => { joint[f + '#' + b] = (joint[f + '#' + b] || 0) + 1; });
+        });
+      });
+      Object.entries(joint).forEach(([key, both]) => {
+        const [f, b] = key.split('#');
+        if (nF[f] < MIN_FACTOR || both < MIN_TOGETHER) return;
+        const share = both / nF[f];
+        const baseRate = nB[b] / A.n;
+        const lift = share / baseRate;
+        if (lift < MIN_LIFT || share < MIN_SHARE) return;
+        const [kind, value] = f.split('|');
+        A.associations.push({
+          kindLabel: kinds[kind][0],
+          factor: kind === 'timeOfDay' ? timeShort(value) : lab(kinds[kind][1], value),
+          behaviour: b, behaviourLabel: lab('behaviours', b),
+          nFactor: nF[f], both, share, baseRate, lift
+        });
+      });
+      A.associations.sort((x, y) => y.lift - x.lift || y.both - x.both);
+      A.associations = A.associations.slice(0, 8);
+    }
+
+    // Behaviour × trigger counts for the matrix
+    const topB = sortedEntries(A.behaviours).filter(([k]) => k !== 'OTHER').slice(0, 8).map(([k]) => k);
+    const topT = sortedEntries(A.antecedents).filter(([k]) => k !== 'OTHER').slice(0, 6).map(([k]) => k);
+    A.matrix = { rows: topB, cols: topT, cells: {}, max: 0 };
+    cur.forEach(i => {
+      (i.behaviours || []).forEach(b => {
+        if (!topB.includes(b)) return;
+        (i.antecedents || []).forEach(t => {
+          if (!topT.includes(t)) return;
+          const key = b + '#' + t;
+          A.matrix.cells[key] = (A.matrix.cells[key] || 0) + 1;
+          A.matrix.max = Math.max(A.matrix.max, A.matrix.cells[key]);
+        });
+      });
+    });
+
+    // Things to point a clinician towards
+    A.review = [];
+    if (A.selfHarm > 0) A.review.push(`${plural(A.selfHarm, 'incident')} involved harm to self, self-harm or risk-taking behaviour.`);
+    if (A.highSeverity > 0) A.review.push(`${plural(A.highSeverity, 'incident')} ${A.highSeverity === 1 ? 'was' : 'were'} rated high or severe.`);
+    if (A.trend === 'increasing') A.review.push('Weekly incident numbers are trending upwards across the period.');
+    if (A.spikes.length) A.review.push(`Unusually busy ${A.spikes.length === 1 ? 'week' : 'weeks'}: ${joinList(A.spikes.map(s => `${fmtDate(s.start)} (${s.count} incidents)`))}.`);
+    if (A.effKnown >= 5 && A.effYes / A.effKnown < 0.5) A.review.push(`Staff strategies were recorded as effective in only ${pct(A.effYes, A.effKnown)}% of incidents (${A.effYes} of ${A.effKnown}).`);
+    Object.entries(A.strategyUse).forEach(([s, o]) => {
+      const kn = o.yes + o.no;
+      if (kn >= 3 && o.yes / kn <= 0.4) A.review.push(`“${lab('strategies', s)}” was recorded as effective in ${o.yes} of ${kn} incidents where it was used.`);
+    });
+    if (A.emergency > 0) A.review.push(`Police or ambulance involvement was recorded in ${plural(A.emergency, 'incident')}.`);
+    if (A.physicalInterventions > 0) A.review.push(`Physical intervention was recorded in ${plural(A.physicalInterventions, 'incident')}.`);
+    if (A.prnMedication > 0) A.review.push(`PRN medication was required in ${plural(A.prnMedication, 'incident')}.`);
+    if (A.injuries > 0) A.review.push(`Injury to the person or others was recorded in ${plural(A.injuries, 'incident')}.`);
+    A.changes.filter(c => c.kind !== 'down').slice(0, 3).forEach(c =>
+      A.review.push(c.kind === 'new'
+        ? `${lab('behaviours', c.b)} appeared this period (${c.c} incidents, none in the previous period).`
+        : `${lab('behaviours', c.b)} increased from ${c.p} to ${c.c} incidents.`));
+
+    return A;
+  }
+
+  // ── Written summary ──
+  function buildSummary(A, ctx) {
+    const S = [];
+    const d = fmtDate;
+    const top = (m, field, n = 3) => sortedEntries(m).filter(([k]) => k !== 'OTHER').slice(0, n)
+      .map(([k, v]) => `${lab(field, k).toLowerCase()} (${v})`);
+
+    if (A.n === 0) {
+      S.push({ title: 'Overview', paras: [`No incidents${ctx.filterText ? ' matching the selected filters' : ''} were recorded for ${ctx.scopeText} between ${d(A.start)} and ${d(A.end)}.`] });
+      return S;
+    }
+
+    S.push({ title: 'Overview', paras: [
+      `This summary covers ${ctx.scopeText} from ${d(A.start)} to ${d(A.end)} (${plural(A.days, 'day')})` +
+      `${ctx.filterText ? `, filtered by ${ctx.filterText}` : ''}. ` +
+      `${plural(A.n, 'incident')} ${A.n === 1 ? 'was' : 'were'} recorded on ${plural(A.daysWith, 'day')}, ` +
+      `leaving ${A.freeDays} incident-free ${A.freeDays === 1 ? 'day' : 'days'} (${pct(A.freeDays, A.days)}%). ` +
+      `That is an average of ${A.perWeek.toFixed(1)} per week.` +
+      `${A.participants > 1 ? ` The data covers ${A.participants} participants.` : ''}`
+    ] });
+
+    const trend = [];
+    if (A.prevN > 0) {
+      const dir = A.changePct > 0.5 ? `increased by ${Math.round(A.changePct)}%` : A.changePct < -0.5 ? `decreased by ${Math.round(-A.changePct)}%` : 'stayed about the same';
+      trend.push(`Compared with the previous ${plural(A.days, 'day')} (${d(A.prevStart)} to ${d(A.prevEnd)}), when ${plural(A.prevN, 'incident')} ${A.prevN === 1 ? 'was' : 'were'} recorded, incidents have ${dir}.`);
+    } else {
+      trend.push(`No incidents matching these filters were recorded in the previous ${plural(A.days, 'day')}, so there is nothing to compare with.`);
+    }
+    if (A.trend === 'increasing') trend.push('Weekly counts show an upward trend across the period.');
+    else if (A.trend === 'decreasing') trend.push('Weekly counts show a downward trend across the period.');
+    else if (A.trend === 'stable') trend.push('Weekly counts were broadly stable across the period.');
+    else trend.push('The period is too short, or has too few incidents, to judge a weekly trend.');
+    if (A.spikes.length) trend.push(`Numbers were notably higher than usual in the ${A.spikes.length === 1 ? 'week' : 'weeks'} of ${joinList(A.spikes.map(s => d(s.start)))}.`);
+    S.push({ title: 'Trend', paras: trend });
+
+    const timing = [];
+    const tod = sortedEntries(A.timeOfDay)[0];
+    const dow = sortedEntries(A.weekday)[0];
+    const loc = sortedEntries(A.location)[0];
+    if (tod) timing.push(`${timeShort(tod[0])} was the most common time of day (${pct(tod[1], A.n)}% of incidents).`);
+    if (dow) timing.push(`${DAY_NAMES[dow[0]]}s had the most incidents (${pct(dow[1], A.n)}%).`);
+    if (loc) timing.push(`${lab('location', loc[0])} was the most common setting (${pct(loc[1], A.n)}%).`);
+    if (timing.length) S.push({ title: 'Timing and setting', paras: [timing.join(' ')] });
+
+    const what = [];
+    const b = top(A.behaviours, 'behaviours'); if (b.length) what.push(`The most frequently recorded behaviours were ${joinList(b)}.`);
+    const t = top(A.antecedents, 'antecedents'); if (t.length) what.push(`The most commonly recorded triggers were ${joinList(t)}.`);
+    const f = top(A.internalFactors, 'internalFactors'); if (f.length) what.push(`The most common internal factors were ${joinList(f)}.`);
+    if (what.length) S.push({ title: 'Behaviours and triggers', paras: what });
+
+    const assoc = { title: 'Possible associations', paras: [], bullets: [] };
+    if (!A.enoughForPatterns) {
+      assoc.paras.push(`There are too few incidents (${A.n}) to look for associations reliably. At least ${MIN_INCIDENTS_FOR_PATTERNS} are needed.`);
+    } else if (!A.associations.length) {
+      assoc.paras.push('No behaviour was recorded together with a trigger, time or setting often enough to report as a possible association.');
+    } else {
+      A.associations.slice(0, 5).forEach(a => assoc.bullets.push(
+        `${a.kindLabel} “${a.factor}” was recorded in ${plural(a.nFactor, 'incident')}; ${a.behaviourLabel.toLowerCase()} occurred in ${Math.round(a.share * 100)}% of them, ` +
+        `compared with ${Math.round(a.baseRate * 100)}% of all incidents (${a.lift.toFixed(1)}× as often).`));
+      assoc.paras.push('These show what was recorded together. They do not show that one caused the other.');
+    }
+    S.push(assoc);
+
+    const sev = [];
+    if (A.moderatePlus || A.highSeverity || Object.keys(A.severity).length) {
+      sev.push(`${pct(A.moderatePlus, A.n)}% of incidents were rated moderate or above, including ${plural(A.highSeverity, 'rated high or severe incident')}.`.replace('including 1 rated high or severe incident', 'including 1 rated high or severe').replace(/including (\d+) rated high or severe incidents/, 'including $1 rated high or severe'));
+    }
+    const dur = sortedEntries(A.duration)[0];
+    if (dur) sev.push(`The most common duration was ${lab('duration', dur[0]).toLowerCase()} (${pct(dur[1], A.n)}% of incidents).`);
+    if (sev.length) S.push({ title: 'Severity and duration', paras: [sev.join(' ')] });
+
+    const resp = [];
+    const st = top(A.strategies, 'strategies');
+    if (st.length) resp.push(`Staff most often used ${joinList(st)}.`);
+    if (A.effKnown) resp.push(`Strategies were recorded as effective in ${pct(A.effYes, A.effKnown)}% of incidents where this was recorded (${A.effYes} of ${A.effKnown}).`);
+    if (resp.length) S.push({ title: 'Staff response', paras: [resp.join(' ')] });
+
+    if (A.changes.length) {
+      S.push({ title: 'Increases and decreases', bullets: A.changes.slice(0, 6).map(c =>
+        c.kind === 'new' ? `${lab('behaviours', c.b)}: ${c.c} incidents, none in the previous period (new).`
+        : `${lab('behaviours', c.b)}: ${c.c} incidents compared with ${c.p} in the previous period (${c.kind === 'up' ? 'increase' : 'decrease'}).`) });
+    }
+
+    S.push({ title: 'Areas that may need clinical review', bullets: A.review.length ? A.review : ['Nothing was flagged automatically. This does not replace clinical judgement.'] });
+    S.push({ title: 'About this summary', caveat: 'Generated automatically from recorded incident data. Associations show how often things were recorded together and do not establish cause. A clinician should review it before any conclusions are drawn.' });
+    return S;
+  }
+
+  function summaryToHtml(sections) {
+    return sections.map(s =>
+      `<h3>${escapeHtml(s.title)}</h3>` +
+      (s.paras || []).map(p => `<p>${escapeHtml(p)}</p>`).join('') +
+      (s.bullets && s.bullets.length ? `<ul>${s.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul>` : '') +
+      (s.caveat ? `<p class="caveat">${escapeHtml(s.caveat)}</p>` : '')
+    ).join('');
+  }
+  function summaryToText(sections) {
+    return sections.map(s =>
+      s.title.toUpperCase() + '\n' +
+      (s.paras || []).join('\n') +
+      (s.bullets ? '\n' + s.bullets.map(b => '- ' + b).join('\n') : '') +
+      (s.caveat ? '\n' + s.caveat : '')
+    ).join('\n\n');
+  }
+
+  // ── Insights (tiles, summary, tables) ──
+  function scopeText() {
+    if (scope === ALL) return 'all participants';
+    return patientNames[scope] || 'this participant';
+  }
+
+  function tilesFor(A) {
+    const tiles = [];
+    tiles.push({ k: 'Incidents', v: String(A.n), s: `${plural(A.daysWith, 'day')} with incidents` });
+    tiles.push({ k: 'Average per week', v: A.perWeek.toFixed(1), s: `over ${plural(A.days, 'day')}` });
+    if (A.prevN > 0) {
+      const up = A.changePct > 0.5, down = A.changePct < -0.5;
+      tiles.push({ k: 'Change vs previous period', v: (up ? '▲ ' : down ? '▼ ' : '') + Math.round(Math.abs(A.changePct)) + '%', cls: up ? 'up' : down ? 'down' : '', s: `${A.prevN} in previous ${plural(A.days, 'day')}` });
+    } else {
+      tiles.push({ k: 'Change vs previous period', v: '–', s: 'no earlier incidents to compare' });
+    }
+    tiles.push({ k: 'Incident-free days', v: pct(A.freeDays, A.days) + '%', s: `${A.freeDays} of ${A.days} days` });
+    const tod = sortedEntries(A.timeOfDay)[0];
+    tiles.push({ k: 'Busiest time of day', v: tod ? timeShort(tod[0]) : '–', s: tod ? `${pct(tod[1], A.n)}% of incidents` : '' });
+    const b = sortedEntries(A.behaviours).filter(([k]) => k !== 'OTHER')[0];
+    tiles.push({ k: 'Most common behaviour', v: b ? lab('behaviours', b[0]) : '–', s: b ? `${b[1]} incidents` : '' });
+    const t = sortedEntries(A.antecedents).filter(([k]) => k !== 'OTHER')[0];
+    tiles.push({ k: 'Most common trigger', v: t ? lab('antecedents', t[0]) : '–', s: t ? `${t[1]} incidents` : '' });
+    tiles.push({ k: 'Strategies effective', v: A.effKnown ? pct(A.effYes, A.effKnown) + '%' : '–', s: A.effKnown ? `${A.effYes} of ${A.effKnown} recorded` : 'not recorded' });
+    return tiles;
+  }
+  function tilesHtml(tiles) {
+    return tiles.map(t => `<div class="tile"><div class="k">${escapeHtml(t.k)}</div><div class="v ${t.cls || ''}">${escapeHtml(t.v)}</div><div class="s">${escapeHtml(t.s)}</div></div>`).join('');
+  }
+
+  function patternsHtml(A) {
+    let html = '';
+    if (!A.enoughForPatterns) {
+      html += `<p class="legend-note">There are too few incidents (${A.n}) to look for associations. At least ${MIN_INCIDENTS_FOR_PATTERNS} are needed.</p>`;
+    } else if (!A.associations.length) {
+      html += '<p class="legend-note">No behaviour was recorded together with a trigger, time or setting often enough to report.</p>';
+    } else {
+      html += '<div class="table-scroll"><table class="data"><thead><tr><th>Factor</th><th>Behaviour</th><th class="num">Together</th><th class="num">When factor present</th><th class="num">Overall</th><th class="num">Strength</th></tr></thead><tbody>' +
+        A.associations.map(a => `<tr><td>${escapeHtml(a.kindLabel)}: ${escapeHtml(a.factor)}</td><td>${escapeHtml(a.behaviourLabel)}</td>` +
+          `<td class="num">${a.both} of ${a.nFactor}</td><td class="num">${Math.round(a.share * 100)}%</td><td class="num">${Math.round(a.baseRate * 100)}%</td><td class="num">${a.lift.toFixed(1)}×</td></tr>`).join('') +
+        '</tbody></table></div>' +
+        `<p class="legend-note">Shown when the factor appears in at least ${MIN_FACTOR} incidents, together with the behaviour at least ${MIN_TOGETHER} times, and the behaviour is at least ${MIN_LIFT}× as common as usual. Possible associations only, not causes.</p>`;
+    }
+    if (A.changes.length) {
+      html += '<div class="sub-h">Changes since the previous period</div><div class="table-scroll"><table class="data"><thead><tr><th>Behaviour</th><th class="num">This period</th><th class="num">Previous</th><th>Change</th></tr></thead><tbody>' +
+        A.changes.slice(0, 8).map(c => `<tr><td>${escapeHtml(lab('behaviours', c.b))}</td><td class="num">${c.c}</td><td class="num">${c.p}</td><td>${c.kind === 'new' ? 'New' : c.kind === 'up' ? 'Increase' : 'Decrease'}</td></tr>`).join('') +
+        '</tbody></table></div>';
+    }
+    const M = A.matrix;
+    if (M.rows.length && M.cols.length && M.max > 0) {
+      html += '<div class="sub-h">Behaviour by trigger (number of incidents)</div><div class="table-scroll"><table class="data matrix"><thead><tr><th></th>' +
+        M.cols.map(c => `<th>${escapeHtml(lab('antecedents', c))}</th>`).join('') + '</tr></thead><tbody>' +
+        M.rows.map(r => `<tr><th class="rowh">${escapeHtml(lab('behaviours', r))}</th>` + M.cols.map(c => {
+          const v = M.cells[r + '#' + c] || 0;
+          const bg = v ? `background:rgba(49,130,206,${(0.12 + 0.6 * v / M.max).toFixed(2)})` : '';
+          return `<td style="${bg}">${v || ''}</td>`;
+        }).join('') + '</tr>').join('') + '</tbody></table></div>';
+    }
+    return html;
+  }
+
+  function renderInsights(A, stats) {
+    const ctx = { scopeText: scopeText(), filterText: describeFilters() };
+    const summary = buildSummary(A, ctx);
+    $('tiles').innerHTML = tilesHtml(tilesFor(A));
+    $('summaryBody').innerHTML = summaryToHtml(summary);
+    $('patternsBody').innerHTML = patternsHtml(A);
+    $('patternsCard').hidden = A.n === 0;
+    $('tiles').hidden = A.n === 0;
+    $('btnCsv').disabled = A.n === 0;
+    $('btnReport').disabled = A.n === 0;
+    $('insights').hidden = false;
+    lastView = { A, stats, summary, ctx, rows: stats.filtered };
+  }
+
+  // ── Charts ──
   function doughnutOptions() {
     return { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } };
   }
@@ -546,10 +1460,25 @@
       }
     });
   }
+  function simpleBar(id, entries, color, horizontal = false) {
+    makeChart(id, {
+      type: 'bar',
+      data: {
+        labels: entries.map(([k]) => k),
+        datasets: [{ label: 'Incidents', data: entries.map(([, v]) => v), backgroundColor: color || entries.map((_, i) => COLORS[i % COLORS.length]) }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        indexAxis: horizontal ? 'y' : 'x',
+        plugins: { legend: { display: false } },
+        scales: integerAxisOptions(horizontal ? 'x' : 'y')
+      }
+    });
+  }
 
-  function renderDashboard(stats) {
+  function renderDashboard(stats, A) {
     destroyCharts();
-    const dashboard = document.getElementById('incidentsDashboard');
+    const dashboard = $('incidentsDashboard');
 
     dashboard.innerHTML = `
       <div class="card">
@@ -606,10 +1535,36 @@
         <h2>13. Trend of verbal and physical aggression</h2>
         <div class="chart-wrap tall"><canvas id="c13"></canvas></div>
       </div>
+      <div class="section-label">Patterns</div>
+      <div class="card">
+        <h2>14. Time of day</h2>
+        <div class="chart-wrap"><canvas id="c14"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>15. Day of the week</h2>
+        <div class="chart-wrap"><canvas id="c15"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>16. Triggers (antecedents)</h2>
+        <div class="chart-wrap tall"><canvas id="c16"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>17. Internal factors</h2>
+        <div class="chart-wrap tall"><canvas id="c17"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>18. Severity of all incidents</h2>
+        <div class="chart-wrap"><canvas id="c18"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>19. Staff responses and whether they worked</h2>
+        <div class="chart-wrap tall"><canvas id="c19"></canvas></div>
+        <p class="legend-note">Effectiveness is recorded once per incident, so each bar shows the incidents where that response was used.</p>
+      </div>
     `;
 
     dashboard.style.display = 'grid';
-    document.getElementById('status').style.display = 'none';
+    $('status').style.display = 'none';
 
     makeChart('c1', {
       type: 'doughnut',
@@ -630,17 +1585,7 @@
       options: doughnutOptions()
     });
 
-    {
-      const entries = Object.entries(stats.multiBehaviourCount).sort((a, b) => b[1] - a[1]);
-      makeChart('c3', {
-        type: 'bar',
-        data: {
-          labels: entries.map(([k]) => displayName(k)),
-          datasets: [{ label: 'Count', data: entries.map(([, v]) => v), backgroundColor: entries.map((_, i) => COLORS[i % COLORS.length]) }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: integerAxisOptions('x') }
-      });
-    }
+    simpleBar('c3', sortedEntries(stats.multiBehaviourCount).map(([k, v]) => [lab('behaviours', k), v]), null, true);
 
     {
       const order = ['ONE', 'TWO', 'THREE_TO_FIVE', 'MORE_THAN_FIVE'];
@@ -655,17 +1600,7 @@
       });
     }
 
-    {
-      const entries = Object.entries(stats.locationCount);
-      makeChart('c5', {
-        type: 'bar',
-        data: {
-          labels: entries.map(([k]) => displayName(k)),
-          datasets: [{ label: 'Incidents', data: entries.map(([, v]) => v), backgroundColor: '#3182ce' }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: integerAxisOptions('y') }
-      });
-    }
+    simpleBar('c5', Object.entries(stats.locationCount).map(([k, v]) => [lab('location', k), v]), '#3182ce');
 
     {
       const labels = stats.dailyTotals.map(i => i.date);
@@ -714,28 +1649,12 @@
     }
 
     {
-      const entries = Object.entries(stats.durationCount);
-      makeChart('c7', {
-        type: 'bar',
-        data: {
-          labels: entries.map(([k]) => displayName(k)),
-          datasets: [{ label: 'Incidents', data: entries.map(([, v]) => v), backgroundColor: '#805ad5' }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: integerAxisOptions('y') }
-      });
+      const known = DURATION_ORDER.filter(k => stats.durationCount[k]);
+      const other = Object.keys(stats.durationCount).filter(k => !DURATION_ORDER.includes(k));
+      simpleBar('c7', [...known, ...other].map(k => [lab('duration', k), stats.durationCount[k]]), '#805ad5');
     }
 
-    {
-      const entries = Object.entries(stats.behaviourCount).sort((a, b) => b[1] - a[1]);
-      makeChart('c8', {
-        type: 'bar',
-        data: {
-          labels: entries.map(([k]) => displayName(k)),
-          datasets: [{ label: 'Total', data: entries.map(([, v]) => v), backgroundColor: entries.map((_, i) => COLORS[i % COLORS.length]) }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: integerAxisOptions('x') }
-      });
-    }
+    simpleBar('c8', sortedEntries(stats.behaviourCount).map(([k, v]) => [lab('behaviours', k), v]), null, true);
 
     lineTrend('c9', stats.suicidalDaily, '#e53e3e', 'Suicidal-related');
     {
@@ -743,7 +1662,7 @@
       makeChart('c10', {
         type: 'doughnut',
         data: {
-          labels: entries.map(([k]) => displayName(k)),
+          labels: entries.map(([k]) => lab('behaviours', k)),
           datasets: [{ data: entries.map(([, v]) => v), backgroundColor: ['#e53e3e', '#dd6b20', '#d69e2e'] }]
         },
         options: doughnutOptions()
@@ -751,12 +1670,11 @@
     }
     {
       const order = ['LOW', 'MILD', 'MODERATE', 'HIGH', 'SEVERE', 'UNKNOWN'];
-      const names = { LOW: 'Low', MILD: 'Mild', MODERATE: 'Moderate', HIGH: 'High', SEVERE: 'Severe', UNKNOWN: 'Not recorded' };
       const keys = order.filter(k => stats.suicidalSeverity[k]);
       makeChart('c11', {
         type: 'pie',
         data: {
-          labels: keys.map(k => names[k]),
+          labels: keys.map(k => lab('severity', k)),
           datasets: [{ data: keys.map(k => stats.suicidalSeverity[k]), backgroundColor: ['#68d391', '#f6e05e', '#ed8936', '#fc8181', '#c53030', '#a0aec0'] }]
         },
         options: doughnutOptions()
@@ -792,47 +1710,277 @@
         }
       }
     });
+
+    // Patterns
+    simpleBar('c14', TIME_BUCKETS.map(b => [b.label, A.timeOfDay[b.key] || 0]), '#319795');
+    simpleBar('c15', DAY_NAMES.map((n, idx) => [n, A.weekday[idx] || 0]), '#d69e2e');
+    simpleBar('c16', sortedEntries(A.antecedents).map(([k, v]) => [lab('antecedents', k), v]), null, true);
+    simpleBar('c17', sortedEntries(A.internalFactors).map(([k, v]) => [lab('internalFactors', k), v]), null, true);
+    {
+      const keys = SEVERITY_ORDER.filter(k => A.severity[k]);
+      const extra = Object.keys(A.severity).filter(k => !SEVERITY_ORDER.includes(k));
+      const sevColor = { LOW: '#68d391', MILD: '#f6e05e', MODERATE: '#ed8936', HIGH: '#fc8181', SEVERE: '#c53030' };
+      makeChart('c18', {
+        type: 'bar',
+        data: {
+          labels: [...keys, ...extra].map(k => lab('severity', k)),
+          datasets: [{ label: 'Incidents', data: [...keys, ...extra].map(k => A.severity[k]), backgroundColor: [...keys, ...extra].map(k => sevColor[k] || '#a0aec0') }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: integerAxisOptions('y') }
+      });
+    }
+    {
+      const rows = Object.entries(A.strategyUse).sort((a, b) => b[1].used - a[1].used);
+      makeChart('c19', {
+        type: 'bar',
+        data: {
+          labels: rows.map(([k]) => lab('strategies', k)),
+          datasets: [
+            { label: 'Effective', data: rows.map(([, o]) => o.yes), backgroundColor: '#38a169' },
+            { label: 'Not effective', data: rows.map(([, o]) => o.no), backgroundColor: '#e53e3e' },
+            { label: 'Not recorded', data: rows.map(([, o]) => o.unknown), backgroundColor: '#a0aec0' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+          plugins: { legend: { position: 'bottom' } },
+          scales: { x: { stacked: true, beginAtZero: true, ticks: { precision: 0, stepSize: 1 } }, y: { stacked: true } }
+        }
+      });
+    }
+
+    addChartDownloadButtons();
   }
 
-  async function loadAndRender() {
-    if (!urlPatientId) {
-      showStatus('Open this page with ?patientId=<uuid>.', true);
-      return;
+  // ── Downloads ──
+  function download(filename, blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function addChartDownloadButtons() {
+    document.querySelectorAll('#incidentsDashboard .card').forEach(card => {
+      const canvas = card.querySelector('canvas');
+      const h2 = card.querySelector('h2');
+      if (!canvas || !h2 || h2.querySelector('.dl-png')) return;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'dl-png';
+      b.dataset.chart = canvas.id;
+      b.title = 'Download this chart as a picture';
+      b.textContent = 'PNG';
+      h2.appendChild(b);
+    });
+  }
+
+  function chartTitle(id) {
+    const h2 = $(id)?.closest('.card')?.querySelector('h2');
+    if (!h2) return id;
+    return [...h2.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
+  }
+
+  // A picture with a title and the filters on it, so it still makes sense once it leaves the page.
+  function chartPicture(id) {
+    const ch = charts[id];
+    if (!ch) return null;
+    ch.update('none');
+    const src = ch.canvas;
+    const scale = src.clientWidth ? src.width / src.clientWidth : 1;
+    const head = Math.round(40 * scale), foot = Math.round(30 * scale), pad = Math.round(12 * scale);
+    const c = document.createElement('canvas');
+    c.width = src.width + pad * 2;
+    c.height = src.height + head + foot;
+    const x = c.getContext('2d');
+    x.fillStyle = '#fff';
+    x.fillRect(0, 0, c.width, c.height);
+    x.fillStyle = '#1e3a5f';
+    x.font = `600 ${Math.round(15 * scale)}px system-ui, sans-serif`;
+    x.fillText(chartTitle(id), pad, Math.round(26 * scale));
+    x.drawImage(src, pad, head);
+    x.fillStyle = '#718096';
+    x.font = `${Math.round(11 * scale)}px system-ui, sans-serif`;
+    const caption = `${scopeText()} · ${fmtDate(lastView?.A.start)} to ${fmtDate(lastView?.A.end)}` + (describeFilters() ? ` · ${describeFilters()}` : '');
+    x.fillText(caption.length > 140 ? caption.slice(0, 137) + '…' : caption, pad, c.height - Math.round(10 * scale));
+    return c;
+  }
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.dl-png');
+    if (!b) return;
+    const pic = chartPicture(b.dataset.chart);
+    if (!pic) return;
+    pic.toBlob(blob => {
+      if (blob) download(`${slug(scopeText())}_${slug(chartTitle(b.dataset.chart))}.png`, blob);
+    }, 'image/png');
+  });
+
+  function csvCell(v) {
+    let s = v === null || v === undefined ? '' : String(v);
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;           // stop spreadsheets running text as a formula
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function yn(v) { return v === true ? 'Yes' : v === false ? 'No' : ''; }
+
+  function buildCsv(rows) {
+    const L = (field, arr) => (arr || []).map(v => lab(field, v)).join('; ');
+    const head = ['Patient number', 'Participant', 'Date', 'Time', 'Day of week', 'Time of day', 'Location', 'Severity', 'Duration', 'Frequency',
+      'Behaviours', 'Triggers', 'Internal factors', 'Harmful activities', 'Consequences', 'People involved', 'Emergency services',
+      'On-call involved', 'NDIS reported', 'Staff responses', 'Communication supports', 'Strategies effective',
+      'Description', 'Response description', 'Recorded by', 'Recorded at', 'Reviewed'];
+    const lines = [head.map(csvCell).join(',')];
+    rows.slice().sort((a, b) => String(a.occurredAt).localeCompare(String(b.occurredAt))).forEach(i => {
+      const tb = timeBucketOf(i), wd = weekdayOf(i);
+      lines.push([
+        i.patientNumber, i.clientName, toDate(i.occurredAt), String(i.occurredAt || '').slice(11, 16),
+        wd === null ? '' : DAY_NAMES[wd], tb ? timeShort(tb) : '',
+        lab('location', i.location), i.severity ? lab('severity', i.severity) : '', i.duration ? lab('duration', i.duration) : '', i.frequency ? lab('frequency', i.frequency) : '',
+        L('behaviours', i.behaviours), L('antecedents', i.antecedents), L('internalFactors', i.internalFactors),
+        L('harmfulActivities', i.harmfulActivities), L('consequences', i.consequences), L('peopleInvolved', i.peopleInvolved),
+        L('emergencyServices', i.emergencyServices), yn(i.onCallInvolved), yn(i.ndisReported),
+        L('strategies', i.strategies), L('communicationSupports', i.communicationSupports), yn(i.strategiesEffective),
+        i.description, i.responseDescription, i.staffName, i.recordedAt, yn(i.reviewed)
+      ].map(csvCell).join(','));
+    });
+    return '﻿' + lines.join('\r\n');
+  }
+
+  $('btnCsv').addEventListener('click', () => {
+    if (!lastView) return;
+    download(`${slug(scopeText())}_incidents_${lastView.A.start}_to_${lastView.A.end}.csv`,
+      new Blob([buildCsv(lastView.rows)], { type: 'text/csv;charset=utf-8' }));
+  });
+
+  $('btnCopy').addEventListener('click', async () => {
+    if (!lastView) return;
+    const text = summaryToText(lastView.summary);
+    const note = $('toolsNote');
+    try {
+      await navigator.clipboard.writeText(text);
+      note.textContent = 'Summary copied.';
+    } catch {
+      note.textContent = 'Could not copy. Select the summary text and copy it.';
     }
-    const from = document.getElementById('fromDate')?.value || null;
-    const to = document.getElementById('toDate')?.value || null;
+  });
+
+  // ── Report (print / save as PDF) ──
+  function buildReport() {
+    if (!lastView) return false;
+    const { A, summary, ctx } = lastView;
+    const user = currentUser || {};
+    const who = [user.fullName || user.name || user.username, user.email].filter(Boolean).join(' · ');
+    const rows = [
+      ['Participant', ctx.scopeText.charAt(0).toUpperCase() + ctx.scopeText.slice(1)],
+      ['Period', `${fmtDate(A.start)} to ${fmtDate(A.end)} (${plural(A.days, 'day')})`],
+      ['Filters', ctx.filterText || 'None'],
+      ['Generated', new Date().toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' })],
+      ['Generated by', who || '—']
+    ];
+    const figs = [];
+    Object.keys(charts).sort((a, b) => parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10)).forEach(id => {
+      const pic = chartPicture(id);
+      if (!pic) return;
+      const wide = $(id).closest('.card')?.classList.contains('grid-wide') || $(id).closest('.chart-wrap')?.classList.contains('tall');
+      figs.push(`<figure class="${wide ? 'wide' : ''}"><img alt="${escapeHtml(chartTitle(id))}" src="${pic.toDataURL('image/png')}"></figure>`);
+    });
+    $('printReport').innerHTML =
+      `<h1>Incident analytics report</h1>` +
+      `<table class="meta">${rows.map(([k, v]) => `<tr><th>${escapeHtml(k)}</th><td>${escapeHtml(v)}</td></tr>`).join('')}</table>` +
+      `<h2>Key figures</h2><div class="tiles">${tilesHtml(tilesFor(A))}</div>` +
+      `<h2>Written summary <span style="font-size:9pt;color:#975a16;font-weight:600">(draft – requires clinical review)</span></h2><div class="summary">${summaryToHtml(summary)}</div>` +
+      (A.n ? `<h2>Patterns and possible associations</h2>${patternsHtml(A)}` : '') +
+      `<h2>Charts</h2><div class="figs">${figs.join('')}</div>` +
+      `<div class="foot">Confidential. Contains personal and health information. Generated automatically from recorded incident data; associations are indicative only and do not establish cause. A clinician should review this report before it is used to make decisions.</div>`;
+    return true;
+  }
+
+  $('btnReport').addEventListener('click', () => {
+    if (!buildReport()) return;
+    window.print();
+  });
+  // Ctrl+P produces the same report
+  window.addEventListener('beforeprint', () => { buildReport(); });
+
+  // ── Rendering ──
+  function readRange() {
+    const from = $('fromDate')?.value || null;
+    const to = $('toDate')?.value || null;
     if (from && to && from > to) {
       showStatus('Start date must be on or before end date.', true);
-      return;
+      return null;
     }
-    const is = document.getElementById('inpatientStart')?.value || null;
-    const ie = document.getElementById('inpatientEnd')?.value || null;
+    const is = $('inpatientStart')?.value || null;
+    const ie = $('inpatientEnd')?.value || null;
     if (is && ie && is > ie) {
       showStatus('Inpatient start must be on or before end.', true);
+      return null;
+    }
+    return { from, to };
+  }
+
+  function renderFromCache() {
+    const all = cache.get(scope);
+    if (!all) return;
+    const range = readRange();
+    if (!range) return;
+
+    const valid = all.filter(i => toDate(i.occurredAt));
+    const base = valid.filter(matchesFilters);
+    const stats = buildStats(base, range.from, range.to);
+
+    $('fpCount').textContent = hasActiveFilters()
+      ? `Showing ${stats.filtered.length} of ${valid.filter(i => inRange(toDate(i.occurredAt), stats.rangeStart, stats.rangeEnd)).length} incidents in this period`
+      : '';
+
+    if (valid.length === 0) {
+      destroyCharts();
+      $('incidentsDashboard').style.display = 'none';
+      $('insights').hidden = true;
+      lastView = null;
+      showStatus('No incidents found for this selection.');
       return;
     }
 
-    showStatus('Loading incidents…');
-    document.getElementById('incidentsDashboard').style.display = 'none';
+    const A = analyse(stats.filtered, base, stats.rangeStart, stats.rangeEnd);
 
-    try {
-      const ok = await checkAuthentication();
-      if (!ok) return;
-      const incidents = await fetchAllIncidents(urlPatientId);
-      const stats = buildStats(incidents, from, to);
-
-      if (stats.filtered.length === 0) {
-        destroyCharts();
-        if (stats.totalCalendarDays > 0) {
-          renderDashboard(stats);
-          showStatus('No incidents in this period. Charts show zeros.');
-        } else {
-          showStatus('No incidents found. Select a date range if needed.');
-        }
-        return;
+    if (stats.filtered.length === 0) {
+      destroyCharts();
+      renderInsights(A, stats);
+      if (stats.totalCalendarDays > 0) {
+        renderDashboard(stats, A);
+        showStatus('No incidents match this period and these filters. Charts show zeros.');
+      } else {
+        $('incidentsDashboard').style.display = 'none';
+        showStatus('No incidents found. Select a date range if needed.');
       }
-      renderDashboard(stats);
-      showStatus(`Loaded ${stats.filtered.length} incidents from ${stats.rangeStart} to ${stats.rangeEnd}.`);
+      return;
+    }
+
+    renderInsights(A, stats);
+    renderDashboard(stats, A);
+    showStatus(`Showing ${stats.filtered.length} incidents from ${fmtDate(stats.rangeStart)} to ${fmtDate(stats.rangeEnd)}.`);
+    // the dashboard is only visible on the incidents tab
+    if (currentTab() !== 'incidents') {
+      $('incidentsDashboard').style.display = 'none';
+      $('insights').hidden = true;
+      $('status').style.display = 'none';
+    }
+  }
+
+  async function loadAndRender(refetch = true) {
+    if (!readRange()) return;
+    showStatus('Loading incidents…');
+    $('incidentsDashboard').style.display = 'none';
+    $('insights').hidden = true;
+    try {
+      if (refetch || !cache.has(scope)) cache.set(scope, await fetchScope(scope));
+      buildFilterPanel(cache.get(scope).filter(i => toDate(i.occurredAt)));
+      renderFromCache();
     } catch (err) {
       console.error(err);
       showStatus(err.message || 'Unable to load dashboard.', true);
@@ -840,28 +1988,35 @@
   }
 
   // ── Tabs ──
+  function currentTab() {
+    const t = document.querySelector('.dash-tab.active');
+    return t ? t.dataset.dash : 'incidents';
+  }
+
   function switchDash(which) {
     document.querySelectorAll('.dash-tab').forEach(t => {
       t.classList.toggle('active', t.dataset.dash === which);
     });
-    document.getElementById('incidentsDashboard').style.display =
-      which === 'incidents' ? 'grid' : 'none';
-    document.getElementById('consumptionDashboard').style.display =
+    $('incidentsDashboard').style.display =
+      which === 'incidents' && $('incidentsDashboard').children.length ? 'grid' : 'none';
+    $('consumptionDashboard').style.display =
       which === 'consumption' ? 'grid' : 'none';
+    $('insights').hidden = which !== 'incidents' || !lastView;
+    $('filterPanel').hidden = which !== 'incidents' || !document.querySelector('details.ms');
 
     const showInpatient = which === 'incidents';
-    document.getElementById('inpatientStartWrap').style.display = showInpatient ? '' : 'none';
-    document.getElementById('inpatientEndWrap').style.display = showInpatient ? '' : 'none';
+    $('inpatientStartWrap').style.display = showInpatient ? '' : 'none';
+    $('inpatientEndWrap').style.display = showInpatient ? '' : 'none';
 
     const url = new URL(location.href);
     url.searchParams.set('dash', which);
     history.replaceState(null, '', url);
 
     if (which === 'incidents') {
-      document.getElementById('status').style.display =
-        document.getElementById('incidentsDashboard').children.length ? 'none' : 'block';
+      $('status').style.display =
+        $('incidentsDashboard').children.length ? 'none' : 'block';
     } else {
-      document.getElementById('status').style.display = 'none';
+      $('status').style.display = 'none';
     }
   }
 
@@ -869,46 +2024,65 @@
     tab.addEventListener('click', () => switchDash(tab.dataset.dash));
   });
 
+  // ── Controls ──
+  $('applyBtn').addEventListener('click', () => loadAndRender(true));
+  ['fromDate', 'toDate', 'inpatientStart', 'inpatientEnd'].forEach(id => {
+    $(id).addEventListener('change', renderFromCache);
+  });
+
+  function buildParticipantSelect() {
+    const sel = $('participantSelect');
+    const opts = [];
+    if (urlPatientId) opts.push({ value: urlPatientId, label: `${patientNames[urlPatientId] || 'This participant'}` });
+    opts.push({ value: ALL, label: 'All participants' });
+    patients.filter(p => p.id !== urlPatientId).forEach(p => opts.push({ value: p.id, label: p.fullName }));
+    sel.innerHTML = opts.map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('');
+    sel.value = scope;
+    // with a single participant there is nothing to choose
+    $('participantWrap').hidden = !(patients.length > 1 || !urlPatientId);
+  }
+
+  $('participantSelect').addEventListener('change', async e => {
+    scope = e.target.value;
+    setHeading();
+    updateAddLinks();
+    await loadAndRender(false);
+  });
+
   // ── + modal ──
-  const modal = document.getElementById('addModal');
-  document.getElementById('plusBtn').addEventListener('click', () => {
+  const modal = $('addModal');
+  $('plusBtn').addEventListener('click', () => {
     modal.classList.add('open');
   });
-  document.getElementById('modalClose').addEventListener('click', () => {
+  $('modalClose').addEventListener('click', () => {
     modal.classList.remove('open');
   });
   modal.addEventListener('click', e => {
     if (e.target === modal) modal.classList.remove('open');
   });
 
-  if (urlPatientId) {
-    document.getElementById('optIncident').href =
-      `Incident.html?patientId=${encodeURIComponent(urlPatientId)}`;
-    document.getElementById('optConsumption').href =
-      `ConsumptionForm.html?patientId=${encodeURIComponent(urlPatientId)}`;
+  function updateAddLinks() {
+    const id = scope !== ALL ? scope : urlPatientId;
+    $('plusBtn').hidden = !id;
+    if (!id) return;
+    $('optIncident').href = `Incident.html?patientId=${encodeURIComponent(id)}`;
+    $('optConsumption').href = `ConsumptionForm.html?patientId=${encodeURIComponent(id)}`;
   }
-function redirectToLogin() {
-  const next = window.location.pathname + window.location.search;
-  // index.html is your login entry point
-  window.location.href =
-    `index.html?next=${encodeURIComponent(next)}`;
-}
-  // ── Patient name in the header ──
+
+  // ── Heading ──
+  function setHeading() {
+    let title = 'Patient Analytics';
+    if (scope === ALL) title = 'All participants analytics';
+    else if (patientNames[scope]) title = `${patientNames[scope]}'s analytics`;
+    $('pageHeading').textContent = title;   // text, never HTML
+    document.title = title;
+  }
+
   async function loadPatientName() {
     if (!urlPatientId) return;
     try {
-      const res = await fetch(`${API}/patients/${encodeURIComponent(urlPatientId)}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: authHeaders()
-      });
-      if (res.status === 401) { redirectToLogin(); return; }
-      if (!res.ok) throw new Error(`Failed to load patient (${res.status}).`);
-      const patient = await res.json();
-      if (!patient.fullName) return;
-      const title = `${patient.fullName}'s analytics`;
-      document.getElementById('pageHeading').textContent = title;   // text, never HTML
-      document.title = title;
+      const patient = await apiGet(`/patients/${encodeURIComponent(urlPatientId)}`);
+      if (patient.fullName) patientNames[urlPatientId] = patient.fullName;
     } catch (err) {
       // The dashboard still works; the heading just stays "Patient Analytics".
       console.error(err);
@@ -918,22 +2092,17 @@ function redirectToLogin() {
   // ── Init ──
   (async function init() {
     try {
-      const ok = await checkAuthentication();
-      if (!ok) return;
+      currentUser = await checkAuthentication();
+      if (!currentUser) return;
 
-      if (!urlPatientId) {
-        showStatus('Open this page with ?patientId=<uuid>.', true);
-        return;
-      }
-
-      loadPatientName();
+      updateAddLinks();
+      await Promise.all([loadOptions(), loadPatients(), loadPatientName()]);
+      buildParticipantSelect();
+      setHeading();
 
       const dash = urlParams.get('dash') || 'incidents';
+      await loadAndRender(true);
       switchDash(dash);
-
-      if (dash === 'incidents') {
-        await loadAndRender();
-      }
     } catch (err) {
       console.error(err);
       showStatus(err.message || 'Unable to initialise.', true);

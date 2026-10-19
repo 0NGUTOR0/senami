@@ -82,7 +82,7 @@
       const name = p.fullName || p.name || p.patientNumber || 'this patient';
 
       // The QR code opens the page where staff choose to record an incident or a consumption record.
-      const target = `${location.origin}/Record.html?patientId=${encodeURIComponent(id)}`;
+      const target = `${location.origin}/Incident.html?patientId=${encodeURIComponent(id)}`;
       const qr = qrcode(0, 'M');
       qr.addData(target);
       qr.make();

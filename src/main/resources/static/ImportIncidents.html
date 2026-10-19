@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Import incidents</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #f0f4f8; color: #1a202c; line-height: 1.5; min-height: 100vh; }
+    .topbar { background: #1e3a5f; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: nowrap; }
+    .back { color: #fff; text-decoration: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 8px; background: rgba(255,255,255,.12); font-size: 1.2rem; flex: none; }
+    .back:hover { background: rgba(255,255,255,.22); }
+    .topbar h1 { font-size: 1.25rem; font-weight: 600; min-width: 0; }
+    .container { max-width: 960px; margin: 0 auto; padding: 1.25rem 1rem 4rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.06); padding: 1.25rem; }
+    .card h2 { font-size: 1rem; color: #1e3a5f; margin-bottom: .6rem; }
+    .muted { color: #718096; font-size: .88rem; }
+    .btn { padding: .6rem 1.1rem; border-radius: 6px; border: 1px solid #cbd5e0; background: #fff; color: #1a202c; font: inherit; font-size: .9rem; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn:hover:not(:disabled) { background: #edf2f7; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { background: #3182ce; border-color: #3182ce; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #2b6cb0; }
+    .btn-danger { color: #c53030; border-color: #feb2b2; }
+    .row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+
+    .drop { display: block; border: 2px dashed #cbd5e0; border-radius: 10px; padding: 1.5rem 1rem; text-align: center; background: #f7fafc; cursor: pointer; }
+    .drop.over, .drop:hover { border-color: #3182ce; background: #ebf8ff; }
+    .drop input { display: none; }
+    .drop strong { color: #1e3a5f; }
+    .fname { margin-top: .5rem; font-size: .88rem; overflow-wrap: anywhere; }
+
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: .6rem; margin-bottom: .75rem; }
+    .tile { background: #f7fafc; border-radius: 10px; padding: .7rem .9rem; }
+    .tile .n { font-size: 1.5rem; font-weight: 700; color: #1e3a5f; }
+    .tile .l { font-size: .75rem; color: #718096; text-transform: uppercase; letter-spacing: .03em; }
+    .tile.bad .n { color: #c53030; }
+    .tile.ok .n { color: #2f855a; }
+
+    .msg { padding: .7rem .9rem; border-radius: 8px; font-size: .92rem; margin-bottom: .75rem; overflow-wrap: anywhere; }
+    .msg.error { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
+    .msg.ok { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+    .msg.warn { background: #fffaf0; color: #975a16; border: 1px solid #fbd38d; }
+    .msg ul { margin: .3rem 0 0 1.2rem; }
+
+    .tablewrap { overflow-x: auto; border: 1px solid #edf2f7; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { text-align: left; padding: .55rem .7rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .03em; color: #718096; background: #f7fafc; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+    td { padding: .55rem .7rem; border-bottom: 1px solid #edf2f7; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .tag { display: inline-block; padding: .05rem .5rem; border-radius: 999px; font-size: .72rem; font-weight: 600; }
+    .tag.INVALID { background: #fed7d7; color: #9b2c2c; }
+    .tag.DUPLICATE { background: #feebc8; color: #975a16; }
+    .issue-list { margin-left: 1rem; }
+
+    .map-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .6rem; align-items: center; padding: .45rem 0; border-bottom: 1px solid #edf2f7; }
+    .map-row:last-child { border-bottom: none; }
+    .map-row .val { overflow-wrap: anywhere; }
+    .map-row .val small { color: #718096; display: block; }
+    select { width: 100%; padding: .45rem .5rem; border: 1px solid #cbd5e0; border-radius: 6px; font: inherit; font-size: .88rem; background: #fff; }
+    label.check { display: flex; gap: .5rem; align-items: flex-start; font-size: .92rem; margin: .6rem 0; }
+    label.check input { margin-top: .25rem; }
+    ol.steps { margin-left: 1.2rem; font-size: .92rem; }
+    ol.steps li { margin-bottom: .3rem; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #cbd5e0; border-top-color: #3182ce; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -2px; margin-right: .4rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 560px) {
+      .topbar { padding: .75rem; }
+      .card { padding: 1rem; }
+      .map-row { grid-template-columns: 1fr; }
+      table.stack thead { display: none; }
+      table.stack tr { display: block; padding: .5rem .7rem; border-bottom: 1px solid #edf2f7; }
+      table.stack tr:last-child { border-bottom: none; }
+      table.stack td { display: block; border: 0; padding: .1rem 0; }
+      table.stack td::before { content: attr(data-label); display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .03em; color: #718096; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="PatientList.html" aria-label="Back to patients">&larr;</a>
+    <h1>Import incidents from CSV</h1>
+  </header>
+
+  <main class="container">
+
+    <section class="card" id="stepFile">
+      <h2>1. Choose a file</h2>
+      <ol class="steps">
+        <li><a href="#" id="templateLink">Download the template</a> and fill it in (or export your data to the same columns from Excel as <em>CSV</em>).</li>
+        <li>Patients are matched by <strong>Patient number</strong>. Choices (such as Severity) use the same wording as the incident form.</li>
+        <li>Put several choices in one cell with <strong>|</strong>, for example <em>Verbal Aggression|Threatening Behaviour</em>. Dates can be 2026-03-05 or 05/03/2026 (day first).</li>
+      </ol>
+      <br>
+      <label class="drop" id="drop" for="fileInput">
+        <input type="file" id="fileInput" accept=".csv,text/csv,text/plain">
+        <strong>Choose a CSV file</strong> or drop it here
+        <div class="fname" id="fname"></div>
+      </label>
+      <div class="muted" style="margin-top:.5rem">Nothing is saved until you press Import. Up to 5000 rows per file.</div>
+    </section>
+
+    <div id="working" class="card" hidden><span class="spinner"></span><span id="workingText">Checking the file…</span></div>
+    <div id="topError" class="msg error" hidden></div>
+
+    <section class="card" id="stepCheck" hidden>
+      <h2>2. Check</h2>
+      <div id="fileErrors" class="msg error" hidden></div>
+      <div id="unknownCols" class="msg warn" hidden></div>
+      <div class="tiles" id="tiles"></div>
+      <div id="checkMsg" class="muted"></div>
+    </section>
+
+    <section class="card" id="stepMap" hidden>
+      <h2>Values I did not recognise</h2>
+      <p class="muted" style="margin-bottom:.6rem">Choose what each one should be. Your choices apply to every row in this file.</p>
+      <div id="mapList"></div>
+      <div class="row" style="margin-top:.8rem">
+        <button class="btn btn-primary" id="btnApplyMap" type="button">Apply and check again</button>
+      </div>
+    </section>
+
+    <section class="card" id="stepIssues" hidden>
+      <h2>Rows with problems</h2>
+      <div id="issueNote" class="muted" style="margin-bottom:.5rem"></div>
+      <div class="tablewrap"><table class="stack">
+        <thead><tr><th>Row</th><th>Status</th><th>Patient</th><th>Problem</th></tr></thead>
+        <tbody id="issueBody"></tbody>
+      </table></div>
+    </section>
+
+    <section class="card" id="stepSample" hidden>
+      <h2>Ready to import (first rows)</h2>
+      <div class="tablewrap"><table class="stack">
+        <thead><tr><th>Row</th><th>Patient</th><th>Date and time</th><th>Severity</th><th>Behaviours</th></tr></thead>
+        <tbody id="sampleBody"></tbody>
+      </table></div>
+    </section>
+
+    <section class="card" id="stepImport" hidden>
+      <h2>3. Import</h2>
+      <label class="check" id="skipWrap" hidden>
+        <input type="checkbox" id="skipInvalid">
+        <span>Skip the rows with problems and import the rest. Leave this off to import nothing until the file is fixed.</span>
+      </label>
+      <div class="row">
+        <button class="btn btn-primary" id="btnImport" type="button">Import</button>
+        <button class="btn" id="btnReset" type="button">Start over</button>
+      </div>
+      <div class="muted" id="importHint" style="margin-top:.5rem"></div>
+    </section>
+
+    <section class="card" id="stepDone" hidden>
+      <h2>Done</h2>
+      <div id="doneMsg" class="msg ok"></div>
+      <div class="row">
+        <a class="btn btn-primary" href="PatientList.html">Back to patients</a>
+        <button class="btn" id="btnAnother" type="button">Import another file</button>
+        <button class="btn btn-danger" id="btnUndo" type="button">Undo this import</button>
+      </div>
+      <div id="undoMsg" class="muted" style="margin-top:.6rem"></div>
+    </section>
+  </main>
+
+<script>
+  const API = '/api';
+  const $ = id => document.getElementById(id);
+
+  // Fields where exactly one choice is needed (the rest accept several).
+  const SINGLE = new Set(['location', 'duration', 'frequency', 'severity']);
+  const FIELD_LABEL = {
+    location: 'Location', antecedents: 'Triggers', internalFactors: 'Internal factors', behaviours: 'Behaviours',
+    harmfulActivities: 'Harmful activities', consequences: 'Consequences', peopleInvolved: 'People involved',
+    duration: 'Duration', frequency: 'Frequency', severity: 'Severity', emergencyServices: 'Emergency services',
+    strategies: 'Staff response', communicationSupports: 'Communication supports'
+  };
+
+  let file = null;
+  let options = {};
+  let mappings = {};          // field -> { typedValue(lowercase) : OPTION or '__ignore__' }
+  let last = null;            // last result from the server
+  let importedBatch = null;
+
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function redirectToLogin() {
+    location.href = '/Login.html?next=' + encodeURIComponent(location.pathname + location.search);
+  }
+
+  function busy(text) {
+    $('working').hidden = !text;
+    if (text) $('workingText').textContent = text;
+    ['btnApplyMap', 'btnUndo'].forEach(id => { $(id).disabled = !!text; });
+    if (text) $('btnImport').disabled = true;
+    else if (last && !$('stepImport').hidden) updateImportButton();
+  }
+
+  function showTopError(message) {
+    $('topError').textContent = message || '';
+    $('topError').hidden = !message;
+  }
+
+  async function readError(res) {
+    if (res.status === 413) return 'That file is too large to upload.';
+    try {
+      const body = await res.json();
+      return body.detail || body.message || body.error || ('Request failed (' + res.status + ').');
+    } catch (e) {
+      return 'Request failed (' + res.status + ').';
+    }
+  }
+
+  async function post(url, extra) {
+    const fd = new FormData();
+    fd.append('file', file, file.name);
+    if (Object.keys(mappings).length) {
+      fd.append('mappings', new Blob([JSON.stringify(mappings)], { type: 'application/json' }));
+    }
+    const res = await fetch(API + url + (extra || ''), { method: 'POST', body: fd, credentials: 'include' });
+    if (res.status === 401 || res.status === 403) { redirectToLogin(); throw new Error('Signed out'); }
+    if (!res.ok) throw new Error(await readError(res));
+    return res.json();
+  }
+
+  async function loadOptions() {
+    try {
+      const res = await fetch(API + '/incident-options', { credentials: 'include', headers: { 'Accept': 'application/json' } });
+      if (res.status === 401 || res.status === 403) return redirectToLogin();
+      if (res.ok) options = await res.json();
+    } catch (e) { console.error(e); }
+  }
+
+  // ---- template download (a plain link would not send the sign-in cookie on every setup) ----
+  $('templateLink').addEventListener('click', async ev => {
+    ev.preventDefault();
+    try {
+      const res = await fetch(API + '/incidents/import/template', { credentials: 'include' });
+      if (res.status === 401 || res.status === 403) return redirectToLogin();
+      if (!res.ok) throw new Error(await readError(res));
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url; a.download = 'incident-import-template.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) { showTopError(e.message); }
+  });
+
+  // ---- choosing a file ----
+  const drop = $('drop');
+  $('fileInput').addEventListener('change', ev => pick(ev.target.files[0]));
+  ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => pick(e.dataTransfer.files[0]));
+
+  function pick(f) {
+    if (!f) return;
+    resetResults();
+    if (!/\.csv$/i.test(f.name) && f.type !== 'text/csv') {
+      showTopError('Please choose a .csv file. In Excel use File > Save As > CSV.');
+      return;
+    }
+    file = f;
+    mappings = {};
+    $('fname').textContent = f.name + ' (' + Math.max(1, Math.round(f.size / 1024)) + ' KB)';
+    check();
+  }
+
+  function resetResults() {
+    showTopError('');
+    ['stepCheck', 'stepMap', 'stepIssues', 'stepSample', 'stepImport', 'stepDone'].forEach(id => { $(id).hidden = true; });
+    last = null;
+  }
+
+  async function check() {
+    showTopError('');
+    busy('Checking the file…');
+    try {
+      last = await post('/incidents/import/preview');
+      render(last);
+    } catch (e) {
+      if (e.message !== 'Signed out') showTopError(e.message);
+    } finally {
+      busy('');
+    }
+  }
+
+  function tile(n, label, cls) {
+    return '<div class="tile ' + (cls || '') + '"><div class="n">' + esc(n) + '</div><div class="l">' + esc(label) + '</div></div>';
+  }
+
+  function render(r) {
+    $('stepCheck').hidden = false;
+    $('stepDone').hidden = true;
+
+    const fe = r.fileErrors || [];
+    $('fileErrors').hidden = !fe.length;
+    $('fileErrors').innerHTML = fe.length ? '<strong>This file cannot be imported</strong><ul>' + fe.map(m => '<li>' + esc(m) + '</li>').join('') + '</ul>' : '';
+    const uc = r.unknownColumns || [];
+    $('unknownCols').hidden = !uc.length;
+    $('unknownCols').textContent = uc.length ? 'These columns are not used and will be ignored: ' + uc.join(', ') + '.' : '';
+
+    if (fe.length) {
+      $('tiles').innerHTML = '';
+      $('checkMsg').textContent = '';
+      ['stepMap', 'stepIssues', 'stepSample', 'stepImport'].forEach(id => { $(id).hidden = true; });
+      return;
+    }
+
+    $('tiles').innerHTML =
+      tile(r.totalRows, 'Rows in file') +
+      tile(r.validRows, 'Ready to import', 'ok') +
+      tile(r.invalidRows, 'With problems', r.invalidRows ? 'bad' : '') +
+      tile(r.duplicateRows, 'Already recorded');
+    $('checkMsg').textContent = r.message || '';
+
+    // values to map
+    const un = r.unmapped || {};
+    const fields = Object.keys(un).filter(f => (un[f] || []).length);
+    $('stepMap').hidden = !fields.length;
+    $('mapList').innerHTML = '';
+    fields.forEach(field => {
+      const h = document.createElement('div');
+      h.style.cssText = 'font-weight:600;margin:.6rem 0 .2rem;color:#2d3748';
+      h.textContent = FIELD_LABEL[field] || field;
+      $('mapList').appendChild(h);
+      un[field].forEach(raw => {
+        const row = document.createElement('div');
+        row.className = 'map-row';
+        const val = document.createElement('div');
+        val.className = 'val';
+        val.textContent = '“' + raw + '”';
+        const sel = document.createElement('select');
+        sel.dataset.field = field;
+        sel.dataset.raw = raw;
+        sel.setAttribute('aria-label', 'Meaning of ' + raw);
+        sel.appendChild(new Option('Choose…', ''));
+        (options[field] || []).forEach(o => sel.appendChild(new Option(o.label, o.value)));
+        if (!SINGLE.has(field)) sel.appendChild(new Option('Leave this value out', '__ignore__'));
+        row.appendChild(val);
+        row.appendChild(sel);
+        $('mapList').appendChild(row);
+      });
+    });
+
+    // problems
+    const issues = r.issues || [];
+    $('stepIssues').hidden = !issues.length;
+    $('issueNote').textContent = r.issuesTruncated ? 'Showing the first 500. Fix these, then check the file again.' : 'Row numbers match your spreadsheet (the header is row 1).';
+    $('issueBody').innerHTML = issues.map(i =>
+      '<tr><td data-label="Row">' + esc(i.row) + '</td>' +
+      '<td data-label="Status"><span class="tag ' + esc(i.status) + '">' + (i.status === 'DUPLICATE' ? 'Duplicate' : 'Problem') + '</span></td>' +
+      '<td data-label="Patient">' + esc(i.patientName || i.patientNumber || '') + (i.patientName && i.patientNumber ? '<div class="muted">' + esc(i.patientNumber) + '</div>' : '') + '</td>' +
+      '<td data-label="Problem">' + (i.messages || []).map(m => '<div>' + esc(m) + '</div>').join('') + '</td></tr>').join('');
+
+    // sample
+    const sample = r.sample || [];
+    $('stepSample').hidden = !sample.length;
+    $('sampleBody').innerHTML = sample.map(s =>
+      '<tr><td data-label="Row">' + esc(s.row) + '</td><td data-label="Patient">' + esc(s.patientName || '') + '<div class="muted">' + esc(s.patientNumber || '') + '</div></td>' +
+      '<td data-label="Date and time">' + esc(s.occurredAt) + '</td><td data-label="Severity">' + esc(s.severity) + '</td><td data-label="Behaviours">' + esc(s.behaviours || '—') + '</td></tr>').join('');
+
+    // import controls
+    $('stepImport').hidden = false;
+    $('skipWrap').hidden = !r.invalidRows;
+    if (!r.invalidRows) $('skipInvalid').checked = false;
+    updateImportButton();
+  }
+
+  function updateImportButton() {
+    const r = last;
+    if (!r) return;
+    const skip = $('skipInvalid').checked;
+    const can = r.validRows > 0 && (r.invalidRows === 0 || skip);
+    $('btnImport').disabled = !can;
+    $('btnImport').textContent = r.validRows > 0 ? 'Import ' + r.validRows + ' incident' + (r.validRows === 1 ? '' : 's') : 'Nothing to import';
+    $('importHint').textContent =
+      r.validRows === 0 ? (r.duplicateRows ? 'Every valid row is already recorded.' : 'Fix the problems above and choose the file again.') :
+      r.invalidRows && !skip ? 'Fix the problems and choose the file again, or tick the box above to import only the rows that are ready.' :
+      r.duplicateRows ? r.duplicateRows + ' row(s) already recorded will be skipped.' : '';
+  }
+  $('skipInvalid').addEventListener('change', updateImportButton);
+
+  $('btnApplyMap').addEventListener('click', () => {
+    let missing = 0;
+    document.querySelectorAll('#mapList select').forEach(sel => {
+      if (!sel.value) { missing++; return; }
+      (mappings[sel.dataset.field] = mappings[sel.dataset.field] || {})[sel.dataset.raw.toLowerCase()] = sel.value;
+    });
+    if (missing) {
+      showTopError('Choose a meaning for every value, or start over with a corrected file.');
+      return;
+    }
+    check();
+  });
+
+  $('btnImport').addEventListener('click', async () => {
+    if (!last || !file) return;
+    showTopError('');
+    busy('Importing…');
+    try {
+      const skip = $('skipInvalid').checked;
+      const r = await post('/incidents/import', '?skipInvalid=' + skip);
+      last = r;
+      if (!r.committed) { render(r); showTopError(r.message || 'Nothing was imported.'); return; }
+      importedBatch = r.batchId;
+      ['stepCheck', 'stepMap', 'stepIssues', 'stepSample', 'stepImport'].forEach(id => { $(id).hidden = true; });
+      $('stepDone').hidden = false;
+      $('doneMsg').textContent = r.message + (r.duplicateRows ? ' ' + r.duplicateRows + ' already recorded were skipped.' : '') + (r.invalidRows ? ' ' + r.invalidRows + ' with problems were skipped.' : '');
+      $('btnUndo').hidden = !importedBatch;
+      $('undoMsg').textContent = '';
+    } catch (e) {
+      if (e.message !== 'Signed out') showTopError(e.message);
+    } finally {
+      busy('');
+    }
+  });
+
+  $('btnUndo').addEventListener('click', async () => {
+    if (!importedBatch) return;
+    if (!confirm('Remove all the incidents added by this import? This cannot be undone.')) return;
+    busy('Removing…');
+    try {
+      const res = await fetch(API + '/incidents/import/' + encodeURIComponent(importedBatch), { method: 'DELETE', credentials: 'include' });
+      if (res.status === 401 || res.status === 403) return redirectToLogin();
+      if (!res.ok) throw new Error(await readError(res));
+      const body = await res.json();
+      $('undoMsg').textContent = body.removed + ' incident' + (body.removed === 1 ? '' : 's') + ' removed.';
+      $('btnUndo').hidden = true;
+      importedBatch = null;
+    } catch (e) {
+      $('undoMsg').textContent = e.message;
+    } finally {
+      busy('');
+      $('btnUndo').disabled = false;
+    }
+  });
+
+  function startOver() {
+    resetResults();
+    file = null; mappings = {}; importedBatch = null;
+    $('fileInput').value = '';
+    $('fname').textContent = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  $('btnReset').addEventListener('click', startOver);
+  $('btnAnother').addEventListener('click', startOver);
+
+  loadOptions();
+</script>
+</body>
+</html>

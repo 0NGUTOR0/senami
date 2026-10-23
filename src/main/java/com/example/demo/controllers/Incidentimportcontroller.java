@@ -29,13 +29,7 @@ public class IncidentImportController {
     public IncidentImportController(IncidentImportService service) {
         this.service = service;
     }
-echo "# senami" >> README.md
-git init
-git add .
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/0NGUTOR0/senami.git
-git push -u origin main
+
     /**
      * Checks a file and reports what would be imported. Nothing is saved.
      * "mappings" is optional: field name -> (typed value -> option value), e.g. {"severity": {"med": "MODERATE"}}.

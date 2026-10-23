@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,4 +18,10 @@ public interface IncidentRepository extends JpaRepository<Incident, UUID> {
 
     @EntityGraph(attributePaths = {"patient", "recordedBy", "lastModifiedBy", "receivedBy"})
     Optional<Incident> findWithDetailsById(UUID id);
+
+    boolean existsByPatientIdAndOccurredAtAndDescription(UUID patientId, LocalDateTime occurredAt, String description);
+
+    boolean existsByExternalId(String externalId);
+
+    List<Incident> findByImportBatchId(UUID importBatchId);
 }

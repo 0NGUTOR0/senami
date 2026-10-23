@@ -44,6 +44,18 @@ public class IncidentService {
         return IncidentResponse.from(incidentRepository.save(incident));
     }
 
+    /** Saves an incident that came from a CSV import. The importing user is recorded as the staff member. */
+    public Incident recordImported(Patient patient, IncidentRequest request, UUID batchId, String externalId) {
+        Incident incident = new Incident();
+        incident.setPatient(patient);
+        incident.setRecordedBy(currentUserService.getCurrentUser());
+        incident.setSource("CSV_IMPORT");
+        incident.setImportBatchId(batchId);
+        incident.setExternalId(externalId);
+        applyForm(incident, request);
+        return incidentRepository.save(incident);
+    }
+
     @Transactional(readOnly = true)
     public Page<IncidentResponse> listForPatient(UUID patientId, Pageable pageable) {
         if (!patientRepository.existsById(patientId)) {

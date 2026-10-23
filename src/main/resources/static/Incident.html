@@ -6,7 +6,6 @@
   <title>Incident Report</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       background: #f0f4f8;
@@ -14,16 +13,8 @@
       line-height: 1.5;
       padding: 2rem 1rem;
     }
-    .logo {
-      height: 48px;
-      margin-left: auto;
-      flex-shrink: 0;
-    }
-    .header-content{
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
+    .logo { height: 48px; margin-left: auto; flex-shrink: 0; }
+    .header-content { display: flex; align-items: center; gap: 1rem; }
     .form-container {
       max-width: 920px;
       margin: 0 auto;
@@ -32,153 +23,30 @@
       box-shadow: 0 4px 20px rgba(0,0,0,.08);
       overflow: hidden;
     }
-
     .form-header {
       background: #1e3a5f;
       color: #fff;
       padding: 1.5rem 2rem;
     }
-
-.report-people {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-    margin: 20px 0;
-}
-
-.person-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.person-card h3 {
-    margin: 0 0 16px;
-    color: #1e3a5f;
-    font-size: 1.05rem;
-}
-
-.person-card p {
-    margin: 9px 0;
-    color: #4a5568;
-    overflow-wrap: anywhere;
-}
-
-.person-card strong {
-    color: #2d3748;
-}
-
-@media (max-width: 700px) {
-    .report-people {
-        grid-template-columns: 1fr;
-    }
-  .logo { display:none }
-}
-
     .form-header h1 { font-size: 1.5rem; font-weight: 600; }
     .form-header p { opacity: .85; font-size: .9rem; margin-top: .25rem; }
-    form { padding: 2rem; }
-
-    .part-banner {
-      background: #ebf4ff;
-      color: #2b6cb0;
-      font-weight: 600;
-      font-size: .9rem;
-      padding: .6rem 1rem;
-      border-radius: 6px;
-      margin-bottom: 1.5rem;
-      border-left: 4px solid #3182ce;
-    }
-
-    .section { margin-bottom: 2rem; }
-
-    .section-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #1e3a5f;
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: .5rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
-    .full { grid-column: 1 / -1; }
-
-    label {
-      display: block;
-      font-size: .85rem;
-      font-weight: 500;
-      color: #4a5568;
-      margin-bottom: .35rem;
-    }
-
-    label .req { color: #e53e3e; }
-
-    input[type="text"],
-    input[type="datetime-local"],
-    select,
-    textarea {
-      width: 100%;
-      padding: .6rem .75rem;
-      border: 1px solid #cbd5e0;
-      border-radius: 6px;
-      font-size: .95rem;
-      background: #fff;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #3182ce;
-      box-shadow: 0 0 0 3px rgba(49,130,206,.15);
-    }
-
-    textarea { resize: vertical; min-height: 100px; }
-
-    .option-group {
+    .report-people {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .5rem .75rem;
-      margin-top: .25rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin: 20px 0 0;
     }
-
-    .option-group.single { grid-template-columns: 1fr; }
-    .classification-help { color: #4a5568; font-size: .9rem; margin: -.65rem 0 1rem; }
-    .classification-category { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin: 0 0 1rem; }
-    .classification-category-title { color: #2d3748; font-size: .98rem; font-weight: 650; margin-bottom: .5rem; }
-    .classification-category .option-group { margin-top: .25rem; }
-    .classification-category .option-item { min-height: 2rem; }
-
-    .option-item {
-      display: flex;
-      align-items: flex-start;
-      gap: .5rem;
-      font-size: .9rem;
-      color: #2d3748;
-      padding: .35rem .5rem;
-      border-radius: 4px;
+    .person-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
     }
-
-    .option-item:hover { background: #f7fafc; }
-    .option-item input { margin-top: .2rem; flex-shrink: 0; }
-
-    .yes-no {
-      display: flex;
-      gap: 1.5rem;
-      margin-top: .4rem;
-    }
-
-    .yes-no label {
-      display: flex;
-      align-items: center;
-      gap: .4rem;
-      font-weight: 400;
-      color: #2d3748;
-      cursor: pointer;
-    }
-.back-btn {
+    .person-card h3 { margin: 0 0 16px; color: #1e3a5f; font-size: 1.05rem; }
+    .person-card p { margin: 9px 0; color: #4a5568; overflow-wrap: anywhere; }
+    .person-card strong { color: #2d3748; }
+    .back-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -190,10 +58,96 @@
       text-decoration: none;
       font-size: 1.25rem;
       flex-shrink: 0;
-      transition: background .15s;
     }
     .back-btn:hover { background: rgba(255,255,255,.22); }
-        .actions {
+    form { padding: 2rem; }
+    .part-banner {
+      background: #ebf4ff;
+      color: #2b6cb0;
+      font-weight: 600;
+      font-size: .9rem;
+      padding: .6rem 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #3182ce;
+    }
+    .section { margin-bottom: 2rem; }
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #1e3a5f;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: .5rem;
+      margin-bottom: 1.25rem;
+    }
+    .classification-help { color: #4a5568; font-size: .9rem; margin: -.65rem 0 1rem; }
+    .classification-category {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0 0 1rem;
+    }
+    .classification-category-title {
+      color: #2d3748;
+      font-size: .98rem;
+      font-weight: 650;
+      margin-bottom: .5rem;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 500;
+      color: #4a5568;
+      margin-bottom: .35rem;
+    }
+    label .req { color: #e53e3e; }
+    input[type="text"],
+    input[type="datetime-local"],
+    select,
+    textarea {
+      width: 100%;
+      padding: .6rem .75rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: .95rem;
+      background: #fff;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 3px rgba(49,130,206,.15);
+    }
+    textarea { resize: vertical; min-height: 100px; }
+    .option-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .5rem .75rem;
+      margin-top: .25rem;
+    }
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: .5rem;
+      font-size: .9rem;
+      color: #2d3748;
+      padding: .35rem .5rem;
+      border-radius: 4px;
+    }
+    .option-item:hover { background: #f7fafc; }
+    .option-item input { margin-top: .2rem; flex-shrink: 0; }
+    .yes-no { display: flex; gap: 1.5rem; margin-top: .4rem; }
+    .yes-no label {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-weight: 400;
+      color: #2d3748;
+      cursor: pointer;
+    }
+    .actions {
       display: flex;
       flex-direction: column;
       gap: .75rem;
@@ -224,7 +178,6 @@
       color: #9b2c2c;
       border: 1px solid #feb2b2;
     }
-
     button {
       padding: .7rem 1.5rem;
       border-radius: 6px;
@@ -233,14 +186,14 @@
       cursor: pointer;
       border: none;
     }
-
     .btn-primary { background: #1e3a5f; color: #fff; }
     .btn-primary:hover { background: #16304f; }
+    .btn-primary:disabled { opacity: .65; cursor: not-allowed; }
     .btn-secondary { background: #edf2f7; color: #2d3748; }
     .btn-secondary:hover { background: #e2e8f0; }
-
     @media (max-width: 700px) {
-      .grid, .grid-3, .option-group { grid-template-columns: 1fr; }
+      .grid, .grid-3, .option-group, .report-people { grid-template-columns: 1fr; }
+      .logo { display: none; }
     }
   </style>
 </head>
@@ -248,36 +201,27 @@
   <div class="form-container">
     <div class="form-header">
       <div class="header-content">
-      <a href="PatientList.html" class="back-btn" title="Back to patients">←</a>
-      <div class="header-text">
-        <h1 id="pageTitle">Incident Report</h1>
-        <p id="pageSubtitle">Report a new incident</p>
-      </div>
-      <img class="logo" src="Images/Logo.png" alt="Logo" >
-      </div>
-<!-- Patient and reporting staff details -->
-<div class="report-people">
-
-    <section class="person-card">
-        <h3>Patient Details</h3>
-        <div id="patientDetails">
-            Loading patient details...
+        <a href="PatientList.html" class="back-btn" id="backLink" title="Back">←</a>
+        <div class="header-text">
+          <h1 id="pageTitle">Incident Report</h1>
+          <p id="pageSubtitle">Report a new incident</p>
         </div>
-    </section>
-
-    <section class="person-card">
-        <h3>Reported By</h3>
-        <div id="staffDetails">
-            Loading staff details...
-        </div>
-    </section>
-
-</div>
-
+        <img class="logo" src="Images/Logo.png" alt="Logo" onerror="this.style.display='none'">
+      </div>
+      <div class="report-people">
+        <section class="person-card">
+          <h3>Patient Details</h3>
+          <div id="patientDetails">Loading patient details…</div>
+        </section>
+        <section class="person-card">
+          <h3>Reported By</h3>
+          <div id="staffDetails">Loading staff details…</div>
+        </section>
+      </div>
     </div>
 
-    <form>
-      
+    <form id="incidentForm">
+      <div class="part-banner">Part 1 — Completed by the staff member</div>
 
       <div class="section">
         <div class="section-title">When &amp; Where</div>
@@ -304,266 +248,25 @@
       </div>
 
       <div class="section classification-section">
-        <div class="section-title">Antecedents</div>
-        <p class="classification-help">Select every antecedent subcategory that applies. The category headings follow the classification document.</p>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Access or Activity Related Factors</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_DENIAL_DELAY_PREFERRED_ITEM_ACTIVITY"> Denial, delay, or removal of a preferred item or activity</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_INTERRUPTION"> Interruption of an activity</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_SHARING"> Required to share an item or activity</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_ITEM_ACTIVITY_UNAVAILABLE"> Preferred item or activity unavailable</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_PREVENTED_FINISHING"> Prevented from finishing an activity</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_FAILURE_OR_LOSS"> Failure or loss</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_TRANSITION"> Transition from one activity or item to another</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Social or Interactional Factors</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_CONFLICT"> Conflict with another person</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_ATTENTION_UNAVAILABLE"> Attention from others unavailable</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_PEER_PRESSURE"> Peer pressure</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_UNFAMILIAR_PERSON"> Unfamiliar person present</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_STAFF_CHANGE"> Change of staff member</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_REJECTION_EXCLUSION"> Rejection or exclusion</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_SOCIAL_FATIGUE"> Social fatigue</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_PREFERRED_PERSON_LEAVES_UNAVAILABLE"> Preferred person leaves or is unavailable</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_SOCIAL_DEMANDS"> Social demands or expectations</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_COMMUNICATION_NOT_UNDERSTOOD"> Communication attempts not understood</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Instructional or Demand Related Factors</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_CHORES"> Chores or household tasks</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_PERSONAL_CARE"> Personal care tasks</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_INSTRUCTION_OR_DEMAND"> Instruction or demand given</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_REPEATED_PROMPTS"> Repeated prompts</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_NON_PREFERRED_ACTIVITY"> Non-preferred activity</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_TASK_DIFFICULTY"> Task is difficult</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_TOO_MANY_INSTRUCTIONS"> Too many instructions</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_PROLONGED_TASK"> Task is prolonged</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_TRANSITION"> Transition between tasks or activities</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_ROUTINE_CHANGE"> Change to routine</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_AUTONOMY_OR_CHOICE"> Limited autonomy or choice</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_ANTICIPATION"> Anticipation of an upcoming task or event</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Physiological and Sensory-related Factors</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_SENSORY_OVERLOAD"> Sensory overload</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_SENSORY_UNDERSTIMULATION"> Sensory under-stimulation</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_LOUD_NOISE_OR_CROWDS"> Loud noise or crowded environment</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_BRIGHT_LIGHTS"> Bright lights</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_UNWANTED_TOUCH"> Unwanted touch</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_SMELLS"> Unwanted or strong smells</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_TEMPERATURE"> Uncomfortable temperature</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_PERSONAL_SPACE"> Personal space not respected</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_UNFAMILIAR_ENVIRONMENT"> Unfamiliar environment</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_PHYSICAL_ENVIRONMENT_CHANGE"> Change in the physical environment</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_MOVEMENT_RESTRICTION"> Restriction of movement</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_ORAL_STIMULATION"> Need for oral stimulation</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_HUNGER_OR_THIRST"> Hunger or thirst</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_ILLNESS_OR_PAIN"> Illness or physical pain</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_FATIGUE_OR_SLEEP"> Fatigue or lack of sleep</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_HORMONAL_OR_MENSTRUATION"> Hormonal changes or menstruation</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_SEXUAL_AROUSAL"> Sexual arousal</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_TOILETING"> Toileting needs</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Mental Health and Emotional Factors</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_MENTAL_HEALTH_CHANGE"> Change in mental health</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_HALLUCINATIONS_OR_DELUSIONS"> Hallucinations or delusions</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_MEDICATION_EFFECTS_OR_CHANGES"> Medication effects or changes</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_ALCOHOL_OR_DRUG_USE"> Alcohol or drug use</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_TRAUMA_REMINDERS"> Trauma reminders</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_COPING_DISTRESS_OR_UNCERTAINTY"> Difficulty coping with distress or uncertainty</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_ANXIETY_WORRY_OR_LOW_MOOD"> Anxiety, worry, or low mood</label>
-              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_FEAR_THREAT_OR_UNSAFE"> Feeling afraid, threatened, or unsafe</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Other or Unknown Factor</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="antecedents" value="OTHER_UNKNOWN_OTHER"> Other</label>
-          </div>
-        </div>
-      </div>
+  <div class="section-title">Antecedents</div>
+  <p class="classification-help">Select every antecedent that applies.</p>
+  <div data-field="antecedents"></div>
+</div>
 
-      <div class="section classification-section">
-        <div class="section-title">Behaviours of Concern</div>
-        <p class="classification-help">Select every behaviour subcategory that applies. The category headings follow the classification document.</p>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Verbal Aggression</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_YELLING_SCREAMING"> Yelling or screaming</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_SWEARING_INSULTING"> Swearing or insulting</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_ARGUING_DEMANDING"> Arguing or making demands</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_INTIMIDATING_GESTURES"> Intimidating gestures</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_NONVIOLENT_THREATS"> Non-violent threats</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_THREATS_OF_VIOLENCE"> Threats of violence</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_LOCKING_DOORS_ON_OTHERS"> Locking doors on others</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Physical Aggression</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_ATTEMPTS_TO_HARM_OTHERS"> Attempts to harm others</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_HITTING"> Hitting</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_KICKING"> Kicking</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_PUSHING_PULLING"> Pushing or pulling</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_GRABBING"> Grabbing</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_HAIR_PULLING"> Hair pulling</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_STRANGLING_CHOKING"> Strangling or choking</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_SCRATCHING_PINCHING"> Scratching or pinching</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_BITING_OTHERS"> Biting others</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_SPITTING"> Spitting</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_THROWING_OBJECTS_AT_PEOPLE"> Throwing objects at people</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_USING_OBJECTS_TO_HIT"> Using objects to hit</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_AGGRESSION_AGAINST_ANIMALS"> Aggression against animals</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Property Damage</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_THROWING_ITEMS_AT_PROPERTY"> Throwing items at property</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_PUNCHING_KICKING_WALLS_FURNITURE"> Punching or kicking walls or furniture</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_BREAKING_OBJECTS"> Breaking objects</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_FLIPPING_TABLES"> Flipping tables</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_STOMPING"> Stomping</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_SLAMMING_DOORS"> Slamming doors</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_BANGING_ON_DOORS"> Banging on doors</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_URINATING_DEFECATING_ON_SURFACES"> Urinating or defecating on surfaces</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_SETTING_FIRES"> Setting fires</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_LITTERING_CLUTTER"> Littering or creating clutter</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Absconding and Wandering</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_MOVING_VEHICLE"> Absconding from a moving vehicle</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_STATIONARY_VEHICLE"> Absconding from a stationary vehicle</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_HAZARDOUS_AREAS_OR_TRAFFIC"> Entering hazardous areas or traffic</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_COMMUNITY"> Absconding or wandering from the community</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_HOME"> Absconding or wandering from home</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_SCHOOL_APPOINTMENT_DAY_PROGRAM"> Absconding or wandering from school, appointments, or day program</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Harm to Self / Suicidal</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SELF_INJURY"> Self-injury</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_ISOLATION"> Isolation or withdrawal</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_DESIRE_TO_SELF_HARM"> Expressing a desire to self-harm</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_CASUAL_TALK_OF_SUICIDE"> Casual talk of suicide</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SUICIDE_THREATS"> Threats of suicide</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SUICIDAL_IDEATION"> Suicidal ideation</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SUICIDE_PLANS"> Suicide plans</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SUICIDE_ATTEMPTS"> Suicide attempts</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Sexualised Behaviour</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_EXPOSURE"> Exposure</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_NUDITY"> Nudity</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_MASTURBATION"> Masturbation</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_PORNOGRAPHY"> Pornography</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_INAPPROPRIATE_SEXUAL_COMMENTS"> Inappropriate sexual comments</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_SEXUAL_HARASSMENT"> Sexual harassment</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_SEXUAL_GESTURES"> Sexual gestures</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_UNWANTED_AFFECTION_KISSING_TOUCH"> Unwanted affection, kissing, or touching</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_SEXUAL_THEFT_OR_RECORDING"> Sexual theft or recording</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_UNSOLICITED_NUDE_OR_PORNOGRAPHIC_MEDIA"> Unsolicited nude or pornographic media</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_SEXUAL_REQUESTS_PRESSURE_INDUCEMENT"> Sexual requests, pressure, or inducement</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_DIRECTED_TOWARD_UNDERAGE_PERSON"> Sexualised behaviour directed toward an underage person</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Food-related Behaviour</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_BINGING"> Binging</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_FOOD_COMPULSIONS_OR_DEMANDS"> Food-related compulsions or demands</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_EATING_NON_FOOD"> Eating non-food items</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_FOOD_REFUSAL_OR_RESTRICTED_INTAKE"> Food refusal or restricted intake</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_EXCESSIVE_LIQUIDS"> Excessive liquid intake</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Non-compliance</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_NOT_DOING_ROUTINE_TASKS"> Not doing routine tasks</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_IGNORING_INSTRUCTIONS"> Ignoring instructions</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_DECLINING_MEDICATION"> Declining medication</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_REPEATED_PROMPTING"> Repeated prompting required</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_UNSAFE_MEDICATION_USE"> Unsafe medication use</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_MISSED_APPOINTMENTS"> Missed appointments</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_REFUSING_PERSONAL_CARE"> Refusing personal care</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_POOR_HYGIENE"> Poor hygiene</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Harmful Activities and Socially Inappropriate Behaviours</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_TAKING_FOOD_MONEY_BELONGINGS"> Taking food, money, or belongings without permission</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_UNSAFE_ALCOHOL_OR_DRUGS"> Unsafe alcohol or drug use</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_ILLICIT_SUBSTANCES_OR_PARAPHERNALIA"> Illicit substances or paraphernalia found</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_DEMANDING_OR_PURCHASING_AOD"> Demanding or purchasing alcohol or other drugs (AOD)</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_COMPULSIVE_PURCHASES"> Compulsive purchases</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_UNSAFE_SITUATIONS"> Engaging in unsafe situations</label>
-              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_ILLEGAL_ACTIVITIES"> Illegal activities</label>
-          </div>
-        </div>
-        <div class="classification-category">
-          <h3 class="classification-category-title">Other Behaviour</h3>
-          <div class="option-group">
-              <label class="option-item"><input type="checkbox" name="behaviours" value="OTHER_BEHAVIOUR_OTHER"> Other</label>
-          </div>
-        </div>
-      </div>
+<div class="section classification-section">
+  <div class="section-title">Behaviours of Concern</div>
+  <p class="classification-help">Select every behaviour that applies.</p>
+  <div data-field="behaviours"></div>
+</div>
 
       <div class="section">
         <div class="section-title">Consequences</div>
-        <div class="option-group" data-options="consequences">
-          <label class="option-item"><input type="checkbox" name="consequences" value="ACTIVITY_OR_OUTING_CANCELLED"> Activity or outing cancelled</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="DAMAGE_TO_PERSONAL_ITEMS_OR_ENVIRONMENT"> Damage to personal items or environment</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="EMOTIONAL_DISTRESS_TO_OTHERS"> Emotional distress to others</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="EMOTIONAL_DISTRESS_TO_SELF"> Emotional distress to self</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="IMPACTED_PEERS_OR_CO_RESIDENTS"> Impacted peers or co-residents</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="INCREASED_ANXIETY_OR_AGITATION"> Increased anxiety or agitation post-incident</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="INCREASED_SUPERVISION"> Increased supervision temporarily</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="INJURY_TO_OTHER_PEOPLE"> Injury to other people</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="INJURY_TO_SELF"> Injury to self</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="LOSS_OR_BREAKAGE_OF_BELONGINGS"> Loss or breakage of personal belongings</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="PROPERTY_DAMAGE_DESTRUCTION"> Property damage/destruction</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="REFUSAL_OF_FOOD_MEDICATION_ACTIVITY"> Refusal of food/medication/activity</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="REFUSED_COMMUNICATION_DEBRIEF"> Refused communication/debrief</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="REQUIRED_ENVIRONMENTAL_CHANGE"> Required environmental change (e.g., moved to safe space)</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="REQUIRED_PHYSICAL_INTERVENTION"> Required physical intervention (authorised RP only)</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="REQUIRED_POLICE_AMBULANCE"> Required police/ambulance intervention</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="REQUIRED_PRN_MEDICATION"> Required PRN medication</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="WITHDRAWAL_OR_ISOLATION"> Withdrawal or isolation from activity</label>
-          <label class="option-item"><input type="checkbox" name="consequences" value="OTHER"> Other</label>
-        </div>
+        <div class="option-group" data-options="consequences"></div>
       </div>
 
       <div class="section">
         <div class="section-title">People Involved</div>
-        <div class="option-group" data-options="peopleInvolved">
-          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="FAMILY_MEMBER"> Family member</label>
-          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="FRIEND"> Friend</label>
-          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="HEALTH_PROFESSIONAL"> Health professional</label>
-          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="HOUSEMATE"> Housemate</label>
-          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="NEIGHBOUR"> Neighbour</label>
-          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="PARTNER_EX_PARTNER"> Partner / Ex-partner</label>
-          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="SOMEONE_FROM_COMMUNITY"> Someone from the community</label>
-          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="STAFF_MEMBER"> Staff member</label>
-          <label class="option-item"><input type="checkbox" name="peopleInvolved" value="OTHER"> Other</label>
-        </div>
+        <div class="option-group" data-options="peopleInvolved"></div>
       </div>
 
       <div class="section">
@@ -571,24 +274,17 @@
         <div class="grid-3">
           <div>
             <label>Duration</label>
-            <select name="duration">
-              <option value="">Select…</option>
-            </select>
+            <select name="duration"><option value="">Select…</option></select>
           </div>
           <div>
             <label>Frequency</label>
-            <select name="frequency">
-              <option value="">Select…</option>
-            </select>
+            <select name="frequency"><option value="">Select…</option></select>
           </div>
           <div>
             <label>Severity</label>
-            <select name="severity">
-              <option value="">Select…</option>
-            </select>
+            <select name="severity"><option value="">Select…</option></select>
           </div>
         </div>
-
         <div class="grid" style="margin-top:1.25rem">
           <div>
             <label>Was on-call staff involved?</label>
@@ -606,36 +302,19 @@
           </div>
           <div class="full">
             <label>Emergency Services</label>
-            <div class="option-group" data-options="emergencyServices">
-              <label class="option-item"><input type="checkbox" name="emergencyServices" value="AMBULANCE"> Ambulance</label>
-              <label class="option-item"><input type="checkbox" name="emergencyServices" value="MENTAL_HEALTH_SERVICES"> Mental health services</label>
-              <label class="option-item"><input type="checkbox" name="emergencyServices" value="NONE_INVOLVED"> None involved</label>
-              <label class="option-item"><input type="checkbox" name="emergencyServices" value="POLICE_SAPOL"> Police (SAPOL)</label>
-              <label class="option-item"><input type="checkbox" name="emergencyServices" value="OTHER"> Other</label>
-            </div>
+            <div class="option-group" data-options="emergencyServices"></div>
           </div>
         </div>
       </div>
 
       <div class="section">
         <div class="section-title">Strategies Used</div>
-        <div class="option-group" data-options="strategies">
-          <label class="option-item"><input type="checkbox" name="strategies" value="BEHAVIOUR_TEACHING_REINFORCEMENT"> Behaviour Teaching &amp; Reinforcement</label>
-          <label class="option-item"><input type="checkbox" name="strategies" value="COMMUNICATION_EMOTIONAL_SUPPORT"> Communication &amp; Emotional Support</label>
-          <label class="option-item"><input type="checkbox" name="strategies" value="ENVIRONMENTAL_SAFETY_ADJUSTMENTS"> Environmental / Safety Adjustments</label>
-          <label class="option-item"><input type="checkbox" name="strategies" value="MEDICAL_PROCEDURAL"> Medical &amp; Procedural</label>
-          <label class="option-item"><input type="checkbox" name="strategies" value="REGULATION_DE_ESCALATION"> Regulation &amp; De-Escalation</label>
-          <label class="option-item"><input type="checkbox" name="strategies" value="OTHER"> Other</label>
-        </div>
+        <div class="option-group" data-options="strategies"></div>
       </div>
 
       <div class="section">
         <div class="section-title">Communication Supports</div>
-        <div class="option-group" data-options="communicationSupports">
-          <label class="option-item"><input type="checkbox" name="communicationSupports" value="DEBRIEF_AFTER_CRISIS"> Debrief conducted after crisis</label>
-          <label class="option-item"><input type="checkbox" name="communicationSupports" value="PROMPTED_TO_IDENTIFY_EMOTIONS"> Prompted to identify and communicate emotions</label>
-          <label class="option-item"><input type="checkbox" name="communicationSupports" value="VERBAL_PRAISE"> Provided verbal praise for calm or positive choices</label>
-        </div>
+        <div class="option-group" data-options="communicationSupports"></div>
       </div>
 
       <div class="section">
@@ -654,13 +333,7 @@
 
       <div class="section">
         <div class="section-title">Follow-up Agencies</div>
-        <div class="option-group" data-options="followUpAgencies">
-          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="GP"> General practitioner (GP)</label>
-          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="MENTAL_HEALTH"> Mental health service</label>
-          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="NDIS"> NDIS</label>
-          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="FAMILY"> Family / guardian</label>
-          <label class="option-item"><input type="checkbox" name="followUpAgencies" value="OTHER"> Other</label>
-        </div>
+        <div class="option-group" data-options="followUpAgencies"></div>
       </div>
 
       <div class="section">
@@ -717,7 +390,7 @@
         </div>
       </div>
 
-            <div class="actions">
+      <div class="actions">
         <div id="form-message"></div>
         <div class="actions-buttons">
           <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
@@ -729,224 +402,58 @@
 
   <script>
     const API_BASE = 'https://senami-1.onrender.com/api';
-       // relative, so it works on Render and locally
-function redirectToLogin() {
-  const next = window.location.pathname + window.location.search;
-  // index.html is your login entry point
-  window.location.href =
-    `index.html?next=${encodeURIComponent(next)}`;
-}
-async function checkAuthentication() {
-  const res = await fetch('https://senami-1.onrender.com/auth/me', {
-    method: 'GET',
-    credentials: 'include',
-    headers: { 'Accept': 'application/json' }
-  });
+    const AUTH_ME = 'https://senami-1.onrender.com/auth/me';
 
-  if (res.status === 401) {
-    redirectToLogin();
-    return false;
-  }
+    function redirectToLogin() {
+      const next = location.pathname + location.search;
+      location.href = `index.html?next=${encodeURIComponent(next)}`;
+    }
 
-  if (!res.ok) {
-    throw new Error(`Session check failed (${res.status})`);
-  }
-
-  return true;
-}
-async function api(method, path, body) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method,
-    credentials: 'include',
-    headers: authHeaders(),
-    body: body !== undefined ? JSON.stringify(body) : undefined
-  });
-
-  if (res.status === 401) {
-    window.location.href = 'Login.html?next=' +
-      encodeURIComponent(location.pathname + location.search);
-    throw new Error('Session expired.');
-  }
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const fields = err.errors
-      ? Object.entries(err.errors).map(([k, v]) => `${k}: ${v}`).join('; ')
-      : '';
-    throw new Error(
-      [err.detail || err.message || err.error || `HTTP ${res.status}`, fields]
-        .filter(Boolean).join(' — ')
-    );
-  }
-
-  if (res.status === 204) return null;
-  return res.json();
-}
-
+    async function checkAuthentication() {
+      const res = await fetch(AUTH_ME, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.status === 401) { redirectToLogin(); return false; }
+      if (!res.ok) throw new Error(`Session check failed (${res.status})`);
+      return true;
+    }
 
     function authHeaders() {
-      const token = localStorage.getItem('token');
       return {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       };
     }
-    function submitIncidentReport(event) {
-      event.preventDefault();
 
-      const patientId = new URLSearchParams(window.location.search).get('patientId');
-      if (!patientId) {
-        alert('No patient selected. Open this page from a patient record.');
-        return;
+    async function api(method, path, body) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        method,
+        credentials: 'include',
+        headers: authHeaders(),
+        body: body !== undefined ? JSON.stringify(body) : undefined
+      });
+      if (res.status === 401) {
+        redirectToLogin();
+        throw new Error('Not authenticated');
       }
-
-      const reportData = {
-        patientId,
-        ...collectPart1(),
-        ...collectPart2()
-      };
-
-      api('POST', '/incidents', reportData)
-        .then(() => {
-          alert('Incident report submitted successfully.');
-          window.location.href = `/patients/${encodeURIComponent(patientId)}`;
-        })
-        .catch(err => {
-          console.error('Error submitting incident report:', err);
-          alert(`Error submitting incident report: ${err.message}`);
-        });
-    }
-    
-async function loadReportPeople() {
-    const patientContainer = document.getElementById('patientDetails');
-    const staffContainer = document.getElementById('staffDetails');
-
-    const patientId = new URLSearchParams(
-        window.location.search
-    ).get('patientId');
-
-    try {
-        // Get the authenticated staff member from the server.
-        const staffResponse = await fetch('/auth/me', {
-            method: 'GET',
-            credentials: 'include'
-        });
-
-        if (staffResponse.status === 401) {
-            window.location.href = '/index.html';
-            return;
-        }
-
-        if (!staffResponse.ok) {
-            throw new Error('Could not load the current staff member.');
-        }
-
-        const staff = await staffResponse.json();
-
-        staffContainer.innerHTML = `
-            <p><strong>Name:</strong> ${escapeHtml(staff.username || 'Not provided')}</p>
-            <p><strong>Email:</strong> ${escapeHtml(staff.email || 'Not provided')}</p>
-        `;
-
-        // Load the patient associated with this report.
-        if (!patientId) {
-            patientContainer.textContent =
-                'No patient selected. Open this page from a patient record.';
-            return;
-        }
-
-        const patientResponse = await fetch(
-            `/api/patients/${encodeURIComponent(patientId)}`,
-            {
-                method: 'GET',
-                credentials: 'include'
-            }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const fields = err.errors
+          ? Object.entries(err.errors).map(([k, v]) => `${k}: ${v}`).join('; ')
+          : '';
+        throw new Error(
+          [err.detail || err.message || err.error || `HTTP ${res.status}`, fields]
+            .filter(Boolean).join(' — ')
         );
-
-        if (!patientResponse.ok) {
-            throw new Error('Could not load the selected patient.');
-        }
-
-        const patient = await patientResponse.json();
-
-        patientContainer.innerHTML = `
-            <p><strong>Patient number:</strong>
-                ${escapeHtml(patient.patientNumber || '—')}</p>
-            <p><strong>Full name:</strong>
-                ${escapeHtml(patient.fullName || '—')}</p>
-            
-        `;
-
-    } catch (error) {
-        console.error('Error loading report details:', error);
-
-        patientContainer.textContent =
-            'Unable to load patient details.';
-        staffContainer.textContent =
-            'Unable to load staff details.';
-    }
-}
-
-loadReportPeople();
-
-
-    
-    async function loadIncidentOptions() {
-      const options = await api('GET', '/incident-options');
-
-      const checkboxFields = [
-        'harmfulActivities',
-        'consequences',
-        'peopleInvolved',
-        'emergencyServices',
-        'strategies',
-        'communicationSupports',
-        'followUpAgencies'
-      ];
-
-      checkboxFields.forEach(field => {
-        const container = document.querySelector(`[data-options="${field}"]`);
-        if (!container || !options[field]) return;
-
-        container.innerHTML = '';
-
-        options[field].forEach(opt => {
-          const label = document.createElement('label');
-          label.className = 'option-item';
-
-          const input = document.createElement('input');
-          input.type = 'checkbox';
-          input.name = field;
-          input.value = opt.value;
-
-          label.appendChild(input);
-          label.appendChild(document.createTextNode(` ${opt.label}`));
-          container.appendChild(label);
-        });
-      });
-
-      const selectFields = ['location', 'duration', 'frequency', 'severity'];
-
-      selectFields.forEach(field => {
-        const select = document.querySelector(`select[name="${field}"]`);
-        if (!select || !options[field]) return;
-
-        const placeholder = select.querySelector('option[value=""]');
-        select.innerHTML = '';
-
-        if (placeholder) select.appendChild(placeholder);
-
-        options[field].forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt.value;
-          option.textContent = opt.label;
-          select.appendChild(option);
-        });
-      });
+      }
+      if (res.status === 204) return null;
+      return res.json();
     }
 
     function escapeHtml(value) {
-    return String(value ?? '')
+      return String(value ?? '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -954,9 +461,16 @@ loadReportPeople();
         .replace(/'/g, '&#39;');
     }
 
+    function showMessage(message, isError = false) {
+      const el = document.getElementById('form-message');
+      if (!el) return;
+      el.textContent = message;
+      el.className = isError ? 'error show' : 'success show';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
     function getCheckedValues(name) {
-      return [...document.querySelectorAll(`input[name="${name}"]:checked`)]
-        .map(el => el.value);
+      return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(el => el.value);
     }
 
     function getRadioValue(name) {
@@ -1017,13 +531,88 @@ loadReportPeople();
       return api('GET', `/incidents/${incidentId}`);
     }
 
-    async function listIncidents(patientId, page = 0, size = 20) {
-      return api('GET', `/patients/${patientId}/incidents?page=${page}&size=${size}`);
-    }
+    async function loadIncidentOptions() {
+  const options = await api('GET', '/incident-options');
 
+  // Grouped fields: antecedents, behaviours
+  renderGrouped('antecedents', options.antecedents);
+  renderGrouped('behaviours', options.behaviours);
+
+  // Flat checkbox lists
+  ['consequences', 'peopleInvolved', 'emergencyServices',
+   'strategies', 'communicationSupports', 'followUpAgencies'
+  ].forEach(field => renderFlat(field, options[field]));
+
+  // Selects
+  ['location', 'duration', 'frequency', 'severity'].forEach(field => {
+    fillSelect(field, options[field]);
+  });
+}
+
+function renderGrouped(fieldName, list) {
+  const section = document.querySelector(`[data-field="${fieldName}"]`);
+  if (!section || !list) return;
+  section.innerHTML = '';
+
+  // Preserve order of first appearance of each group
+  const groups = [];
+  const byGroup = new Map();
+  list.forEach(opt => {
+    const g = opt.group || 'Other';
+    if (!byGroup.has(g)) {
+      byGroup.set(g, []);
+      groups.push(g);
+    }
+    byGroup.get(g).push(opt);
+  });
+
+  groups.forEach(g => {
+    const cat = document.createElement('div');
+    cat.className = 'classification-category';
+    cat.innerHTML = `<h3 class="classification-category-title">${escapeHtml(g)}</h3>`;
+    const grid = document.createElement('div');
+    grid.className = 'option-group';
+    byGroup.get(g).forEach(opt => {
+      const label = document.createElement('label');
+      label.className = 'option-item';
+      label.innerHTML =
+        `<input type="checkbox" name="${fieldName}" value="${opt.value}"> ${escapeHtml(opt.label)}`;
+      grid.appendChild(label);
+    });
+    cat.appendChild(grid);
+    section.appendChild(cat);
+  });
+}
+
+function renderFlat(fieldName, list) {
+  const container = document.querySelector(`[data-options="${fieldName}"]`);
+  if (!container || !list) return;
+  container.innerHTML = '';
+  list.forEach(opt => {
+    const label = document.createElement('label');
+    label.className = 'option-item';
+    label.innerHTML =
+      `<input type="checkbox" name="${fieldName}" value="${opt.value}"> ${escapeHtml(opt.label)}`;
+    container.appendChild(label);
+  });
+}
+
+function fillSelect(fieldName, list) {
+  const select = document.querySelector(`select[name="${fieldName}"]`);
+  if (!select || !list) return;
+  const placeholder = select.querySelector('option[value=""]');
+  select.innerHTML = '';
+  if (placeholder) select.appendChild(placeholder);
+  list.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt.value;
+    o.textContent = opt.label;
+    select.appendChild(o);
+  });
+}
     function setCheckedValues(name, values = []) {
       document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
-        el.checked = values.includes(el.value);
+        el.checked = (values || []).includes(el.value);
       });
     }
 
@@ -1035,21 +624,17 @@ loadReportPeople();
 
     function populateForm(data) {
       if (!data) return;
-
       const set = (name, val) => {
         const el = document.querySelector(`[name="${name}"]`);
         if (el && val != null) el.value = val;
       };
-
       if (data.occurredAt) set('occurredAt', data.occurredAt.slice(0, 16));
-
       set('location', data.location);
       set('description', data.description);
       set('duration', data.duration);
       set('frequency', data.frequency);
       set('severity', data.severity);
       set('responseDescription', data.responseDescription);
-
       setCheckedValues('antecedents', data.antecedents);
       setCheckedValues('behaviours', data.behaviours);
       setCheckedValues('consequences', data.consequences);
@@ -1058,7 +643,6 @@ loadReportPeople();
       setCheckedValues('strategies', data.strategies);
       setCheckedValues('communicationSupports', data.communicationSupports);
       setCheckedValues('followUpAgencies', data.followUpAgencies);
-
       setRadioValue('onCallInvolved', data.onCallInvolved);
       setRadioValue('ndisReported', data.ndisReported);
       setRadioValue('strategiesEffective', data.strategiesEffective);
@@ -1070,12 +654,43 @@ loadReportPeople();
       setRadioValue('injuryFormCompleted', data.injuryFormCompleted);
     }
 
-        function showMessage(message, isError = false) {
-      const el = document.getElementById('form-message');
-      if (!el) return;
-      el.textContent = message;
-      el.className = isError ? 'error show' : 'success show';
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    async function loadReportPeople() {
+      const patientContainer = document.getElementById('patientDetails');
+      const staffContainer = document.getElementById('staffDetails');
+      const patientId = new URLSearchParams(location.search).get('patientId');
+      try {
+        const staffRes = await fetch(AUTH_ME, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (staffRes.status === 401) { redirectToLogin(); return; }
+        if (!staffRes.ok) throw new Error('Could not load staff');
+        const staff = await staffRes.json();
+        staffContainer.innerHTML = `
+          <p><strong>Name:</strong> ${escapeHtml(staff.username || '—')}</p>
+          <p><strong>Email:</strong> ${escapeHtml(staff.email || '—')}</p>
+        `;
+        if (!patientId) {
+          patientContainer.textContent = 'No patient selected. Open this page from a patient record.';
+          return;
+        }
+        const patient = await api('GET', `/patients/${encodeURIComponent(patientId)}`);
+        patientContainer.innerHTML = `
+          <p><strong>Patient number:</strong> ${escapeHtml(patient.patientNumber || '—')}</p>
+          <p><strong>Full name:</strong> ${escapeHtml(patient.fullName || '—')}</p>
+        `;
+        if (patient.fullName) {
+          document.getElementById('pageSubtitle').textContent = `Patient: ${patient.fullName}`;
+        }
+        const back = `IncidentAnalyticsDashboard.html?patientId=${encodeURIComponent(patientId)}`;
+        document.getElementById('backLink').href = back;
+        document.getElementById('cancelBtn').onclick = () => { location.href = back; };
+      } catch (err) {
+        console.error(err);
+        patientContainer.textContent = 'Unable to load patient details.';
+        staffContainer.textContent = 'Unable to load staff details.';
+      }
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -1083,13 +698,24 @@ loadReportPeople();
       const incidentId = new URLSearchParams(location.search).get('incidentId');
 
       try {
-        await loadIncidentOptions();
+        const ok = await checkAuthentication();
+        if (!ok) return;
       } catch (e) {
-        showMessage('Failed to load form options: ' + e.message, true);
+        showMessage(e.message, true);
         return;
       }
 
+      try {
+        await loadIncidentOptions();
+      } catch (e) {
+        showMessage('Failed to load form options: ' + e.message, true);
+      }
+
+      await loadReportPeople();
+
       if (incidentId) {
+        document.getElementById('pageTitle').textContent = 'Edit Incident';
+        document.getElementById('submitBtn').textContent = 'Update Incident';
         try {
           const data = await getIncident(incidentId);
           populateForm(data);
@@ -1098,35 +724,35 @@ loadReportPeople();
         }
       }
 
-      const form = document.querySelector('form');
-      if (!form) return;
-
-      form.addEventListener('submit', async e => {
+      document.getElementById('incidentForm').addEventListener('submit', async e => {
         e.preventDefault();
-
-        const isReview = e.submitter?.dataset?.action === 'review'
-          || document.querySelector('[data-part="2"]')?.contains(e.submitter);
-
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = incidentId ? 'Updating…' : 'Submitting…';
         try {
-          let result;
-
-          if (isReview) {
-            if (!incidentId) throw new Error('No incident ID for review');
-            result = await reviewIncident(incidentId);
-            showMessage('Review saved successfully');
-          } else if (incidentId) {
-            result = await updateIncident(incidentId);
-            showMessage('Incident updated successfully');
+          if (incidentId) {
+            await updateIncident(incidentId);
+            showMessage('✓ Incident updated successfully');
           } else {
-            if (!patientId) throw new Error('patientId is required');
-            result = await createIncident(patientId);
-            showMessage('Incident recorded successfully');
-            console.log('Created incident:', result.id);
+            if (!patientId) throw new Error('patientId is required in the URL');
+            const result = await createIncident(patientId);
+            showMessage('✓ Incident recorded successfully');
+            if (result?.id) {
+              history.replaceState(
+                null,
+                '',
+                `?patientId=${encodeURIComponent(patientId)}&incidentId=${encodeURIComponent(result.id)}`
+              );
+              document.getElementById('submitBtn').textContent = 'Update Incident';
+            }
           }
-
-          console.log(result);
         } catch (err) {
-          showMessage(err.message, true);
+          showMessage(err.message || 'Could not save incident', true);
+        } finally {
+          btn.disabled = false;
+          if (!btn.textContent.includes('Update')) btn.textContent = original;
+          else btn.textContent = 'Update Incident';
         }
       });
     });

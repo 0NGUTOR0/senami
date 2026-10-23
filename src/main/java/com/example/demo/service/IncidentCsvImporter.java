@@ -30,6 +30,14 @@ public final class IncidentCsvImporter {
     private IncidentCsvImporter() {
     }
 
+    /** The choices currently offered on the form, by field. Older choices kept only for existing records are not accepted. */
+    private static Set<String> allowed(String field) {
+        Set<String> names = new HashSet<>();
+        List<IncidentOptions.Option> list = IncidentOptions.all().get(field);
+        if (list != null) list.forEach(o -> names.add(o.value()));
+        return names;
+    }
+
     /** One CSV data row after parsing. {@code request} is null when {@code errors} is not empty. */
     public record Row(int rowNumber, String patientNumber, String externalId,
                       IncidentRequest request, List<String> errors) {
@@ -277,17 +285,23 @@ public final class IncidentCsvImporter {
                     return null;   // multi-choice: quietly dropped; for single choice the empty result is caught below
                 }
                 try {
-                    return Enum.valueOf(type, target);
+                    E chosen = Enum.valueOf(type, target);
+                    if (allowed(field).contains(chosen.name())) return chosen;
                 } catch (IllegalArgumentException ex) {
                     // a stale mapping: fall through and treat as unrecognised
                 }
             }
-            E e = match(type, raw);
+            Set<String> current = allowed(field);
+            E e = match(type, current, raw);
             if (e != null) return e;
             unmapped.computeIfAbsent(field, k -> new LinkedHashSet<>()).add(raw);
-            List<String> allowed = new ArrayList<>();
-            for (E o : type.getEnumConstants()) allowed.add(o.label());
-            error(c.label + ": \"" + raw + "\" is not recognised. Allowed: " + String.join(", ", allowed) + ".");
+            List<String> labels = new ArrayList<>();
+            for (E o : type.getEnumConstants()) if (current.contains(o.name())) labels.add(o.label());
+            if (labels.size() <= 8) {
+                error(c.label + ": \"" + raw + "\" is not recognised. Allowed: " + String.join(", ", labels) + ".");
+            } else {
+                error(c.label + ": \"" + raw + "\" is not recognised. Use the exact wording from the form (there are " + labels.size() + " choices).");
+            }
             return null;
         }
 
@@ -344,12 +358,13 @@ public final class IncidentCsvImporter {
 
     private static final Map<Class<?>, Map<String, Enum<?>>> LOOKUPS = new java.util.concurrent.ConcurrentHashMap<>();
 
-    /** Matches an enum by its name or its on-screen label, ignoring case, spaces and punctuation. */
-    static <E extends Enum<E> & Labeled> E match(Class<E> type, String raw) {
+    /** Matches a choice the form offers today by its name or its label, ignoring case, spaces and punctuation. */
+    static <E extends Enum<E> & Labeled> E match(Class<E> type, Set<String> current, String raw) {
         @SuppressWarnings("unchecked")
         Map<String, Enum<?>> map = LOOKUPS.computeIfAbsent(type, t -> {
             Map<String, Enum<?>> m = new HashMap<>();
             for (E e : type.getEnumConstants()) {
+                if (!current.contains(e.name())) continue;   // earlier choices that are no longer offered are not accepted
                 m.put(norm(e.name()), e);
                 m.put(norm(e.label()), e);
             }

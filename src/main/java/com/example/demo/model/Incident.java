@@ -15,7 +15,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "incidents", indexes = {
         @Index(name = "idx_incident_patient", columnList = "patient_id"),
-        @Index(name = "idx_incident_occurred_at", columnList = "occurred_at")
+        @Index(name = "idx_incident_occurred_at", columnList = "occurred_at"),
+        @Index(name = "idx_incident_import_batch", columnList = "import_batch_id"),
+        @Index(name = "idx_incident_external_id", columnList = "external_id")
 })
 public class Incident {
 
@@ -58,42 +60,42 @@ public class Incident {
     @ElementCollection
     @CollectionTable(name = "incident_antecedents", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.Antecedent> antecedents = new HashSet<>();
 
     @ElementCollection
     @CollectionTable(name = "incident_internal_factors", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.InternalFactor> internalFactors = new HashSet<>();
 
     @ElementCollection
     @CollectionTable(name = "incident_behaviours", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.Behaviour> behaviours = new HashSet<>();
 
     @ElementCollection
     @CollectionTable(name = "incident_harmful_activities", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.HarmfulActivity> harmfulActivities = new HashSet<>();
 
     @ElementCollection
     @CollectionTable(name = "incident_consequences", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.Consequence> consequences = new HashSet<>();
 
     @ElementCollection
     @CollectionTable(name = "incident_people_involved", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.PersonInvolved> peopleInvolved = new HashSet<>();
 
@@ -115,7 +117,7 @@ public class Incident {
     @ElementCollection
     @CollectionTable(name = "incident_emergency_services", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.EmergencyService> emergencyServices = new HashSet<>();
 
@@ -125,14 +127,14 @@ public class Incident {
     @ElementCollection
     @CollectionTable(name = "incident_strategies", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.Strategy> strategies = new HashSet<>();
 
     @ElementCollection
     @CollectionTable(name = "incident_communication_supports", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.CommunicationSupport> communicationSupports = new HashSet<>();
 
@@ -154,7 +156,7 @@ public class Incident {
     @ElementCollection
     @CollectionTable(name = "incident_follow_up_agencies", joinColumns = @JoinColumn(name = "incident_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "option_value", length = 60)
+    @Column(name = "option_value", length = 120)
     @BatchSize(size = 50)
     private Set<IncidentOptions.FollowUpAgency> followUpAgencies = new HashSet<>();
 
@@ -176,12 +178,32 @@ public class Incident {
     @Column(name = "injury_form_completed", nullable = true)
     private Boolean injuryFormCompleted;
 
+    // ---- Where the record came from (null = entered on the form) ----
+
+    @Column(name = "source", length = 30)
+    private String source;
+
+    @Column(name = "external_id", length = 100)
+    private String externalId;
+
+    @Column(name = "import_batch_id")
+    private UUID importBatchId;
+
     @PrePersist
     void onCreate() {
         recordedAt = LocalDateTime.now();
     }
 
     public UUID getId() { return id; }
+
+    public String getSource() { return source; }
+    public void setSource(String source) { this.source = source; }
+
+    public String getExternalId() { return externalId; }
+    public void setExternalId(String externalId) { this.externalId = externalId; }
+
+    public UUID getImportBatchId() { return importBatchId; }
+    public void setImportBatchId(UUID importBatchId) { this.importBatchId = importBatchId; }
 
     public Patient getPatient() { return patient; }
     public void setPatient(Patient patient) { this.patient = patient; }

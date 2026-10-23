@@ -145,6 +145,11 @@
     }
 
     .option-group.single { grid-template-columns: 1fr; }
+    .classification-help { color: #4a5568; font-size: .9rem; margin: -.65rem 0 1rem; }
+    .classification-category { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin: 0 0 1rem; }
+    .classification-category-title { color: #2d3748; font-size: .98rem; font-weight: 650; margin-bottom: .5rem; }
+    .classification-category .option-group { margin-top: .25rem; }
+    .classification-category .option-item { min-height: 2rem; }
 
     .option-item {
       display: flex;
@@ -298,62 +303,226 @@
         </div>
       </div>
 
-      <div class="section">
+      <div class="section classification-section">
         <div class="section-title">Antecedents</div>
-        <div class="option-group" data-options="antecedents">
-          <label class="option-item"><input type="checkbox" name="antecedents" value="ENVIRONMENTAL_SITUATIONAL"> Environmental / Situational Factors</label>
-          <label class="option-item"><input type="checkbox" name="antecedents" value="INTERNAL_PERSONAL"> Internal / Personal Factors</label>
-          <label class="option-item"><input type="checkbox" name="antecedents" value="ROUTINE_TIME_BASED"> Routine / Time-Based Triggers</label>
-          <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL"> Social / Interactional Factors</label>
-          <label class="option-item"><input type="checkbox" name="antecedents" value="TASK_ACTIVITY"> Task / Activity Related Factors</label>
-          <label class="option-item"><input type="checkbox" name="antecedents" value="OTHER"> Other</label>
+        <p class="classification-help">Select every antecedent subcategory that applies. The category headings follow the classification document.</p>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Access or Activity Related Factors</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_DENIAL_DELAY_PREFERRED_ITEM_ACTIVITY"> Denial, delay, or removal of a preferred item or activity</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_INTERRUPTION"> Interruption of an activity</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_SHARING"> Required to share an item or activity</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_ITEM_ACTIVITY_UNAVAILABLE"> Preferred item or activity unavailable</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_PREVENTED_FINISHING"> Prevented from finishing an activity</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_FAILURE_OR_LOSS"> Failure or loss</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="ACCESS_ACTIVITY_TRANSITION"> Transition from one activity or item to another</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Social or Interactional Factors</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_CONFLICT"> Conflict with another person</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_ATTENTION_UNAVAILABLE"> Attention from others unavailable</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_PEER_PRESSURE"> Peer pressure</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_UNFAMILIAR_PERSON"> Unfamiliar person present</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_STAFF_CHANGE"> Change of staff member</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_REJECTION_EXCLUSION"> Rejection or exclusion</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_SOCIAL_FATIGUE"> Social fatigue</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_PREFERRED_PERSON_LEAVES_UNAVAILABLE"> Preferred person leaves or is unavailable</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_SOCIAL_DEMANDS"> Social demands or expectations</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="SOCIAL_INTERACTIONAL_COMMUNICATION_NOT_UNDERSTOOD"> Communication attempts not understood</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Instructional or Demand Related Factors</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_CHORES"> Chores or household tasks</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_PERSONAL_CARE"> Personal care tasks</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_INSTRUCTION_OR_DEMAND"> Instruction or demand given</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_REPEATED_PROMPTS"> Repeated prompts</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_NON_PREFERRED_ACTIVITY"> Non-preferred activity</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_TASK_DIFFICULTY"> Task is difficult</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_TOO_MANY_INSTRUCTIONS"> Too many instructions</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_PROLONGED_TASK"> Task is prolonged</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_TRANSITION"> Transition between tasks or activities</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_ROUTINE_CHANGE"> Change to routine</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_AUTONOMY_OR_CHOICE"> Limited autonomy or choice</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="INSTRUCTIONAL_DEMAND_ANTICIPATION"> Anticipation of an upcoming task or event</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Physiological and Sensory-related Factors</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_SENSORY_OVERLOAD"> Sensory overload</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_SENSORY_UNDERSTIMULATION"> Sensory under-stimulation</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_LOUD_NOISE_OR_CROWDS"> Loud noise or crowded environment</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_BRIGHT_LIGHTS"> Bright lights</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_UNWANTED_TOUCH"> Unwanted touch</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_SMELLS"> Unwanted or strong smells</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_TEMPERATURE"> Uncomfortable temperature</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_PERSONAL_SPACE"> Personal space not respected</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_UNFAMILIAR_ENVIRONMENT"> Unfamiliar environment</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_PHYSICAL_ENVIRONMENT_CHANGE"> Change in the physical environment</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_MOVEMENT_RESTRICTION"> Restriction of movement</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_ORAL_STIMULATION"> Need for oral stimulation</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_HUNGER_OR_THIRST"> Hunger or thirst</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_ILLNESS_OR_PAIN"> Illness or physical pain</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_FATIGUE_OR_SLEEP"> Fatigue or lack of sleep</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_HORMONAL_OR_MENSTRUATION"> Hormonal changes or menstruation</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_SEXUAL_AROUSAL"> Sexual arousal</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="PHYSIOLOGICAL_SENSORY_TOILETING"> Toileting needs</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Mental Health and Emotional Factors</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_MENTAL_HEALTH_CHANGE"> Change in mental health</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_HALLUCINATIONS_OR_DELUSIONS"> Hallucinations or delusions</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_MEDICATION_EFFECTS_OR_CHANGES"> Medication effects or changes</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_ALCOHOL_OR_DRUG_USE"> Alcohol or drug use</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_TRAUMA_REMINDERS"> Trauma reminders</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_COPING_DISTRESS_OR_UNCERTAINTY"> Difficulty coping with distress or uncertainty</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_ANXIETY_WORRY_OR_LOW_MOOD"> Anxiety, worry, or low mood</label>
+              <label class="option-item"><input type="checkbox" name="antecedents" value="MENTAL_HEALTH_EMOTIONAL_FEAR_THREAT_OR_UNSAFE"> Feeling afraid, threatened, or unsafe</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Other or Unknown Factor</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="antecedents" value="OTHER_UNKNOWN_OTHER"> Other</label>
+          </div>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">Internal / Personal Factors</div>
-        <div class="option-group" data-options="internalFactors">
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="FEELING_OVERWHELMED"> Feeling overwhelmed / overstimulated</label>
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="HORMONAL_CHANGES"> Hormonal changes / menstruation</label>
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="HUNGER_OR_THIRST"> Hunger or thirst</label>
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="MEDICATION_SIDE_EFFECTS"> Medication side effects or changes</label>
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="MENTAL_HEALTH_DETERIORATION"> Mental health deterioration</label>
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="POOR_SLEEP_FATIGUE"> Poor sleep / fatigue</label>
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="SENSORY_DEPRIVATION"> Sensory deprivation (not enough stimulation)</label>
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="SENSORY_OVERLOAD"> Sensory overload (noise, lights, smell, touch)</label>
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="UNWELL_PHYSICAL_PAIN"> Unwell / physical pain</label>
-          <label class="option-item"><input type="checkbox" name="internalFactors" value="OTHER"> Other</label>
+      <div class="section classification-section">
+        <div class="section-title">Behaviours of Concern</div>
+        <p class="classification-help">Select every behaviour subcategory that applies. The category headings follow the classification document.</p>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Verbal Aggression</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_YELLING_SCREAMING"> Yelling or screaming</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_SWEARING_INSULTING"> Swearing or insulting</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_ARGUING_DEMANDING"> Arguing or making demands</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_INTIMIDATING_GESTURES"> Intimidating gestures</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_NONVIOLENT_THREATS"> Non-violent threats</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_THREATS_OF_VIOLENCE"> Threats of violence</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION_LOCKING_DOORS_ON_OTHERS"> Locking doors on others</label>
+          </div>
         </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Behaviours</div>
-        <div class="option-group" data-options="behaviours">
-          <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING"> Absconding/Wandering</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED"> Food Related Behaviour</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF"> Harm to self</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_ACTIVITIES"> Harmful Activities</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_REFUSAL"> Non-compliance/Refusal</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION"> Physical Aggression</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_DESTRUCTION"> Property Damage/Destruction</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="RISK_TAKING"> Risk taking behaviours</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED"> Sexualised Behaviour</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="SOCIALLY_INAPPROPRIATE"> Socially Inappropriate Behaviours</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="SUBSTANCE_MISUSE"> Substance Misuse</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="THREATENING"> Threatening Behaviour</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="VERBAL_AGGRESSION"> Verbal Aggression</label>
-          <label class="option-item"><input type="checkbox" name="behaviours" value="OTHER"> Other</label>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Physical Aggression</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_ATTEMPTS_TO_HARM_OTHERS"> Attempts to harm others</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_HITTING"> Hitting</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_KICKING"> Kicking</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_PUSHING_PULLING"> Pushing or pulling</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_GRABBING"> Grabbing</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_HAIR_PULLING"> Hair pulling</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_STRANGLING_CHOKING"> Strangling or choking</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_SCRATCHING_PINCHING"> Scratching or pinching</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_BITING_OTHERS"> Biting others</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_SPITTING"> Spitting</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_THROWING_OBJECTS_AT_PEOPLE"> Throwing objects at people</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_USING_OBJECTS_TO_HIT"> Using objects to hit</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PHYSICAL_AGGRESSION_AGGRESSION_AGAINST_ANIMALS"> Aggression against animals</label>
+          </div>
         </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Harmful Activities</div>
-        <div class="option-group" data-options="harmfulActivities">
-          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="ALCOHOL"> Alcohol use</label>
-          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="DRUGS"> Drug use</label>
-          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="SELF_HARM"> Self-harm</label>
-          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="SMOKING"> Smoking</label>
-          <label class="option-item"><input type="checkbox" name="harmfulActivities" value="OTHER"> Other</label>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Property Damage</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_THROWING_ITEMS_AT_PROPERTY"> Throwing items at property</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_PUNCHING_KICKING_WALLS_FURNITURE"> Punching or kicking walls or furniture</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_BREAKING_OBJECTS"> Breaking objects</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_FLIPPING_TABLES"> Flipping tables</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_STOMPING"> Stomping</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_SLAMMING_DOORS"> Slamming doors</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_BANGING_ON_DOORS"> Banging on doors</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_URINATING_DEFECATING_ON_SURFACES"> Urinating or defecating on surfaces</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_SETTING_FIRES"> Setting fires</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="PROPERTY_DAMAGE_LITTERING_CLUTTER"> Littering or creating clutter</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Absconding and Wandering</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_MOVING_VEHICLE"> Absconding from a moving vehicle</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_STATIONARY_VEHICLE"> Absconding from a stationary vehicle</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_HAZARDOUS_AREAS_OR_TRAFFIC"> Entering hazardous areas or traffic</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_COMMUNITY"> Absconding or wandering from the community</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_HOME"> Absconding or wandering from home</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="ABSCONDING_WANDERING_FROM_SCHOOL_APPOINTMENT_DAY_PROGRAM"> Absconding or wandering from school, appointments, or day program</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Harm to Self / Suicidal</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SELF_INJURY"> Self-injury</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_ISOLATION"> Isolation or withdrawal</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_DESIRE_TO_SELF_HARM"> Expressing a desire to self-harm</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_CASUAL_TALK_OF_SUICIDE"> Casual talk of suicide</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SUICIDE_THREATS"> Threats of suicide</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SUICIDAL_IDEATION"> Suicidal ideation</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SUICIDE_PLANS"> Suicide plans</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARM_TO_SELF_SUICIDAL_SUICIDE_ATTEMPTS"> Suicide attempts</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Sexualised Behaviour</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_EXPOSURE"> Exposure</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_NUDITY"> Nudity</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_MASTURBATION"> Masturbation</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_PORNOGRAPHY"> Pornography</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_INAPPROPRIATE_SEXUAL_COMMENTS"> Inappropriate sexual comments</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_SEXUAL_HARASSMENT"> Sexual harassment</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_SEXUAL_GESTURES"> Sexual gestures</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_UNWANTED_AFFECTION_KISSING_TOUCH"> Unwanted affection, kissing, or touching</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_SEXUAL_THEFT_OR_RECORDING"> Sexual theft or recording</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_UNSOLICITED_NUDE_OR_PORNOGRAPHIC_MEDIA"> Unsolicited nude or pornographic media</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_SEXUAL_REQUESTS_PRESSURE_INDUCEMENT"> Sexual requests, pressure, or inducement</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="SEXUALISED_BEHAVIOUR_DIRECTED_TOWARD_UNDERAGE_PERSON"> Sexualised behaviour directed toward an underage person</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Food-related Behaviour</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_BINGING"> Binging</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_FOOD_COMPULSIONS_OR_DEMANDS"> Food-related compulsions or demands</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_EATING_NON_FOOD"> Eating non-food items</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_FOOD_REFUSAL_OR_RESTRICTED_INTAKE"> Food refusal or restricted intake</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="FOOD_RELATED_BEHAVIOUR_EXCESSIVE_LIQUIDS"> Excessive liquid intake</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Non-compliance</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_NOT_DOING_ROUTINE_TASKS"> Not doing routine tasks</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_IGNORING_INSTRUCTIONS"> Ignoring instructions</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_DECLINING_MEDICATION"> Declining medication</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_REPEATED_PROMPTING"> Repeated prompting required</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_UNSAFE_MEDICATION_USE"> Unsafe medication use</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_MISSED_APPOINTMENTS"> Missed appointments</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_REFUSING_PERSONAL_CARE"> Refusing personal care</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="NON_COMPLIANCE_POOR_HYGIENE"> Poor hygiene</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Harmful Activities and Socially Inappropriate Behaviours</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_TAKING_FOOD_MONEY_BELONGINGS"> Taking food, money, or belongings without permission</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_UNSAFE_ALCOHOL_OR_DRUGS"> Unsafe alcohol or drug use</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_ILLICIT_SUBSTANCES_OR_PARAPHERNALIA"> Illicit substances or paraphernalia found</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_DEMANDING_OR_PURCHASING_AOD"> Demanding or purchasing alcohol or other drugs (AOD)</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_COMPULSIVE_PURCHASES"> Compulsive purchases</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_UNSAFE_SITUATIONS"> Engaging in unsafe situations</label>
+              <label class="option-item"><input type="checkbox" name="behaviours" value="HARMFUL_SOCIAL_INAPPROPRIATE_ILLEGAL_ACTIVITIES"> Illegal activities</label>
+          </div>
+        </div>
+        <div class="classification-category">
+          <h3 class="classification-category-title">Other Behaviour</h3>
+          <div class="option-group">
+              <label class="option-item"><input type="checkbox" name="behaviours" value="OTHER_BEHAVIOUR_OTHER"> Other</label>
+          </div>
         </div>
       </div>
 
@@ -726,9 +895,6 @@ loadReportPeople();
       const options = await api('GET', '/incident-options');
 
       const checkboxFields = [
-        'antecedents',
-        'internalFactors',
-        'behaviours',
         'harmfulActivities',
         'consequences',
         'peopleInvolved',
@@ -807,9 +973,7 @@ loadReportPeople();
         location: document.querySelector('[name="location"]').value || null,
         description: document.querySelector('[name="description"]').value || null,
         antecedents: getCheckedValues('antecedents'),
-        internalFactors: getCheckedValues('internalFactors'),
         behaviours: getCheckedValues('behaviours'),
-        harmfulActivities: getCheckedValues('harmfulActivities'),
         consequences: getCheckedValues('consequences'),
         peopleInvolved: getCheckedValues('peopleInvolved'),
         duration: document.querySelector('[name="duration"]').value || null,
@@ -887,9 +1051,7 @@ loadReportPeople();
       set('responseDescription', data.responseDescription);
 
       setCheckedValues('antecedents', data.antecedents);
-      setCheckedValues('internalFactors', data.internalFactors);
       setCheckedValues('behaviours', data.behaviours);
-      setCheckedValues('harmfulActivities', data.harmfulActivities);
       setCheckedValues('consequences', data.consequences);
       setCheckedValues('peopleInvolved', data.peopleInvolved);
       setCheckedValues('emergencyServices', data.emergencyServices);

@@ -12,6 +12,9 @@ import java.util.Set;
 /**
  * The staff part of the incident form. Only the description is free text; everything else is a choice.
  * Client comes from the URL and staff from the logged-in user, so neither is sent.
+ *
+ * The antecedents and behaviours sets now accept the detailed subcategory enum values from the
+ * classification document. Their category-prefixed enum names match the HTML checkbox values.
  */
 public record IncidentRequest(
         @NotNull @PastOrPresent LocalDateTime occurredAt,

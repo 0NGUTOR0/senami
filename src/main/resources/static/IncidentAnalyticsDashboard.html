@@ -553,16 +553,9 @@
           </span>
         </a>
         <a class="modal-option" id="optConsumption" href="#">
-          <span class="icon icon-consumption"><i class="fa-solid fa-smoking"></i></span>
+          <span class="icon icon-consumption">📦</span>
           <span>
             <strong>Consumption</strong><br>
-            <small style="color:#718096;font-weight:400">Log a consumption entry</small>
-          </span>
-        </a>
-         <a class="modal-option" id="optImport" href="#">
-          <span class="icon icon-import">📦</span>
-          <span>
-            <strong>External Imports</strong><br>
             <small style="color:#718096;font-weight:400">Log a consumption entry</small>
           </span>
         </a>
@@ -579,9 +572,15 @@
   const ALL = '__all__';
   const charts = {};
 
+  // Behaviour groups used by the clinical charts. The earlier (pre-category) choices are matched by name.
   const SUICIDAL = ['HARM_TO_SELF', 'RISK_TAKING'];
   const WANDERING = ['ABSCONDING_WANDERING'];
-  const AGGRESSION = ['PHYSICAL_AGGRESSION', 'VERBAL_AGGRESSION', 'THREATENING'];
+  const GROUPS = {};                        // field -> { VALUE: 'Category' }, from /api/incident-options
+  const inGroup = (field, v, group, earlier) => earlier.includes(v) || (GROUPS[field] || {})[v] === group;
+  const isSuicidal = b => inGroup('behaviours', b, 'Harm to Self / Suicidal', SUICIDAL);
+  const isWandering = b => inGroup('behaviours', b, 'Absconding and Wandering', WANDERING);
+  const isVerbal = b => inGroup('behaviours', b, 'Verbal Aggression', ['VERBAL_AGGRESSION']);
+  const isPhysical = b => inGroup('behaviours', b, 'Physical Aggression', ['PHYSICAL_AGGRESSION']);
   const COLORS = [
     '#3182ce', '#e53e3e', '#38a169', '#d69e2e',
     '#805ad5', '#dd6b20', '#319795', '#d53f8c',
@@ -739,11 +738,20 @@
       const options = await apiGet('/incident-options');
       LABELS = {};
       OPTION_ORDER = {};
+      Object.keys(GROUPS).forEach(k => delete GROUPS[k]);
       Object.entries(options || {}).forEach(([field, list]) => {
         if (!Array.isArray(list)) return;
-        LABELS[field] = {};
-        OPTION_ORDER[field] = [];
-        list.forEach(o => { LABELS[field][o.value] = o.label; OPTION_ORDER[field].push(o.value); });
+        // "antecedentsLegacy" holds earlier choices: they only add labels to "antecedents", so old reports still read well.
+        const legacy = /Legacy$/.test(field);
+        const base = legacy ? field.slice(0, -6) : field;
+        LABELS[base] = LABELS[base] || {};
+        GROUPS[base] = GROUPS[base] || {};
+        if (!legacy) OPTION_ORDER[base] = [];
+        list.forEach(o => {
+          LABELS[base][o.value] = o.label;
+          if (o.group) GROUPS[base][o.value] = o.group;
+          if (!legacy) OPTION_ORDER[base].push(o.value);
+        });
       });
     } catch (err) {
       console.error('Option labels unavailable, using generated names:', err);
@@ -906,7 +914,8 @@
     const present = new Set();
     data.forEach(i => f.get(i).forEach(v => present.add(v)));
     const ordered = [];
-    (OPTION_ORDER[f.field] || []).forEach(v => { ordered.push(v); present.delete(v); });
+    // Only choices that appear in the data: the full lists are long.
+    (OPTION_ORDER[f.field] || []).forEach(v => { if (present.delete(v)) ordered.push(v); });
     [...present].sort().forEach(v => ordered.push(v));
     return ordered.map(v => ({ value: v, label: filterValueLabel(f, v) }));
   }
@@ -1034,27 +1043,19 @@
     });
 
     const dailyTotals = calendarDates.map(d => ({ date: d, count: (byDay[d] || []).length }));
-    function dailyFor(list) {
+    function dailyFor(test) {
       return calendarDates.map(d => ({
         date: d,
-        count: (byDay[d] || []).filter(i =>
-          (i.behaviours || []).some(b => list.includes(b))
-        ).length
-      }));
-    }
-    function dailyBehaviourCount(b) {
-      return calendarDates.map(d => ({
-        date: d,
-        count: (byDay[d] || []).filter(i => (i.behaviours || []).includes(b)).length
+        count: (byDay[d] || []).filter(i => (i.behaviours || []).some(test)).length
       }));
     }
 
     const suicidalIncidents = filtered.filter(i =>
-      (i.behaviours || []).some(b => SUICIDAL.includes(b))
+      (i.behaviours || []).some(isSuicidal)
     );
     const suicidalBreakdown = {}, suicidalSeverity = {};
     suicidalIncidents.forEach(i => {
-      (i.behaviours || []).filter(b => SUICIDAL.includes(b)).forEach(b => {
+      (i.behaviours || []).filter(isSuicidal).forEach(b => {
         suicidalBreakdown[b] = (suicidalBreakdown[b] || 0) + 1;
       });
       const s = i.severity || 'UNKNOWN';
@@ -1066,10 +1067,10 @@
       multiDays, singleDays, freeDays, daysWithIncident, totalCalendarDays,
       behaviourCount, locationCount, durationCount, multiBehaviourCount, frequencyCount,
       dailyTotals,
-      suicidalDaily: dailyFor(SUICIDAL),
-      wanderingDaily: dailyFor(WANDERING),
-      verbalAggressionDaily: dailyBehaviourCount('VERBAL_AGGRESSION'),
-      physicalAggressionDaily: dailyBehaviourCount('PHYSICAL_AGGRESSION'),
+      suicidalDaily: dailyFor(isSuicidal),
+      wanderingDaily: dailyFor(isWandering),
+      verbalAggressionDaily: dailyFor(isVerbal),
+      physicalAggressionDaily: dailyFor(isPhysical),
       suicidalBreakdown, suicidalSeverity
     };
   }
@@ -1151,7 +1152,7 @@
 
     // Items that usually need a clinician's attention
     const has = (arr, v) => (arr || []).includes(v);
-    A.selfHarm = cur.filter(i => has(i.behaviours, 'HARM_TO_SELF') || has(i.harmfulActivities, 'SELF_HARM') || has(i.behaviours, 'RISK_TAKING')).length;
+    A.selfHarm = cur.filter(i => (i.behaviours || []).some(isSuicidal) || has(i.harmfulActivities, 'SELF_HARM')).length;
     A.highSeverity = cur.filter(i => i.severity === 'HIGH' || i.severity === 'SEVERE').length;
     A.moderatePlus = cur.filter(i => ['MODERATE', 'HIGH', 'SEVERE'].includes(i.severity)).length;
     A.emergency = cur.filter(i => has(i.emergencyServices, 'POLICE_SAPOL') || has(i.emergencyServices, 'AMBULANCE') || has(i.consequences, 'REQUIRED_POLICE_AMBULANCE')).length;
@@ -2074,7 +2075,6 @@
     if (!id) return;
     $('optIncident').href = `Incident.html?patientId=${encodeURIComponent(id)}`;
     $('optConsumption').href = `ConsumptionForm.html?patientId=${encodeURIComponent(id)}`;
-    $('optImport').href = `ImportIncidents.html?patientId=${encodeURIComponent(id)}`;
   }
 
   // ── Heading ──

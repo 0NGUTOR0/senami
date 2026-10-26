@@ -84,7 +84,7 @@
 
   <main class="container">
 
-    <section class="card" id="stepFile">
+    <section class="card" id="stepFile" hidden>
       <h2>1. Choose a file</h2>
       <ol class="steps">
         <li><a href="#" id="templateLink">Download the template</a> and fill it in (or export your data to the same columns from Excel as <em>CSV</em>).</li>
@@ -98,6 +98,7 @@
         <div class="fname" id="fname"></div>
       </label>
       <div class="muted" style="margin-top:.5rem">Nothing is saved until you press Import. Up to 5000 rows per file.</div>
+      <div class="muted" id="whoami" style="margin-top:.5rem"></div>
     </section>
 
     <div id="working" class="card" hidden><span class="spinner"></span><span id="workingText">Checking the file…</span></div>
@@ -186,7 +187,32 @@
   }
 
   function redirectToLogin() {
-    location.href = '/Login.html?next=' + encodeURIComponent(location.pathname + location.search);
+    location.href = '/index.html?next=' + encodeURIComponent(location.pathname + location.search);
+  }
+
+  // Same check the other pages make: nothing is shown until the sign-in cookie has been verified.
+  async function checkAuthentication() {
+    try {
+      const res = await fetch('/auth/me', { credentials: 'include', headers: { 'Accept': 'application/json' } });
+      if (res.status === 401 || res.status === 403) { redirectToLogin(); return false; }
+      if (!res.ok) throw new Error('Could not verify your sign-in (' + res.status + '). Please try again.');
+      return true;
+    } catch (e) {
+      showTopError(e.message || 'Unable to verify your sign-in. Check your connection and try again.');
+      return false;
+    }
+  }
+
+  // Shows who is signed in. Staff can only import for patients assigned to them.
+  async function showWhoAmI() {
+    try {
+      const res = await fetch(API + '/access/me', { credentials: 'include', headers: { 'Accept': 'application/json' } });
+      if (!res.ok) return;
+      const me = await res.json();
+      $('whoami').textContent = 'Signed in as ' + (me.name || me.email || 'you') + (me.admin
+        ? ' (admin): you can import for any patient.'
+        : ' (staff): you can only import for patients assigned to you.');
+    } catch (e) { console.error(e); }
   }
 
   function busy(text) {
@@ -447,7 +473,12 @@
   $('btnReset').addEventListener('click', startOver);
   $('btnAnother').addEventListener('click', startOver);
 
-  loadOptions();
+  (async function init() {
+    if (!(await checkAuthentication())) return;
+    $('stepFile').hidden = false;
+    showWhoAmI();
+    loadOptions();
+  })();
 </script>
 </body>
 </html>

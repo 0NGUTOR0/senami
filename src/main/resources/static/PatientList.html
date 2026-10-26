@@ -260,6 +260,24 @@
     }
     th.col-number { width: 200px; }
     th.col-age { width: 110px; }
+    th.col-cw { width: 190px; }
+    .cw-text { color: #4a5568; }
+    .cw-none { color: #a0aec0; font-style: italic; }
+    .cw-line { display: none; font-size: .78rem; color: #718096; margin-top: .1rem; }
+    .filter-wrap { display: none; }
+    .filter-wrap select {
+      padding: .65rem .85rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: .95rem;
+      background: #fff;
+      max-width: 100%;
+    }
+    .filter-wrap select:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 3px rgba(49,130,206,.15);
+    }
     td {
       padding: 0;
       border-bottom: 1px solid #edf2f7;
@@ -338,11 +356,13 @@
       .cell-link { padding: .8rem .75rem; }
       table { table-layout: fixed; }
       th.col-number { width: 24%; }
-      th:nth-child(4) { width: 118px; }
+      th.col-actions { width: 118px; }
+      th.col-cw, td.cw-cell { display: none; }          /* on phones the case worker shows under the name instead */
+      .cw-line { display: block; }
       .name .cell-link { overflow-wrap: anywhere; }
       th.col-age { width: 70px; }
       .patient-number { font-size: .75rem; overflow-wrap: anywhere; }
-      th:nth-child(3), td:nth-child(3) { display: none; }   /* age is hidden on phones so the row actions stay visible */
+      th.col-age, td.age-cell { display: none; }   /* age is hidden on phones so the row actions stay visible */
       .link-btn { padding: .4rem .4rem; }
       .link-btn .long { display: none; }
       .row-actions { padding-right: .25rem; }
@@ -388,6 +408,12 @@
       <div class="search-wrap">
         <input type="search" id="searchInput" placeholder="Search by name or patient number…" autocomplete="off">
       </div>
+      <div class="filter-wrap" id="filterWrap">
+        <select id="caseWorkerFilter" aria-label="Filter by case worker">
+          <option value="">All case workers</option>
+          <option value="unassigned">Unassigned</option>
+        </select>
+      </div>
     </div>
 
     <div class="card">
@@ -408,6 +434,8 @@
     let totalPages = 0;
     let searchQuery = '';
     let searchTimeout = null;
+    let caseWorkerFilter = '';
+    let isAdmin = false;
 
     // Cookies are HTTP-only, so JavaScript must not read the JWT.
     function authHeaders() {
@@ -539,6 +567,9 @@
         if (searchQuery) {
             params.set('q', searchQuery);
         }
+        if (isAdmin && caseWorkerFilter) {
+            params.set('caseWorker', caseWorkerFilter);
+        }
 
         const container = document.getElementById('content');
         container.innerHTML =
@@ -587,12 +618,12 @@
         if (patients.length === 0) {
             container.innerHTML = `
                 <div class="state">
-                    ${searchQuery
+                    ${searchQuery || caseWorkerFilter
                         ? 'No patients match your search.'
-                        : 'No patients yet.'}
+                        : (isAdmin ? 'No patients yet.' : 'No patients are assigned to you yet.')}
                     <br><br>
                     <a href="Patient.html" class="btn btn-primary">
-                        Add first patient
+                        ${searchQuery || caseWorkerFilter ? 'Add a patient' : 'Add first patient'}
                     </a>
                 </div>`;
             return;
@@ -615,16 +646,24 @@
                 <td class="name">
                     <a class="cell-link" href="${href}">
                         ${escapeHtml(patient.fullName || '—')}
+                        ${isAdmin ? `<div class="cw-line">${caseWorkerText(patient)}</div>` : ''}
                     </a>
                 </td>
 
-                <td>
+                <td class="age-cell">
                     <a class="cell-link" href="${href}" tabindex="-1" aria-hidden="true">
                         ${patient.age != null
                             ? escapeHtml(patient.age)
                             : '—'}
                     </a>
                 </td>
+
+                ${isAdmin ? `
+                <td class="cw-cell">
+                    <a class="cell-link" href="${href}" tabindex="-1" aria-hidden="true">
+                        ${caseWorkerText(patient)}
+                    </a>
+                </td>` : ''}
 
                 <td class="actions-cell">
                     <div class="row-actions">
@@ -652,7 +691,8 @@
                     <th class="col-number">Number</th>
                     <th>Name</th>
                     <th class="col-age">Age</th>
-                    <th></th>
+                    ${isAdmin ? '<th class="col-cw">Case worker</th>' : ''}
+                    <th class="col-actions"></th>
                 </tr>
             </thead>
 
@@ -663,6 +703,47 @@
             ${renderPagination(page)}
         `;
     }
+
+    // The case worker's name, or a grey "Unassigned".
+    function caseWorkerText(patient) {
+        return patient.caseWorkerName
+            ? `<span class="cw-text">${escapeHtml(patient.caseWorkerName)}</span>`
+            : '<span class="cw-none">Unassigned</span>';
+    }
+
+    // Admins get the case worker column and filter. Staff only ever see their own patients.
+    async function setupRole() {
+        try {
+            const res = await fetch(`${API}/access/me`, { credentials: 'include', headers: { 'Accept': 'application/json' } });
+            if (!res.ok) return;
+            const me = await res.json();
+            isAdmin = me.admin === true;
+        } catch (e) {
+            console.error('Could not check the role:', e);
+        }
+        if (!isAdmin) return;
+
+        try {
+            const res = await fetch(`${API}/users/case-workers`, { credentials: 'include', headers: { 'Accept': 'application/json' } });
+            if (res.ok) {
+                const select = document.getElementById('caseWorkerFilter');
+                (await res.json()).forEach(u => {
+                    const o = document.createElement('option');
+                    o.value = String(u.id);
+                    o.textContent = u.name;
+                    select.append(o);
+                });
+            }
+        } catch (e) {
+            console.error('Could not load case workers:', e);
+        }
+        document.getElementById('filterWrap').style.display = 'block';
+    }
+
+    document.getElementById('caseWorkerFilter').addEventListener('change', event => {
+        caseWorkerFilter = event.target.value;
+        loadPatients(0);
+    });
 
     // Render pagination controls.
     function renderPagination(page) {
@@ -756,6 +837,7 @@
 
         if (user) {
             renderUser(user);
+            await setupRole();
             await loadPatients(0);
         }
     })();

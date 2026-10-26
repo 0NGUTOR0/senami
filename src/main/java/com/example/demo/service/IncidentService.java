@@ -24,19 +24,23 @@ public class IncidentService {
     private final IncidentRepository incidentRepository;
     private final PatientRepository patientRepository;
     private final CurrentUserService currentUserService;
+    private final PatientAccessService access;
 
     public IncidentService(IncidentRepository incidentRepository,
                            PatientRepository patientRepository,
-                           CurrentUserService currentUserService) {
+                           CurrentUserService currentUserService,
+                           PatientAccessService access) {
         this.incidentRepository = incidentRepository;
         this.patientRepository = patientRepository;
         this.currentUserService = currentUserService;
+        this.access = access;
     }
 
     /** Staff completes the form for a patient. The staff member is the logged-in user. */
     public IncidentResponse record(UUID patientId, IncidentRequest request) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new PatientNotFoundException("Patient not found: " + patientId));
+        access.requireAccess(patient);
         Incident incident = new Incident();
         incident.setPatient(patient);
         incident.setRecordedBy(currentUserService.getCurrentUser());
@@ -58,9 +62,9 @@ public class IncidentService {
 
     @Transactional(readOnly = true)
     public Page<IncidentResponse> listForPatient(UUID patientId, Pageable pageable) {
-        if (!patientRepository.existsById(patientId)) {
-            throw new PatientNotFoundException("Patient not found: " + patientId);
-        }
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new PatientNotFoundException("Patient not found: " + patientId));
+        access.requireAccess(patient);
         return incidentRepository.findByPatientId(patientId, pageable).map(IncidentResponse::from);
     }
 
@@ -94,8 +98,12 @@ public class IncidentService {
     }
 
     private Incident find(UUID id) {
-        return incidentRepository.findWithDetailsById(id)
+        Incident incident = incidentRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Incident not found: " + id));
+        if (!access.canAccess(incident.getPatient())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Incident not found: " + id);
+        }
+        return incident;
     }
 
     private void applyForm(Incident i, IncidentRequest r) {

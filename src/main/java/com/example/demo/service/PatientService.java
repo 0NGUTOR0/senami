@@ -5,6 +5,7 @@ import com.example.demo.dto.PatientResponse;
 import com.example.demo.dto.NextOfKinRequest;
 import com.example.demo.model.Patient;
 import com.example.demo.model.NextOfKin;
+import com.example.demo.model.User;
 import com.example.demo.repository.PatientRepository;
 
 import org.springframework.data.domain.Page;
@@ -20,9 +21,11 @@ import java.util.UUID;
 public class PatientService {
 
     private final PatientRepository repository;
+    private final PatientAccessService access;
 
-    public PatientService(PatientRepository repository) {
+    public PatientService(PatientRepository repository, PatientAccessService access) {
         this.repository = repository;
+        this.access = access;
     }
 
     public PatientResponse create(PatientRequest request) {
@@ -31,6 +34,10 @@ public class PatientService {
         }
         Patient patient = new Patient();
         apply(patient, request);
+        // A patient a staff member creates is theirs. An admin assigns the case worker afterwards.
+        if (!access.isAdmin()) {
+            patient.setCaseWorker(access.currentUser());
+        }
         return PatientResponse.from(repository.save(patient));
     }
 
@@ -41,22 +48,44 @@ public class PatientService {
 
     @Transactional(readOnly = true)
     public PatientResponse getByPatientNumber(String patientNumber) {
-        return repository.findByPatientNumber(patientNumber)
-                .map(PatientResponse::from)
+        Patient patient = repository.findByPatientNumber(patientNumber)
                 .orElseThrow(() -> new PatientNotFoundException("Patient not found: " + patientNumber));
+        access.requireAccess(patient);
+        return PatientResponse.from(patient);
     }
 
     @Transactional(readOnly = true)
     public Page<PatientResponse> getAll(Pageable pageable) {
-        return repository.findAll(pageable).map(PatientResponse::from);
+        return search(null, null, false, pageable);
     }
 
+    /**
+     * Staff always get only their own patients, whatever filter they send.
+     * Admins get everyone, or one case worker's patients, or the unassigned ones.
+     */
     @Transactional(readOnly = true)
-    public Page<PatientResponse> search(String term, Pageable pageable) {
-        Page<Patient> page = (term == null || term.isBlank())
-                ? repository.findAll(pageable)
-                : repository.search(term.trim(), pageable);
+    public Page<PatientResponse> search(String term, Long caseWorkerId, boolean unassigned, Pageable pageable) {
+        String t = term == null ? "" : term.trim();
+        Page<Patient> page;
+        if (!access.isAdmin()) {
+            page = repository.searchByCaseWorker(t, access.currentUser().getId(), pageable);
+        } else if (unassigned) {
+            page = repository.searchUnassigned(t, pageable);
+        } else if (caseWorkerId != null) {
+            page = repository.searchByCaseWorker(t, caseWorkerId, pageable);
+        } else {
+            page = repository.search(t, pageable);
+        }
         return page.map(PatientResponse::from);
+    }
+
+    /** Admin only. A null caseWorkerId removes the assignment. */
+    public PatientResponse assignCaseWorker(UUID id, Long caseWorkerId) {
+        access.requireAdmin();
+        Patient patient = find(id);
+        User caseWorker = caseWorkerId == null ? null : access.findUser(caseWorkerId);
+        patient.setCaseWorker(caseWorker);
+        return PatientResponse.from(patient);
     }
 
     public PatientResponse update(UUID id, PatientRequest request) {
@@ -74,8 +103,10 @@ public class PatientService {
     }
 
     private Patient find(UUID id) {
-        return repository.findWithNextOfKinById(id)
+        Patient patient = repository.findWithNextOfKinById(id)
                 .orElseThrow(() -> new PatientNotFoundException("Patient not found: " + id));
+        access.requireAccess(patient);
+        return patient;
     }
 
     private void apply(Patient p, PatientRequest r) {

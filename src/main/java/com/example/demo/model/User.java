@@ -26,6 +26,14 @@ public class User {
 
     private String username;               // optional
 
+    /**
+     * ADMIN or STAFF. New accounts are STAFF. Rows created before this column existed are null,
+     * and are treated as STAFF too (the least access).
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", length = 20)
+    @Builder.Default
+    private Role role = Role.STAFF;
 
     @Column(nullable = false)
     @Builder.Default
@@ -42,4 +50,8 @@ public class User {
     @Column(name = "password_reset_expires")
     private LocalDateTime passwordResetExpires;
 
+    /** The name shown for this user in lists: the username, or the email when there is none. */
+    public String displayName() {
+        return username != null && !username.isBlank() ? username : email;
+    }
 }

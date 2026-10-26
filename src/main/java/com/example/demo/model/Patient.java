@@ -82,6 +82,11 @@ public class Patient {
     @Column(name = "preferred_communication_method", length = 20)
     private CommunicationMethod preferredCommunicationMethod;
 
+    /** The staff member responsible for this patient. Staff only see patients they are the case worker for. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "case_worker_id")
+    private User caseWorker;
+
     @Valid
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NextOfKin> nextOfKin = new ArrayList<>();
@@ -154,6 +159,9 @@ public class Patient {
 
     public CommunicationMethod getPreferredCommunicationMethod() { return preferredCommunicationMethod; }
     public void setPreferredCommunicationMethod(CommunicationMethod m) { this.preferredCommunicationMethod = m; }
+
+    public User getCaseWorker() { return caseWorker; }
+    public void setCaseWorker(User caseWorker) { this.caseWorker = caseWorker; }
 
     public List<NextOfKin> getNextOfKin() { return nextOfKin; }
 }

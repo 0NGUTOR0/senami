@@ -28,13 +28,16 @@ public class IncidentImportService {
     private final PatientRepository patientRepository;
     private final IncidentRepository incidentRepository;
     private final IncidentService incidentService;
+    private final PatientAccessService access;
 
     public IncidentImportService(PatientRepository patientRepository,
                                  IncidentRepository incidentRepository,
-                                 IncidentService incidentService) {
+                                 IncidentService incidentService,
+                                 PatientAccessService access) {
         this.patientRepository = patientRepository;
         this.incidentRepository = incidentRepository;
         this.incidentService = incidentService;
+        this.access = access;
     }
 
     /** Checks the file and reports what would happen. Nothing is saved. */
@@ -98,7 +101,7 @@ public class IncidentImportService {
             Patient patient = null;
             if (!row.patientNumber().isEmpty()) {
                 patient = patients.computeIfAbsent(row.patientNumber(),
-                        n -> patientRepository.findByPatientNumber(n)).orElse(null);
+                        n -> patientRepository.findByPatientNumber(n).filter(access::canAccess)).orElse(null);
                 if (patient == null) problems.add("Patient number \"" + row.patientNumber() + "\" was not found.");
             }
             if (!problems.isEmpty()) {

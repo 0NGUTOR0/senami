@@ -638,7 +638,7 @@
             return `
             <tr>
                 <td class="patient-number">
-                    <a class="cell-link" href="${href}" tabindex="-1" aria-hidden="true">
+                    <a class="cell-link" href="${href}" tabindex="-1">
                         ${escapeHtml(patient.patientNumber || '—')}
                     </a>
                 </td>
@@ -651,7 +651,7 @@
                 </td>
 
                 <td class="age-cell">
-                    <a class="cell-link" href="${href}" tabindex="-1" aria-hidden="true">
+                    <a class="cell-link" href="${href}" tabindex="-1">
                         ${patient.age != null
                             ? escapeHtml(patient.age)
                             : '—'}
@@ -660,7 +660,7 @@
 
                 ${isAdmin ? `
                 <td class="cw-cell">
-                    <a class="cell-link" href="${href}" tabindex="-1" aria-hidden="true">
+                    <a class="cell-link" href="${href}" tabindex="-1">
                         ${caseWorkerText(patient)}
                     </a>
                 </td>` : ''}

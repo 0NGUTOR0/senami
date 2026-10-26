@@ -29,7 +29,9 @@ public record PatientResponse(
         String emailAddress,
         String preferredLanguage,
         CommunicationMethod preferredCommunicationMethod,
-        List<NextOfKinResponse> nextOfKin
+        List<NextOfKinResponse> nextOfKin,
+        Long caseWorkerId,
+        String caseWorkerName
 ) {
     public static PatientResponse from(Patient p) {
         return new PatientResponse(p.getId(), p.getPatientNumber(), p.getFullName(), p.getPreviousName(),
@@ -37,6 +39,8 @@ public record PatientResponse(
                 p.getMaritalStatus(), p.getOccupation(), p.getEducationLevel(), p.getResidentialAddress(),
                 p.getPhoneNumber(), p.getEmailAddress(), p.getPreferredLanguage(),
                 p.getPreferredCommunicationMethod(),
-                p.getNextOfKin().stream().map(NextOfKinResponse::from).toList());
+                p.getNextOfKin().stream().map(NextOfKinResponse::from).toList(),
+                p.getCaseWorker() == null ? null : p.getCaseWorker().getId(),
+                p.getCaseWorker() == null ? null : p.getCaseWorker().displayName());
     }
 }
